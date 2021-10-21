@@ -39,10 +39,10 @@ public class MecanumDrive extends LinearOpMode {
         // TODO: Change gamepad1.left_stick_x to x?
         x = gamepad1.left_stick_x * STRAFING_CORRECTION;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double LF_power = (y + x + rx) / denominator/2;
-        double LB_power = (y - x + rx) / denominator/2;
-        double RF_power = (y - x - rx) / denominator/2;
-        double RB_power = (y + x - rx) / denominator/2;
+        double LF_power = (y + x + rx) / denominator/3;
+        double LB_power = (y - x + rx) / denominator/3;
+        double RF_power = (y - x - rx) / denominator/3;
+        double RB_power = (y + x - rx) / denominator/3;
         //denominator/power = speed
 
         LF.setPower(LF_power);
@@ -68,6 +68,12 @@ public class MecanumDrive extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
+        double lastTimeDuck = 0D;
+        double lastTimeIntake = 0D;
+
+        boolean intakeOn = false;
+        boolean duckWheelOn = false;
+
         LF = hardwareMap.dcMotor.get("LF");
         RF = hardwareMap.dcMotor.get("RF");
         LB = hardwareMap.dcMotor.get("LB");
@@ -114,19 +120,17 @@ public class MecanumDrive extends LinearOpMode {
             //drive train
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            if (gamepad1.x) {
-                // try the power on the ducks
-                Duck_Wheel.setPower(.9);
-            }
-            else if (gamepad1.y) {
-                Duck_Wheel.setPower(0);
+
+            if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > 500) {
+                lastTimeDuck = System.currentTimeMillis();
+                duckWheelOn = !duckWheelOn;
+                Intake.setPower(duckWheelOn ? 0.54 : 0);
             }
 
-            if (gamepad1.a) {
-                Intake.setPower(1);
-            }
-            else if (gamepad1.b) {
-                Intake.setPower(0);
+            if (gamepad2.a && System.currentTimeMillis() - lastTimeIntake > 500) {
+                lastTimeIntake = System.currentTimeMillis();
+                intakeOn =  !intakeOn;
+                Intake.setPower(intakeOn ? 0.56 : 0);
             }
         }
     }
