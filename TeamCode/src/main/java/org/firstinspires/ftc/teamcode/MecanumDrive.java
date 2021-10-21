@@ -27,6 +27,7 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor Intake;
 
     public DcMotor LiftMotor;
+
     /**
      * Applies the needed power to move the robot
      *
