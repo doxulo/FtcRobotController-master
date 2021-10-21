@@ -26,6 +26,7 @@ public class MecanumDrive extends LinearOpMode {
 
     public DcMotor Intake;
 
+    public DcMotor LiftMotor;
     /**
      * Applies the needed power to move the robot
      *
@@ -74,6 +75,9 @@ public class MecanumDrive extends LinearOpMode {
         boolean intakeOn = false;
         boolean duckWheelOn = false;
 
+        boolean liftDownOn = false;
+        boolean liftUpOn = false;
+
         LF = hardwareMap.dcMotor.get("LF");
         RF = hardwareMap.dcMotor.get("RF");
         LB = hardwareMap.dcMotor.get("LB");
@@ -105,6 +109,12 @@ public class MecanumDrive extends LinearOpMode {
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        // Not sure if it works
+        // TODO: gamepad2.rt = down, gamepad2.lt = up,
+        LiftMotor = hardwareMap.dcMotor.get("Lift");
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         waitForStart();
         while (opModeIsActive()) {
             int encoder_LF = LF.getCurrentPosition();
@@ -115,6 +125,8 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("LB encoder: ", encoder_LB);
             telemetry.addData("RF encoder: ", encoder_RF);
             telemetry.addData("RB encoder: ", encoder_RB);
+            telemetry.addData("Left Trigger:", gamepad2.left_trigger);
+            telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
             telemetry.update();
 
             //drive train
@@ -129,8 +141,24 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.a && System.currentTimeMillis() - lastTimeIntake > 500) {
                 lastTimeIntake = System.currentTimeMillis();
-                intakeOn =  !intakeOn;
+                intakeOn = !intakeOn;
                 Intake.setPower(intakeOn ? 0.56 : 0);
+            }
+
+            if (gamepad2.left_trigger > 0) {
+                if (!liftUpOn) {
+                    liftDownOn = false;
+                    liftUpOn = true;
+                    LiftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+                    LiftMotor.setPower(gamepad2.left_trigger);
+                }
+            } else if (gamepad2.right_trigger > 0) {
+                if (!liftDownOn) {
+                    liftUpOn = false;
+                    liftDownOn = true;
+                    LiftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+                    LiftMotor.setPower(gamepad2.right_trigger);
+                }
             }
         }
     }
