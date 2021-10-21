@@ -29,6 +29,28 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor LiftMotor;
 
     /**
+     * Possible function to initialize and setup future motors
+     *
+     * @param motorName             Name to index the motor
+     * @param direction             Direction of the motor's power
+     * @param runMode               Reverse or Forward power motion
+     * @param zeroPowerBehavior     Zero Power Behavior of the motor
+     * @return                      Setup motor
+     */
+    private DcMotor initMotor(
+            String motorName,
+            DcMotorSimple.Direction direction,
+            DcMotor.RunMode runMode,
+            DcMotor.ZeroPowerBehavior zeroPowerBehavior
+    ) {
+        DcMotor motor = hardwareMap.dcMotor.get(motorName);
+        motor.setDirection(direction);
+        motor.setMode(runMode);
+        motor.setZeroPowerBehavior(zeroPowerBehavior);
+
+        return motor;
+    }
+    /**
      * Applies the needed power to move the robot
      *
      * @param y     First Variable used in the calculation of the power
@@ -70,6 +92,7 @@ public class MecanumDrive extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
+        long inputDelay = 500;
         double lastTimeDuck = 0D;
         double lastTimeIntake = 0D;
 
@@ -79,6 +102,7 @@ public class MecanumDrive extends LinearOpMode {
         boolean liftDownOn = false;
         boolean liftUpOn = false;
 
+        // TODO: change setup to utilize initMotor
         LF = hardwareMap.dcMotor.get("LF");
         RF = hardwareMap.dcMotor.get("RF");
         LB = hardwareMap.dcMotor.get("LB");
@@ -122,11 +146,12 @@ public class MecanumDrive extends LinearOpMode {
             int encoder_LB = LB.getCurrentPosition();
             int encoder_RF = RF.getCurrentPosition();
             int encoder_RB = RB.getCurrentPosition();
+
             telemetry.addData("LF encoder: ", encoder_LF);
             telemetry.addData("LB encoder: ", encoder_LB);
             telemetry.addData("RF encoder: ", encoder_RF);
             telemetry.addData("RB encoder: ", encoder_RB);
-            telemetry.addData("Left Trigger:", gamepad2.left_trigger);
+            telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
             telemetry.update();
 
@@ -134,13 +159,13 @@ public class MecanumDrive extends LinearOpMode {
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
 
-            if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > 500) {
+            if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > inputDelay) {
                 lastTimeDuck = System.currentTimeMillis();
                 duckWheelOn = !duckWheelOn;
                 Intake.setPower(duckWheelOn ? 0.54 : 0);
             }
 
-            if (gamepad2.a && System.currentTimeMillis() - lastTimeIntake > 500) {
+            if (gamepad2.a && System.currentTimeMillis() - lastTimeIntake > inputDelay) {
                 lastTimeIntake = System.currentTimeMillis();
                 intakeOn = !intakeOn;
                 Intake.setPower(intakeOn ? 0.56 : 0);
