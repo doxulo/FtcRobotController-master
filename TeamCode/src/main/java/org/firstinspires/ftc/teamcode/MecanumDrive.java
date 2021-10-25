@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.lifecycle.Lifecycle;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +10,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
 public class MecanumDrive extends LinearOpMode {
+
+    /** Global comments:
+     * GamePad1 == For movements,
+     * GamePad2 == Gadgets,
+     */
+
 
     /**
      * Initialize all motors that control the robot's wheels
@@ -99,9 +107,6 @@ public class MecanumDrive extends LinearOpMode {
         boolean intakeOn = false;
         boolean duckWheelOn = false;
 
-        boolean liftDownOn = false;
-        boolean liftUpOn = false;
-
         // TODO: change setup to utilize initMotor
         LF = hardwareMap.dcMotor.get("LF");
         RF = hardwareMap.dcMotor.get("RF");
@@ -172,19 +177,13 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad2.left_trigger > 0) {
-                if (!liftUpOn) {
-                    liftDownOn = false;
-                    liftUpOn = true;
-                    LiftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                    LiftMotor.setPower(gamepad2.left_trigger);
-                }
+                LiftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+                LiftMotor.setPower(gamepad2.left_trigger);
             } else if (gamepad2.right_trigger > 0) {
-                if (!liftDownOn) {
-                    liftUpOn = false;
-                    liftDownOn = true;
-                    LiftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                    LiftMotor.setPower(gamepad2.right_trigger);
-                }
+                LiftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+                LiftMotor.setPower(gamepad2.right_trigger);
+            } else {
+                LiftMotor.setPower(0);
             }
         }
     }
