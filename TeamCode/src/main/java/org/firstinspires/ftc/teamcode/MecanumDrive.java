@@ -58,6 +58,39 @@ public class MecanumDrive extends LinearOpMode {
 
         return motor;
     }
+
+    private DcMotor initMotor(
+            String motorName,
+            DcMotorSimple.Direction direction,
+            DcMotor.RunMode runMode
+    ) {
+        return initMotor(
+                motorName,
+                direction,
+                runMode,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
+    }
+
+    private DcMotor initMotor(
+            String motorName,
+            DcMotorSimple.Direction direction
+    ) {
+        return initMotor(
+                motorName,
+                direction,
+                DcMotor.RunMode.RUN_USING_ENCODER
+        );
+    }
+
+    private DcMotor initMotor(
+            String motorName
+    ) {
+        return initMotor(
+                motorName,
+                DcMotorSimple.Direction.FORWARD
+        );
+    }
     /**
      * Applies the needed power to move the robot
      *
@@ -107,45 +140,59 @@ public class MecanumDrive extends LinearOpMode {
         boolean intakeOn = false;
         boolean duckWheelOn = false;
 
-        // TODO: change setup to utilize initMotor
-        LF = hardwareMap.dcMotor.get("LF");
-        RF = hardwareMap.dcMotor.get("RF");
-        LB = hardwareMap.dcMotor.get("LB");
-        RB = hardwareMap.dcMotor.get("RB");
+        LF = initMotor(
+            "LF",
+            DcMotorSimple.Direction.FORWARD,
+            DcMotor.RunMode.RUN_USING_ENCODER,
+            DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
-        //right side motors are reversed, change to left side if needed
-        LF.setDirection(DcMotorSimple.Direction.FORWARD);
-        RF.setDirection(DcMotorSimple.Direction.FORWARD);
-        RB.setDirection(DcMotorSimple.Direction.REVERSE);//r
-        LB.setDirection(DcMotorSimple.Direction.FORWARD);
+        RF = initMotor(
+                "RF",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
-        LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        LB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        RB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LB = initMotor(
+                "LB",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
-        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        RB = initMotor(
+                "RB",
+                DcMotorSimple.Direction.REVERSE,
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
-        Duck_Wheel = hardwareMap.dcMotor.get("Duck_Wheel");
-        Duck_Wheel.setDirection(DcMotorSimple.Direction.FORWARD);
-        Duck_Wheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Duck_Wheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Duck_Wheel = initMotor(
+                "Duck_Wheel",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
 
-        Intake = hardwareMap.dcMotor.get("Intake");
-        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
-        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Intake = initMotor(
+                "Intake",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
-        // Not sure if it works
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
-        LiftMotor = hardwareMap.dcMotor.get("Lift");
-        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        LiftMotor = initMotor(
+                "liftMotor",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
 
         waitForStart();
+
         while (opModeIsActive()) {
             int encoder_LF = LF.getCurrentPosition();
             int encoder_LB = LB.getCurrentPosition();
@@ -167,10 +214,10 @@ public class MecanumDrive extends LinearOpMode {
             if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > inputDelay) {
                 lastTimeDuck = System.currentTimeMillis();
                 duckWheelOn = !duckWheelOn;
-                Intake.setPower(duckWheelOn ? 0.54 : 0);
+                Duck_Wheel.setPower(duckWheelOn ? 0.54 : 0);
             }
 
-            if (gamepad2.a && System.currentTimeMillis() - lastTimeIntake > inputDelay) {
+            if (gamepad1.a && System.currentTimeMillis() - lastTimeIntake > inputDelay) {
                 lastTimeIntake = System.currentTimeMillis();
                 intakeOn = !intakeOn;
                 Intake.setPower(intakeOn ? 0.56 : 0);
