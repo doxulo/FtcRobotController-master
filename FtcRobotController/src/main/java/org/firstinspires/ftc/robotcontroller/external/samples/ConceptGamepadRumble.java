@@ -66,7 +66,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * ########   Read the telemetry display on the Driver Station Screen for instructions.   ######
  *
  * Ex 1)    This example shows a) how to create a custom rumble effect, and then b) how to trigger it based
- *          on game time.  One use for this might be to alert the driver that half-time or End-game is approaching.
+ *          on game time.  One use for this might be to alert the driver that haLF-time or End-game is approaching.
  *
  * Ex 2)    This example shows tying the rumble power to a changing sensor value.
  *          In this case it is the Gamepad trigger, but it could be any sensor output scaled to the 0-1 range.
@@ -93,12 +93,12 @@ public class ConceptGamepadRumble extends LinearOpMode
     boolean lastA = false;                      // Use to track the prior button state.
     boolean lastLB = false;                     // Use to track the prior button state.
     boolean highLevel = false;                  // used to prevent multiple level-based rumbles.
-    boolean secondHalf = false;                 // Use to prevent multiple half-time warning rumbles.
+    boolean secondHaLF = false;                 // Use to prevent multiple haLF-time warning rumbles.
 
     Gamepad.RumbleEffect customRumbleEffect;    // Use to build a custom rumble sequence.
     ElapsedTime runtime = new ElapsedTime();    // Use to determine when end game is starting.
 
-    final double HALF_TIME = 60.0;              // Wait this many seconds before rumble-alert for half-time.
+    final double HALF_TIME = 60.0;              // Wait this many seconds before rumble-alert for haLF-time.
     final double TRIGGER_THRESHOLD  = 0.75;     // Squeeze more than 3/4 to get rumble.
 
     @Override
@@ -130,17 +130,17 @@ public class ConceptGamepadRumble extends LinearOpMode
             telemetry.addData(">", "Are we RUMBLING? %s\n", gamepad1.isRumbling() ? "YES" : "no" );
 
             // ----------------------------------------------------------------------------------------
-            // Example 1. b) Watch the runtime timer, and run the custom rumble when we hit half-time.
-            //               Make sure we only signal once by setting "secondHalf" flag to prevent further rumbles.
+            // Example 1. b) Watch the runtime timer, and run the custom rumble when we hit haLF-time.
+            //               Make sure we only signal once by setting "secondHaLF" flag to prevent further rumbles.
             // ----------------------------------------------------------------------------------------
-            if ((runtime.seconds() > HALF_TIME) && !secondHalf)  {
+            if ((runtime.seconds() > HALF_TIME) && !secondHaLF)  {
                 gamepad1.runRumbleEffect(customRumbleEffect);
-                secondHalf =true;
+                secondHaLF =true;
             }
 
             // Display the time remaining while we are still counting down.
-            if (!secondHalf) {
-                telemetry.addData(">", "Halftime Alert Countdown: %3.0f Sec \n", (HALF_TIME - runtime.seconds()) );
+            if (!secondHaLF) {
+                telemetry.addData(">", "HaLFtime Alert Countdown: %3.0f Sec \n", (HALF_TIME - runtime.seconds()) );
             }
 
 

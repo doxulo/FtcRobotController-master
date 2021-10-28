@@ -30,6 +30,13 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor LB; // 3
     public DcMotor RB; // 2
 
+    /**
+     * Initialize all motors that control the robot's accessories
+     *
+     * Duck_Wheel - Vertically propped motor that controls the duck dropper
+     * Intake - Intake Motor
+     * ArmMotor - Arm Motor
+     */
     public DcMotor Duck_Wheel;
 
     public DcMotor Intake;
@@ -179,7 +186,7 @@ public class MecanumDrive extends LinearOpMode {
         );
 
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
-
+        // TODO: Change name on DriverHub from Lift to ArmMotor
         ArmMotor = initMotor(
                 "ArmMotor",
                 DcMotorSimple.Direction.FORWARD,

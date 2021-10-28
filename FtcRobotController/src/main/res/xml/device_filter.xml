@@ -42,7 +42,7 @@ https://developer.android.com/guide/topics/connectivity/usb/host
 
    <!-- cameras -->
    <!-- We don't currently auto-connect to UVC cameras, instead relying
-        on the app itself to poll. But we could change that if we wished -->
+        on the app itseLF to poll. But we could change that if we wished -->
    <!-- Update: turns out we need that if we are to get onNewIntent() notifications
         in our activity when cameras attach. See FtcRobotControllerActivity. -->
    <usb-device class="14" subclass="2"/>

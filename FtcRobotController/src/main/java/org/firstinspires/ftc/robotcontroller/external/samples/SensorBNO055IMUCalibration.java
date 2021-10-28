@@ -52,7 +52,7 @@ import java.util.Locale;
  *
  * <p>Manual calibration of the IMU is definitely NOT necessary: except for the magnetometer
  * (which is not used by the default {@link BNO055IMU.SensorMode#IMU
- * SensorMode#IMU}), the BNO055 is internally self-calibrating and thus can be very successfully
+ * SensorMode#IMU}), the BNO055 is internally seLF-calibrating and thus can be very successfully
  * used without manual intervention. That said, performing a one-time calibration, saving the
  * results persistently, then loading them again at each run can help reduce the time that automatic
  * calibration requires.</p>

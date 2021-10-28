@@ -79,7 +79,7 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
      *
      * Vuforia license keys are always 380 characters long, and look as if they contain mostly
      * random data. As an example, here is a example of a fragment of a valid key:
-     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGLFOOI2dRzKS4T0hQ8kT ...
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
@@ -181,6 +181,6 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 }

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string name="app_name">FTC Robot Controller</string>
 
   <!-- Menu -->
-  <string name="inspection_mode_menu_item">Self Inspect</string>
+  <string name="inspection_mode_menu_item">SeLF Inspect</string>
   <string name="program_and_manage_menu_item">Program &amp; Manage</string>
   <string name="blocks_menu_item">Blocks</string>
   <string name="settings_menu_item">Settings</string>

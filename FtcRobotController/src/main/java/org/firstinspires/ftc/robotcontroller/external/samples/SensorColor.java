@@ -81,7 +81,7 @@ public class SensorColor extends LinearOpMode {
   /**
    * The runOpMode() method is the root of this Op Mode, as it is in all LinearOpModes.
    * Our implementation here, though is a bit unusual: we've decided to put all the actual work
-   * in the runSample() method rather than directly in runOpMode() itself. The reason we do that is
+   * in the runSample() method rather than directly in runOpMode() itseLF. The reason we do that is
    * that in this sample we're changing the background color of the robot controller screen as the
    * Op Mode runs, and we want to be able to *guarantee* that we restore it to something reasonable
    * and palatable when the Op Mode ends. The simplest way to do that is to use a try...finally

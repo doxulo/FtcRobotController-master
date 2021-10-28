@@ -87,7 +87,7 @@ public class ConceptVuforiaFieldNavigationWebcam extends LinearOpMode {
      *
      * Vuforia license keys are always 380 characters long, and look as if they contain mostly
      * random data. As an example, here is a example of a fragment of a valid key:
-     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGLFOOI2dRzKS4T0hQ8kT ...
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
@@ -98,9 +98,9 @@ public class ConceptVuforiaFieldNavigationWebcam extends LinearOpMode {
     // We will define some constants and conversions here
     private static final float mmPerInch        = 25.4f;
     private static final float mmTargetHeight   = 6 * mmPerInch;          // the height of the center of the target image above the floor
-    private static final float halfField        = 72 * mmPerInch;
-    private static final float halfTile         = 12 * mmPerInch;
-    private static final float oneAndHalfTile   = 36 * mmPerInch;
+    private static final float haLFField        = 72 * mmPerInch;
+    private static final float haLFTile         = 12 * mmPerInch;
+    private static final float oneAndHaLFTile   = 36 * mmPerInch;
 
     // Class Members
     private OpenGLMatrix lastLocation   = null;
@@ -162,10 +162,10 @@ public class ConceptVuforiaFieldNavigationWebcam extends LinearOpMode {
          */
 
         // Name and locate each trackable object
-        identifyTarget(0, "Blue Storage",       -halfField,  oneAndHalfTile, mmTargetHeight, 90, 0, 90);
-        identifyTarget(1, "Blue Alliance Wall",  halfTile,   halfField,      mmTargetHeight, 90, 0, 0);
-        identifyTarget(2, "Red Storage",        -halfField, -oneAndHalfTile, mmTargetHeight, 90, 0, 90);
-        identifyTarget(3, "Red Alliance Wall",   halfTile,  -halfField,      mmTargetHeight, 90, 0, 180);
+        identifyTarget(0, "Blue Storage",       -haLFField,  oneAndHaLFTile, mmTargetHeight, 90, 0, 90);
+        identifyTarget(1, "Blue Alliance Wall",  haLFTile,   haLFField,      mmTargetHeight, 90, 0, 0);
+        identifyTarget(2, "Red Storage",        -haLFField, -oneAndHaLFTile, mmTargetHeight, 90, 0, 90);
+        identifyTarget(3, "Red Alliance Wall",   haLFTile,  -haLFField,      mmTargetHeight, 90, 0, 180);
 
         /*
          * Create a transformation matrix describing where the camera is on the robot.

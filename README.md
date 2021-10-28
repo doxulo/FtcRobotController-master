@@ -108,7 +108,7 @@ The readme.md file located in the [/TeamCode/src/main/java/org/firstinspires/ftc
     * Calling these new methods when using Modern Robotics hardware will result in an UnsupportedOperationException
 * Changes VuforiaLocalizer `close()` method to be public
 * Adds support for TensorFlow v2 object detection models.
-* Reduces ambiguity of the Self Inspect language and graphics.
+* Reduces ambiguity of the SeLF Inspect language and graphics.
 * OnBotJava now warns about potentially unintended file overwrites
 * Improves behavior of the Wi-Fi band and channel selector on the Manage webpage.
 
@@ -122,7 +122,7 @@ The readme.md file located in the [/TeamCode/src/main/java/org/firstinspires/ftc
    LED blocks and Java class do not work
  * Fixes match logging for Op Modes that contain special characters in their names
  * Fixes Driver Station OpMode controls becoming unresponsive if the Driver Station was set to the landscape layout and an OnBotJava build was triggered while an OpMode was running
- * Fixes the Driver Station app closing itself when it is switched away from, or the screen is turned off
+ * Fixes the Driver Station app closing itseLF when it is switched away from, or the screen is turned off
  * Fixes "black swirl of doom" (Infinite "configuring Wi-Fi Direct" message) on older devices
  * Updates the wiki comment on the OnBotJava intro page
 
@@ -133,7 +133,7 @@ The readme.md file located in the [/TeamCode/src/main/java/org/firstinspires/ftc
   working by re-flashing its firmware
 * Makes various improvements to the Wi-Fi Direct pairing screen, especially in landscape mode
 * Makes the Robot Controller service no longer be categorically restarted when the main activity is brought to foreground
-    * (e.g. the service is no longer restarted simply by viewing the Self Inspect screen and pressing the back button)
+    * (e.g. the service is no longer restarted simply by viewing the SeLF Inspect screen and pressing the back button)
     * It is still restarted if the Settings menu or Configure Robot menu is opened
 
 
@@ -294,7 +294,7 @@ Version 5.5 requires Android Studio 4.0 or later.
     * New color scheme
 * Attempts to force-stop a runaway/stuck OpMode without restarting the entire app
     * Not all types of runaway conditions are stoppable, but if the user code attempts to talk to hardware during the runaway, the system should be able to capture it.
-* Makes various tweaks to the Self Inspect screen
+* Makes various tweaks to the SeLF Inspect screen
     * Renames "OS version" entry to "Android version"
     * Renames "Wi-Fi Direct Name" to "Wi-Fi Name"
     * Adds Control Hub OS version, when viewing the report of a Control Hub
@@ -350,7 +350,7 @@ Version 5.5 requires Android Studio 4.0 or later.
     * Issue manifested as kernel panic on devices which do not have [this kernel patch](https://lore.kernel.org/patchwork/patch/352400/).
     * On affected devices which **do** have the patch, the issue was manifest as simply a failure to start streaming.
     * The Tech Team believes that the root cause of the issue is a bug in the Linux kernel XHCI driver. A workaround was implemented in the SDK UVC driver.
-* Fixes bug in UVC driver where often half the frames from the camera would be dropped (e.g. only 15FPS delivered during a streaming session configured for 30FPS).
+* Fixes bug in UVC driver where often haLF the frames from the camera would be dropped (e.g. only 15FPS delivered during a streaming session configured for 30FPS).
 * Fixes issue where TensorFlow Object Detection would show results whose confidence was lower than
   the minimum confidence parameter.
 * Fixes a potential exploitation issue of [CVE-2019-11358](https://www.cvedetails.com/cve/CVE-2019-11358/) in OnBotJava
@@ -689,7 +689,7 @@ Changes with verion 3.3 include:
 
 Known issues:
  * Android Studio
-    - After updating to the new v3.3 Android Studio project folder, if you get error messages indicating "InvalidVirtualFileAccessException" then you might need to do a File->Invalidate Caches / Restart to clear the error.
+    - After updating to the new v3.3 Android Studio project folder, if you get error messages indicating "InvalidVirtuaLFileAccessException" then you might need to do a File->Invalidate Caches / Restart to clear the error.
  * OnBot Java
     - Sometimes when you push the build button to build all op modes, the RC returns an error message that the build failed.  If you press the build button a second time, the build typically suceeds.
 
@@ -1004,7 +1004,7 @@ Changes include:
  * Added support for voltage indicator for legacy (NXT-compatible) motor controllers.
  * Changes made to provide auto stop capabilities for op modes.
     - A LinearOpMode class will stop when the statements in runOpMode() are complete.  User does not have to push the stop button on the driver station.
-    - If an op mode is stopped by the driver station, but there is a run away/uninterruptible thread persisting, the app will log an error message then force itself to crash to stop the runaway thread.
+    - If an op mode is stopped by the driver station, but there is a run away/uninterruptible thread persisting, the app will log an error message then force itseLF to crash to stop the runaway thread.
  * Driver Station UI modified to display lowest measured voltage below current voltage (12V battery).
  * Driver Station UI modified to have color background for current voltage (green=good, yellow=caution, red=danger, extremely low voltage).
  * javadoc improved (edits and additional classes).
@@ -1022,7 +1022,7 @@ Changes include:
 ## Release 16.02.09
 
  * Improved battery checker feature so that voltage values get refreshed regularly (every 250 msec) on Driver Station (DS) user interface.
- * Improved software so that Robot Controller (RC) is much more resilient and “self-healing” to USB disconnects:
+ * Improved software so that Robot Controller (RC) is much more resilient and “seLF-healing” to USB disconnects:
     - If user attempts to start/restart RC with one or more module missing, it will display a warning but still start up.
     - When running an op mode, if one or more modules gets disconnected, the RC & DS will display warnings,and robot will keep on working in spite of the missing module(s).
     - If a disconnected module gets physically reconnected the RC will auto detect the module and the user will regain control of the recently connected module.

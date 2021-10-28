@@ -48,7 +48,7 @@ public class FtcOpModeRegister implements OpModeRegister {
      *
      * There are two mechanisms by which an OpMode may be registered.
      *
-     *  1) The preferred method is by means of class annotations in the OpMode itself.
+     *  1) The preferred method is by means of class annotations in the OpMode itseLF.
      *  See, for example the class annotations in {@link ConceptNullOp}.
      *
      *  2) The other, retired,  method is to modify this {@link #register(OpModeManager)}

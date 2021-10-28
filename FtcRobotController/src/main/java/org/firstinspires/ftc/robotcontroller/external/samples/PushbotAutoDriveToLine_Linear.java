@@ -45,10 +45,10 @@ import com.qualcomm.robotcore.hardware.LightSensor;
  *   instead of the LEGO sensor.  Chose to use one sensor or the other.
  *
  *   Setting the correct WHITE_THRESHOLD value is key to stopping correctly.
- *   This should be set half way between the light and dark values.
+ *   This should be set haLF way between the light and dark values.
  *   These values can be read on the screen once the OpMode has been INIT, but before it is STARTED.
  *   Move the senso on asnd off the white line and not the min and max readings.
- *   Edit this code to make WHITE_THRESHOLD half way between the min and max.
+ *   Edit this code to make WHITE_THRESHOLD haLF way between the min and max.
  *
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
