@@ -34,7 +34,7 @@ public class MecanumDrive extends LinearOpMode {
 
     public DcMotor Intake;
 
-    public DcMotor LiftMotor;
+    public DcMotor ArmMotor;
 
     /**
      * Possible function to initialize and setup future motors
@@ -59,6 +59,7 @@ public class MecanumDrive extends LinearOpMode {
         return motor;
     }
 
+    /**
     private DcMotor initMotor(
             String motorName,
             DcMotorSimple.Direction direction,
@@ -91,6 +92,7 @@ public class MecanumDrive extends LinearOpMode {
                 DcMotorSimple.Direction.FORWARD
         );
     }
+     */
     /**
      * Applies the needed power to move the robot
      *
@@ -142,37 +144,31 @@ public class MecanumDrive extends LinearOpMode {
 
         LF = initMotor(
             "LF",
-            DcMotorSimple.Direction.FORWARD,
-            DcMotor.RunMode.RUN_USING_ENCODER,
-            DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RF = initMotor(
-                "RF",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        RF = initMotor(
+                "RF",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+
+        );
+
         LB = initMotor(
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        Duck_Wheel = initMotor(
-                "Duck_Wheel",
-                DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.BRAKE
+                DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         Intake = initMotor(
@@ -184,11 +180,18 @@ public class MecanumDrive extends LinearOpMode {
 
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
 
-        LiftMotor = initMotor(
-                "liftMotor",
+        ArmMotor = initMotor(
+                "ArmMotor",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
+        );
+
+        Duck_Wheel = initMotor(
+                "Duck_Wheel",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         waitForStart();
@@ -214,7 +217,7 @@ public class MecanumDrive extends LinearOpMode {
             if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > inputDelay) {
                 lastTimeDuck = System.currentTimeMillis();
                 duckWheelOn = !duckWheelOn;
-                Duck_Wheel.setPower(duckWheelOn ? 0.54 : 0);
+                Duck_Wheel.setPower(duckWheelOn ? ( gamepad2.a ? 1 : 0.54 ) : 0);
             }
 
             if (gamepad1.a && System.currentTimeMillis() - lastTimeIntake > inputDelay) {
@@ -224,13 +227,13 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad2.left_trigger > 0) {
-                LiftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                LiftMotor.setPower(gamepad2.left_trigger);
+                ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+                ArmMotor.setPower(gamepad2.left_trigger);
             } else if (gamepad2.right_trigger > 0) {
-                LiftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                LiftMotor.setPower(gamepad2.right_trigger);
+                ArmMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+                ArmMotor.setPower(gamepad2.right_trigger);
             } else {
-                LiftMotor.setPower(0);
+                ArmMotor.setPower(0);
             }
         }
     }
