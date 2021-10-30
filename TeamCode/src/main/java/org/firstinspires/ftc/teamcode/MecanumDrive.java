@@ -142,7 +142,7 @@ public class MecanumDrive extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
-        long inputDelay = 500;
+        long inputDelay = 500; // Seconds: inputDelay/1000
         double lastTimeDuck = 0D;
         double lastTimeIntake = 0D;
 
@@ -185,14 +185,17 @@ public class MecanumDrive extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        // TODO: Uncomment tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS); statements
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
         // TODO: Change name on DriverHub from Lift to ArmMotor
+        /*
         ArmMotor = initMotor(
-                "ArmMotor",
+                "Lift", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
+        */
 
         Duck_Wheel = initMotor(
                 "Duck_Wheel",
@@ -227,12 +230,19 @@ public class MecanumDrive extends LinearOpMode {
                 Duck_Wheel.setPower(duckWheelOn ? ( gamepad2.a ? 1 : 0.54 ) : 0);
             }
 
-            if (gamepad1.a && System.currentTimeMillis() - lastTimeIntake > inputDelay) {
-                lastTimeIntake = System.currentTimeMillis();
-                intakeOn = !intakeOn;
-                Intake.setPower(intakeOn ? 0.56 : 0);
+            if (System.currentTimeMillis() - lastTimeIntake > inputDelay) {
+                if (gamepad1.b || gamepad1.a) {
+                    if (gamepad1.b) {
+                        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
+                    } else {
+                        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
+                    }
+                    lastTimeIntake = System.currentTimeMillis();
+                    intakeOn = !intakeOn;
+                    Intake.setPower(intakeOn ? 0.56 : 0);
+                }
             }
-
+            /**
             if (gamepad2.left_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
                 ArmMotor.setPower(gamepad2.left_trigger);
@@ -242,6 +252,7 @@ public class MecanumDrive extends LinearOpMode {
             } else {
                 ArmMotor.setPower(0);
             }
+             */
         }
     }
 }

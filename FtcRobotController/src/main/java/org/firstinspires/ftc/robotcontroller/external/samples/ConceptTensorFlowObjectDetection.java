@@ -181,6 +181,6 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS);
+        // tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 }
