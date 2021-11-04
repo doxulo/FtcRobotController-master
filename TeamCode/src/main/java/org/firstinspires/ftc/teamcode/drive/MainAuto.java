@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous
-@Disabled
 public class MainAuto extends LinearOpMode {
 
 

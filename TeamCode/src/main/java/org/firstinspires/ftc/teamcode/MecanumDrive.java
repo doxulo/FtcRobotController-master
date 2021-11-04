@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class MecanumDrive extends LinearOpMode {
@@ -29,6 +30,8 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor RF; // 0
     public DcMotor LB; // 3
     public DcMotor RB; // 2
+    public Servo Twist;
+    public Servo Gate;
 
     /**
      * Initialize all motors that control the robot's accessories
@@ -43,6 +46,8 @@ public class MecanumDrive extends LinearOpMode {
 
     public DcMotor ArmMotor;
 
+    public double limit = 1.0D;
+    public double limitPower = 0.75D;
     /**
      * Possible function to initialize and setup future motors
      *
@@ -111,12 +116,12 @@ public class MecanumDrive extends LinearOpMode {
         // Change if strafe bad
         double STRAFING_CORRECTION = 1.0D;
         // TODO: Change gamepad1.left_stick_x to x?
-        x = gamepad1.left_stick_x * STRAFING_CORRECTION;
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double LF_power = (y + x + rx) / denominator/3;
-        double LB_power = (y - x + rx) / denominator/3;
-        double RF_power = (y - x - rx) / denominator/3;
-        double RB_power = (y + x - rx) / denominator/3;
+        x = x * STRAFING_CORRECTION;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1)*limit;
+        double LF_power = (y + x + rx) / denominator;
+        double LB_power = (y - x + rx) / denominator;
+        double RF_power = (y - x - rx) / denominator;
+        double RB_power = (y + x - rx) / denominator;
         //denominator/power = speed
 
         LF.setPower(LF_power);
@@ -142,17 +147,22 @@ public class MecanumDrive extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
+        limitPower = 1/limitPower;
+
         long inputDelay = 500; // Seconds: inputDelay/1000
         double lastTimeDuck = 0D;
         double lastTimeIntake = 0D;
 
+        double lastTimeLimit = 0D;
+
         boolean intakeOn = false;
         boolean duckWheelOn = false;
+        boolean limitOn = false;
 
         LF = initMotor(
             "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
@@ -188,14 +198,13 @@ public class MecanumDrive extends LinearOpMode {
         // TODO: Uncomment tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS); statements
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
         // TODO: Change name on DriverHub from Lift to ArmMotor
-        /*
+
         ArmMotor = initMotor(
-                "Lift", // TODO: change to ArmMotor
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                "ArmMotor", // TODO: change to ArmMotor
+                DcMotorSimple.Direction.REVERSE,
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
-        */
 
         Duck_Wheel = initMotor(
                 "Duck_Wheel",
@@ -203,7 +212,9 @@ public class MecanumDrive extends LinearOpMode {
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
-
+        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Twist = hardwareMap.servo.get("Twist");
+        Gate = hardwareMap.servo.get("Gate");
         waitForStart();
 
         while (opModeIsActive()) {
@@ -211,6 +222,7 @@ public class MecanumDrive extends LinearOpMode {
             int encoder_LB = LB.getCurrentPosition();
             int encoder_RF = RF.getCurrentPosition();
             int encoder_RB = RB.getCurrentPosition();
+            int encoder_Arm = ArmMotor.getCurrentPosition();
 
             telemetry.addData("LF encoder: ", encoder_LF);
             telemetry.addData("LB encoder: ", encoder_LB);
@@ -218,11 +230,17 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("RB encoder: ", encoder_RB);
             telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
+            telemetry.addData("Arm encoder: ", encoder_Arm);
+            telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
             telemetry.update();
 
             //drive train
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+            if (gamepad1.y && System.currentTimeMillis() - lastTimeLimit > inputDelay) {
+                limit = ( limitOn ? 1 : limitPower );
+                limitOn = !limitOn;
+            }
 
             if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > inputDelay) {
                 lastTimeDuck = System.currentTimeMillis();
@@ -230,8 +248,8 @@ public class MecanumDrive extends LinearOpMode {
                 Duck_Wheel.setPower(duckWheelOn ? ( gamepad2.a ? 1 : 0.54 ) : 0);
             }
 
-            if (System.currentTimeMillis() - lastTimeIntake > inputDelay) {
-                if (gamepad1.b || gamepad1.a) {
+            if (gamepad1.b || gamepad1.a) {
+                if (System.currentTimeMillis() - lastTimeIntake > inputDelay) {
                     if (gamepad1.b) {
                         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
                     } else {
@@ -242,17 +260,34 @@ public class MecanumDrive extends LinearOpMode {
                     Intake.setPower(intakeOn ? 0.56 : 0);
                 }
             }
-            /**
+
             if (gamepad2.left_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                ArmMotor.setPower(gamepad2.left_trigger);
+                ArmMotor.setPower(gamepad2.left_trigger/2);
             } else if (gamepad2.right_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                ArmMotor.setPower(gamepad2.right_trigger);
+                ArmMotor.setPower(gamepad2.right_trigger/2);
             } else {
                 ArmMotor.setPower(0);
             }
-             */
+            if (gamepad2.a) {
+                Gate.setPosition(1);
+            }
+            else if (gamepad2.b) {
+                Gate.setPosition(0);
+            }
+
+            if (gamepad2.dpad_up) {
+                Twist.setPosition(1);
+                ArmMotor.setPower(-0.2);
+                while(ArmMotor.getCurrentPosition()<500) {
+                    ArmMotor.setPower(-((double)ArmMotor.getCurrentPosition()/(500*3)));
+                }
+                ArmMotor.setPower(0);
+                Gate.setPosition(0);
+
+
+            }
         }
     }
 }
