@@ -155,6 +155,11 @@ public class MecanumDrive extends LinearOpMode {
 
         double lastTimeLimit = 0D;
 
+        double Gate_close = 0;
+        double Gate_open = 1;
+        double Twist_default  =0 ;
+        double Twist_active = 0.5;
+
         boolean intakeOn = false;
         boolean duckWheelOn = false;
         boolean limitOn = false;
@@ -271,17 +276,16 @@ public class MecanumDrive extends LinearOpMode {
                 ArmMotor.setPower(0);
             }
             if (gamepad2.a) {
-                Gate.setPosition(1);
+                Twist.setPosition(0);
             }
             else if (gamepad2.b) {
-                Gate.setPosition(0);
+                Twist.setPosition(0.25);
             }
 
             if (gamepad2.dpad_up) {
-                Twist.setPosition(1);
-                ArmMotor.setPower(-0.2);
+                Twist.setPosition(0.25);
+                ArmMotor.setPower(-1);
                 while(ArmMotor.getCurrentPosition()<500) {
-                    ArmMotor.setPower(-((double)ArmMotor.getCurrentPosition()/(500*3)));
                 }
                 ArmMotor.setPower(0);
                 Gate.setPosition(0);
