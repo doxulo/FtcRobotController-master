@@ -182,7 +182,7 @@ public class MecanumDrive extends LinearOpMode {
         double Gate_close = 0;
         double Gate_open = 1;
         double Twist_default = 0;
-        double Twist_active = 0.5;
+        double Twist_active = 0.95;
         double Top_Start = 0.025;
         double Close_Point = 0.015;
         int ArmPosition = 0;
@@ -301,6 +301,10 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("Gate Position: ", Gate.getPosition());
+            telemetry.addData("Twist Position: ", Twist.getPosition());
+            telemetry.addData("Gate Orientation: ", Gate.getDirection());
+            telemetry.addData("Twist Orientation: ", Twist.getDirection());
             telemetry.update();
 
             //drive train
@@ -346,7 +350,7 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.b && debounces.checkAndUpdate("Gate")) {
                 gateOn = !gateOn;
-                Twist.setPosition(gateOn ? Gate_open : Gate_close);
+                Gate.setPosition(gateOn ? Gate_open : Gate_close);
             }
 
             if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
