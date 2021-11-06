@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.checkerframework.checker.units.qual.A;
+import org.firstinspires.ftc.teamcode.util.Debounce;
 
 @TeleOp
 public class MecanumDrive extends LinearOpMode {
@@ -25,7 +26,7 @@ public class MecanumDrive extends LinearOpMode {
 
     /**
      * Initialize all motors that control the robot's wheels
-     *
+     * <p>
      * RF - Right Front wheel
      * RB - Right Back wheel
      * LF - Left Front wheel
@@ -45,7 +46,7 @@ public class MecanumDrive extends LinearOpMode {
 
     /**
      * Initialize all motors that control the robot's accessories
-     *
+     * <p>
      * Duck_Wheel - Vertically propped motor that controls the duck dropper
      * Intake - Intake Motor
      * ArmMotor - Arm Motor
@@ -53,14 +54,15 @@ public class MecanumDrive extends LinearOpMode {
 
     public double limit = 1.0D;
     public double limitPower = 0.75D;
+
     /**
      * Possible function to initialize and setup future motors
      *
-     * @param motorName             Name to index the motor
-     * @param direction             Direction of the motor's power
-     * @param runMode               Reverse or Forward power motion
-     * @param zeroPowerBehavior     Zero Power Behavior of the motor
-     * @return                      Setup motor
+     * @param motorName         Name to index the motor
+     * @param direction         Direction of the motor's power
+     * @param runMode           Reverse or Forward power motion
+     * @param zeroPowerBehavior Zero Power Behavior of the motor
+     * @return Setup motor
      */
     private DcMotor initMotor(
             String motorName,
@@ -77,52 +79,52 @@ public class MecanumDrive extends LinearOpMode {
     }
 
     /**
-    private DcMotor initMotor(
-            String motorName,
-            DcMotorSimple.Direction direction,
-            DcMotor.RunMode runMode
-    ) {
-        return initMotor(
-                motorName,
-                direction,
-                runMode,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-    }
+     private DcMotor initMotor(
+     String motorName,
+     DcMotorSimple.Direction direction,
+     DcMotor.RunMode runMode
+     ) {
+     return initMotor(
+     motorName,
+     direction,
+     runMode,
+     DcMotor.ZeroPowerBehavior.FLOAT
+     );
+     }
 
-    private DcMotor initMotor(
-            String motorName,
-            DcMotorSimple.Direction direction
-    ) {
-        return initMotor(
-                motorName,
-                direction,
-                DcMotor.RunMode.RUN_USING_ENCODER
-        );
-    }
+     private DcMotor initMotor(
+     String motorName,
+     DcMotorSimple.Direction direction
+     ) {
+     return initMotor(
+     motorName,
+     direction,
+     DcMotor.RunMode.RUN_USING_ENCODER
+     );
+     }
 
-    private DcMotor initMotor(
-            String motorName
-    ) {
-        return initMotor(
-                motorName,
-                DcMotorSimple.Direction.FORWARD
-        );
-    }
+     private DcMotor initMotor(
+     String motorName
+     ) {
+     return initMotor(
+     motorName,
+     DcMotorSimple.Direction.FORWARD
+     );
+     }
      */
     /**
      * Applies the needed power to move the robot
      *
-     * @param y     First Variable used in the calculation of the power
-     * @param x     Second variable used in the calculations of the power
-     * @param rx    Third variable used in the calculations of the power
+     * @param y  First Variable used in the calculation of the power
+     * @param x  Second variable used in the calculations of the power
+     * @param rx Third variable used in the calculations of the power
      */
     public void mecanum(double y, double x, double rx) {
         // Change if strafe bad
         double STRAFING_CORRECTION = 1.0D;
         // TODO: Change gamepad1.left_stick_x to x?
         x = x * STRAFING_CORRECTION;
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1)*limit;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1) * limit;
         double LF_power = (y + x + rx) / denominator;
         double LB_power = (y - x + rx) / denominator;
         double RF_power = (y - x - rx) / denominator;
@@ -138,7 +140,7 @@ public class MecanumDrive extends LinearOpMode {
     /**
      * Applies the same power to all of the wheels
      *
-     * @param power     The power to be set to all of the motors
+     * @param power The power to be set to all of the motors
      */
     public void wheels_power(double power) {
         LF.setPower(power);
@@ -148,7 +150,7 @@ public class MecanumDrive extends LinearOpMode {
     }
 
     public double lerp(double p0, double p1, double t) {
-        return (1-t)*p0 + t*p1;
+        return (1 - t) * p0 + t * p1;
     }
 
     /**
@@ -158,41 +160,56 @@ public class MecanumDrive extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        limitPower = 1/limitPower;
+        limitPower = 1 / limitPower;
 
-        long inputDelay = 500; // Seconds: inputDelay/1000
-        double lastTimeDuck = 0D;
-        double lastTimeIntake = 0D;
+        Debounce debounces = new Debounce(
+                300,
+                "Duck",
+                "Intake",
+                "Arm",
+                "Limit",
+                "Gate",
+                "Twist"
+        );
+//        long inputDelay = 500; // Seconds: inputDelay/1000
+//        double lastTimeDuck = 0D;
+//        double lastTimeIntake = 0D;
+//        double lastTimeArm = 0D;
 
-        double lastTimeLimit = 0D;
+//        double lastTimeLimit = 0D;
 
         double startArmPower = -0.15;
         double Gate_close = 0;
         double Gate_open = 1;
-        double Twist_default  = 0 ;
+        double Twist_default = 0;
         double Twist_active = 0.5;
-        double Top_Start = 0.1445545;
-        double Close_Point = 0.067889;
+        double Top_Start = 0.025;
+        double Close_Point = 0.015;
+        int ArmPosition = 0;
+        int Arm_default = 0;
+        int Arm_top1 = 700;
+        int Arm_top2 = 1400;
 
         boolean intakeOn = false;
         boolean duckWheelOn = false;
         boolean limitOn = false;
         boolean armOn = false;
+        boolean twistOn = false;
+        boolean gateOn = false;
         boolean lastResetState = false;
-        boolean curResetState  = false;
-
+        boolean curResetState = false;
 
         LF = initMotor(
-            "LF",
+                "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
 
         );
@@ -200,14 +217,14 @@ public class MecanumDrive extends LinearOpMode {
         LB = initMotor(
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
@@ -222,12 +239,12 @@ public class MecanumDrive extends LinearOpMode {
         // TODO: gamepad2.rt = down, gamepad2.lt = up,
         // TODO: Change name on DriverHub from Lift to ArmMotor
 
-        ArmMotor = initMotor(
+        /*ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
-                DcMotorSimple.Direction.REVERSE,
+                DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
-        );
+        );*/
 
         Duck_Wheel = initMotor(
                 "Duck_Wheel",
@@ -235,27 +252,36 @@ public class MecanumDrive extends LinearOpMode {
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
-      //  ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //  ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ArmMotor = hardwareMap.dcMotor.get("ArmMotor");
+        ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        ArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         Twist = hardwareMap.servo.get("Twist");
         Gate = hardwareMap.servo.get("Gate");
         modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-        gyro = (IntegratingGyroscope)modernRoboticsI2cGyro;
+        gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
         modernRoboticsI2cGyro.calibrate();
         timer.reset();
-        while (!isStopRequested() && modernRoboticsI2cGyro.isCalibrating())  {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+        while (!isStopRequested() && modernRoboticsI2cGyro.isCalibrating()) {
+            telemetry.addData("calibrating", "%s", Math.round(timer.seconds()) % 2 == 0 ? "|.." : "..|");
             telemetry.update();
             sleep(50);
         }
 
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
+        telemetry.log().clear();
+        telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear();
+        telemetry.update();
+
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         while (opModeIsActive()) {
-
+            double currentSystemTime = System.currentTimeMillis();
             int encoder_LF = LF.getCurrentPosition();
             int encoder_LB = LB.getCurrentPosition();
             int encoder_RF = RF.getCurrentPosition();
@@ -273,32 +299,31 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
             telemetry.addData("Arm encoder: ", encoder_Arm);
             telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
-            telemetry.addData("Arm Power: ", lerp(startArmPower, 0, (double) ArmMotor.getCurrentPosition()/500));
+            telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("heading", "%3d deg", heading);
             telemetry.update();
 
             //drive train
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            if (gamepad1.y && System.currentTimeMillis() - lastTimeLimit > inputDelay) {
-                limit = ( limitOn ? 1 : limitPower );
+            if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
+//                lastTimeLimit = currentSystemTime;
+                limit = (limitOn ? 1 : limitPower);
                 limitOn = !limitOn;
             }
 
-            if (gamepad2.x && System.currentTimeMillis() - lastTimeDuck > inputDelay) {
-                lastTimeDuck = System.currentTimeMillis();
+            if (gamepad2.x && debounces.checkAndUpdate("Duck")) {
                 duckWheelOn = !duckWheelOn;
-                Duck_Wheel.setPower(duckWheelOn ? ( gamepad2.a ? 1 : 0.54 ) : 0);
+                Duck_Wheel.setPower(duckWheelOn ? 0.56 : 0);
             }
 
             if (gamepad1.b || gamepad1.a) {
-                if (System.currentTimeMillis() - lastTimeIntake > inputDelay) {
+                if (debounces.checkAndUpdate("Intake")) {
                     if (gamepad1.b) {
                         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
                     } else {
                         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
                     }
-                    lastTimeIntake = System.currentTimeMillis();
                     intakeOn = !intakeOn;
                     Intake.setPower(intakeOn ? 0.56 : 0);
                 }
@@ -306,36 +331,51 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.left_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                ArmMotor.setPower(gamepad2.left_trigger/10);
+                ArmMotor.setPower(gamepad2.left_trigger / 2);
             } else if (gamepad2.right_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                ArmMotor.setPower(gamepad2.right_trigger/10);
+                ArmMotor.setPower(gamepad2.right_trigger / 2);
             } else {
                 ArmMotor.setPower(0);
             }
-            if (gamepad2.a) {
-                Twist.setPosition(0);
-            }
-            else if (gamepad2.b) {
-                Twist.setPosition(0.25);
-            }
-            if (gamepad2.dpad_up) {
-            zAccumulated = modernRoboticsI2cGyro.getIntegratedZValue();
-            if (zAccumulated > 195) {
-                ArmMotor.setPower(Top_Start);
-            }
-            if (zAccumulated < 160) {
-                ArmMotor.setPower(-Top_Start);
+
+            if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
+                twistOn = !twistOn;
+                Twist.setPosition(twistOn ? Twist_active : Twist_default);
             }
 
-            if (zAccumulated > 161) {
-                ArmMotor.setPower(Close_Point);
-            }
-            if (zAccumulated > 194) {
-                ArmMotor.setPower(Close_Point);
+            if (gamepad2.b && debounces.checkAndUpdate("Gate")) {
+                gateOn = !gateOn;
+                Twist.setPosition(gateOn ? Gate_open : Gate_close);
             }
 
+            if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
+                //ArmPosition = 175;
+                ArmMotor.setTargetPosition(700);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(-0.5);
             }
+            /*zAccumulated = modernRoboticsI2cGyro.getIntegratedZValue();
+             if (zAccumulated > ArmPosition - 15 && zAccumulated < ArmPosition + 15 ) {
+                if (zAccumulated < ArmPosition-5) {
+                    ArmMotor.setPower(Close_Point);
+                }
+                else if (zAccumulated > ArmPosition+5) {
+                    ArmMotor.setPower(-Close_Point);
+                }
+                else {
+                    ArmMotor.setPower(0);
+                }
+            }
+            else {
+                if (zAccumulated < ArmPosition) {
+                    ArmMotor.setPower(Top_Start);
+                }
+                else if (zAccumulated > ArmPosition) {
+                    ArmMotor.setPower(-Top_Start);
+                }
+            }*/
+
             /*
             if (armOn && gamepad2.dpad_up) {
                 ArmMotor.setTargetPosition(500);
@@ -373,4 +413,5 @@ public class MecanumDrive extends LinearOpMode {
                 ArmMotor.setPower(0.14);
             }
         }
-    }}
+    }
+}
