@@ -1,22 +1,18 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-
-public class BlueBoxAuto extends LinearOpMode {
+@Autonomous
+public class SlantBox extends LinearOpMode {
 
     /** Global comments:
      * GamePad1 == For movements,
      * GamePad2 == Gadgets,
      */
 
-    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
     /**
      * Initialize all motors that control the robot's wheels
      *
@@ -29,19 +25,6 @@ public class BlueBoxAuto extends LinearOpMode {
     public DcMotor RF; // 0
     public DcMotor LB; // 3
     public DcMotor RB; // 2
-
-    /**
-     * Initialize all motors that control the robot's accessories
-     *
-     * Duck_Wheel - Vertically propped motor that controls the duck dropper
-     * Intake - Intake Motor
-     * ArmMotor - Arm Motor
-     */
-    public DcMotor Duck_Wheel;
-
-    public DcMotor Intake;
-
-    public DcMotor ArmMotor;
 
     /**
      * Possible function to initialize and setup future motors
@@ -66,13 +49,12 @@ public class BlueBoxAuto extends LinearOpMode {
         return motor;
     }
 
-    private void applyPower(double power) {
-        RB.setPower(power);
-        RF.setPower(power);
-        LF.setPower(power);
-        LB.setPower(power);
+    private void applyPower(double LF_power, double RF_power, double LB_power, double RB_power) {
+        LF.setPower(LF_power);
+        RF.setPower(RF_power);
+        LB.setPower(LB_power);
+        RB.setPower(RB_power);
     }
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
@@ -80,7 +62,7 @@ public class BlueBoxAuto extends LinearOpMode {
         LF = initMotor(
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
@@ -106,36 +88,9 @@ public class BlueBoxAuto extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
-        Intake = initMotor(
-                "Intake",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-        /*
-        ArmMotor = initMotor(
-                "Lift", // TODO: change name back to "ArmMotor"
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-         */
-        Duck_Wheel = initMotor(
-                "Duck_Wheel",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.BRAKE
-        );
-
         waitForStart();
-
-        // Strafe Code
-
-        // Go Forward for 0.5 seconds
-        applyPower(0.5);
-        sleep(500);
-
-        // Stop in the box
-        applyPower(0);
+        applyPower(0.4, 0.4, 0.4 ,0.4);
+        sleep(2015);
+        applyPower(0,0,0,0);
     }
 }

@@ -16,7 +16,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 
 @TeleOp
-public class MecanumDrive extends LinearOpMode {
+public class MecanumDriveRed extends LinearOpMode {
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -181,8 +181,8 @@ public class MecanumDrive extends LinearOpMode {
         double startArmPower = -0.15;
         double Gate_close = 0;
         double Gate_open = 1;
-        double Twist_default = 0;
-        double Twist_active = 0.95;
+        double Twist_default = 0.05;
+        double Twist_active = .3;
         double Top_Start = 0.025;
         double Close_Point = 0.015;
         int ArmPosition = 0;
@@ -202,14 +202,14 @@ public class MecanumDrive extends LinearOpMode {
         LF = initMotor(
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
 
         );
@@ -217,14 +217,14 @@ public class MecanumDrive extends LinearOpMode {
         LB = initMotor(
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
@@ -316,9 +316,14 @@ public class MecanumDrive extends LinearOpMode {
                 limitOn = !limitOn;
             }
 
-            if (gamepad2.x && debounces.checkAndUpdate("Duck")) {
+            if (gamepad2.dpad_left && debounces.checkAndUpdate("Duck")) {
                 duckWheelOn = !duckWheelOn;
                 Duck_Wheel.setPower(duckWheelOn ? 0.56 : 0);
+            }
+
+            if (gamepad2.dpad_right && debounces.checkAndUpdate("Duck")) {
+                duckWheelOn = !duckWheelOn;
+                Duck_Wheel.setPower(duckWheelOn ? -0.56 : 0);
             }
 
             if (gamepad1.b || gamepad1.a) {
@@ -348,9 +353,11 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistOn ? Twist_active : Twist_default);
             }
 
-            if (gamepad2.b && debounces.checkAndUpdate("Gate")) {
-                gateOn = !gateOn;
-                Gate.setPosition(gateOn ? Gate_open : Gate_close);
+            if (gamepad2.b) {
+                Gate.setPosition(1);
+            }
+            if (gamepad2. y) {
+                Gate.setPosition(0.8);
             }
 
             if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
