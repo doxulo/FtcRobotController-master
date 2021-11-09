@@ -175,7 +175,7 @@ public class MecanumDriveRed extends LinearOpMode {
 //        double lastTimeDuck = 0D;
 //        double lastTimeIntake = 0D;
 //        double lastTimeArm = 0D;
-
+        double startDuck = 0;
 //        double lastTimeLimit = 0D;
 
         double startArmPower = -0.15;
@@ -366,6 +366,49 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ArmMotor.setPower(-0.5);
             }
+
+            /*if(gamepad1.left_trigger>0.80 && gamepad1.right_trigger<=0.1) {
+                Duck_Wheel.setPower(1);
+            }
+            else if (gamepad1.left_trigger>0.1 && gamepad1.right_trigger<=0.1) {
+                Duck_Wheel.setPower(0.56);
+            }
+            else if(gamepad1.right_trigger>0.80 && gamepad1.left_trigger<=0.1) {
+                Duck_Wheel.setPower(-1);
+            }
+            else if (gamepad1.right_trigger>0.1 && gamepad1.left_trigger<=0.1) {
+                Duck_Wheel.setPower(-0.56);
+            }
+            else {
+                Duck_Wheel.setPower(0);
+            }*/
+
+            if(gamepad2.left_bumper) {
+                if (startDuck == 0) {
+                    startDuck = System.currentTimeMillis();
+                    Duck_Wheel.setPower(0.56);
+                }
+                else if (startDuck != 0) {
+                    if (System.currentTimeMillis() - startDuck > 750) {
+                        Duck_Wheel.setPower(1);
+                    }
+                }
+            }
+            else if(gamepad2.right_bumper) {
+                if (startDuck == 0) {
+                    startDuck = System.currentTimeMillis();
+                    Duck_Wheel.setPower(-0.56);
+                }
+                else if (startDuck != 0) {
+                    if (System.currentTimeMillis() - startDuck > 750) {
+                        Duck_Wheel.setPower(-1);
+                    }
+                }
+            }
+            else {
+                startDuck = 0;
+                Duck_Wheel.setPower(0);
+            }
             /*zAccumulated = modernRoboticsI2cGyro.getIntegratedZValue();
              if (zAccumulated > ArmPosition - 15 && zAccumulated < ArmPosition + 15 ) {
                 if (zAccumulated < ArmPosition-5) {
@@ -417,12 +460,6 @@ public class MecanumDriveRed extends LinearOpMode {
 
             }
             */
-
-            if (gamepad2.right_bumper) {
-                ArmMotor.setPower(-0.14);
-            } else if (gamepad2.left_bumper) {
-                ArmMotor.setPower(0.14);
-            }
         }
     }
 }
