@@ -4,17 +4,45 @@ import java.util.HashMap;
 
 public class Debounce {
 
-    private final HashMap<String, double[]> debounces = new HashMap<>();
-    public Debounce (double debounceTime, String... names) {
+    private final HashMap<String, DebounceObject> debounces = new HashMap<>();
+
+    public Debounce(double debounceTime, String... names) {
         for (int i = 0; i < names.length; i++) {
             this.add(names[i], debounceTime);
         }
     }
-    public void add(String name, double debounceTime) {
+
+    public Debounce(DebounceObject... objects) {
+        for (int i = 0; i < objects.length; i++) {
+            this.add(objects[i]);
+        }
+    }
+
+    private DebounceObject getObjectAssert(String name) {
+        DebounceObject object = this.debounces.get(name);
+        assert object != null;
+        return object;
+    }
+
+    public void add(DebounceObject object) {
         this.debounces.put(
-                name,
-                new double[]{0, debounceTime}
+                object.getName(),
+                object
         );
+    }
+
+    public void add(String name, double debounceTime) {
+        this.add(
+                new DebounceObject(name, debounceTime)
+        );
+    }
+
+    public long getTimePassed(String name) {
+        return System.currentTimeMillis() - this.getObjectAssert(name).getLastTime();
+    }
+
+    public boolean getTimePassedAndCheckAndReset(String name, long comparisonTime) {
+        return this.getTimePassed(name) >= comparisonTime;
     }
 
     public boolean checkAndUpdate(String name) {
@@ -22,20 +50,14 @@ public class Debounce {
     }
 
     public boolean check(String name) {
-        double[] keyValue = this.debounces.get(name);
-        assert keyValue != null;
-        return System.currentTimeMillis() - keyValue[0] > keyValue[1];
+        return this.getObjectAssert(name).check();
     }
 
     public boolean update(String name) {
-        double[] keyValue = this.debounces.get(name);
-        assert keyValue != null;
-        keyValue[0] = System.currentTimeMillis();
-        this.debounces.put(
-                name,
-                keyValue
-        );
+        return this.getObjectAssert(name).updateLastTime();
+    }
 
-        return true;
+    public void reset(String name) {
+        this.getObjectAssert(name).reset();
     }
 }

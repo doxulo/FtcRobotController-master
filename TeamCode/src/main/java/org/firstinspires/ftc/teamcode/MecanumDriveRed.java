@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.util.Debounce;
+import org.firstinspires.ftc.teamcode.util.DebounceObject;
 
 @TeleOp
 public class MecanumDriveRed extends LinearOpMode {
@@ -112,19 +113,18 @@ public class MecanumDriveRed extends LinearOpMode {
         limitPower = 1 / limitPower;
 
         Debounce debounces = new Debounce(
-                300,
-                "Duck",
-                "Intake",
-                "Arm",
-                "Limit",
-                "Gate",
-                "Twist"
+                new DebounceObject("Duck", 750),
+                new DebounceObject("Intake", 500),
+                new DebounceObject("Arm", 500),
+                new DebounceObject("Limit", 500),
+                new DebounceObject("Gate", 500),
+                new DebounceObject("Twist", 500)
         );
-
-        double startDuck = 0;
 
         double Twist_default = 0.05;
         double Twist_active = .3;
+
+        long startDuck = 0;
 
         boolean intakeOn = false;
         boolean duckWheelOn = false;
@@ -235,19 +235,8 @@ public class MecanumDriveRed extends LinearOpMode {
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
-//                lastTimeLimit = currentSystemTime;
                 limit = (limitOn ? 1 : limitPower);
                 limitOn = !limitOn;
-            }
-
-            if (gamepad2.dpad_left && debounces.checkAndUpdate("Duck")) {
-                duckWheelOn = !duckWheelOn;
-                Duck_Wheel.setPower(duckWheelOn ? 0.56 : 0);
-            }
-
-            if (gamepad2.dpad_right && debounces.checkAndUpdate("Duck")) {
-                duckWheelOn = !duckWheelOn;
-                Duck_Wheel.setPower(duckWheelOn ? -0.56 : 0);
             }
 
             if (gamepad1.b || gamepad1.a) {
@@ -280,7 +269,7 @@ public class MecanumDriveRed extends LinearOpMode {
             if (gamepad2.b) {
                 Gate.setPosition(1);
             }
-            if (gamepad2. y) {
+            if (gamepad2.y) {
                 Gate.setPosition(0.8);
             }
 
