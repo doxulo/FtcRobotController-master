@@ -79,40 +79,6 @@ public class MecanumDriveRed extends LinearOpMode {
     }
 
     /**
-     private DcMotor initMotor(
-     String motorName,
-     DcMotorSimple.Direction direction,
-     DcMotor.RunMode runMode
-     ) {
-     return initMotor(
-     motorName,
-     direction,
-     runMode,
-     DcMotor.ZeroPowerBehavior.FLOAT
-     );
-     }
-
-     private DcMotor initMotor(
-     String motorName,
-     DcMotorSimple.Direction direction
-     ) {
-     return initMotor(
-     motorName,
-     direction,
-     DcMotor.RunMode.RUN_USING_ENCODER
-     );
-     }
-
-     private DcMotor initMotor(
-     String motorName
-     ) {
-     return initMotor(
-     motorName,
-     DcMotorSimple.Direction.FORWARD
-     );
-     }
-     */
-    /**
      * Applies the needed power to move the robot
      *
      * @param y  First Variable used in the calculation of the power
@@ -122,7 +88,6 @@ public class MecanumDriveRed extends LinearOpMode {
     public void mecanum(double y, double x, double rx) {
         // Change if strafe bad
         double STRAFING_CORRECTION = 1.0D;
-        // TODO: Change gamepad1.left_stick_x to x?
         x = x * STRAFING_CORRECTION;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1) * limit;
         double LF_power = (y + x + rx) / denominator;
@@ -135,22 +100,6 @@ public class MecanumDriveRed extends LinearOpMode {
         RF.setPower(RF_power);
         LB.setPower(LB_power);
         RB.setPower(RB_power);
-    }
-
-    /**
-     * Applies the same power to all of the wheels
-     *
-     * @param power The power to be set to all of the motors
-     */
-    public void wheels_power(double power) {
-        LF.setPower(power);
-        RB.setPower(power);
-        LB.setPower(power);
-        RF.setPower(power);
-    }
-
-    public double lerp(double p0, double p1, double t) {
-        return (1 - t) * p0 + t * p1;
     }
 
     /**
@@ -171,33 +120,16 @@ public class MecanumDriveRed extends LinearOpMode {
                 "Gate",
                 "Twist"
         );
-//        long inputDelay = 500; // Seconds: inputDelay/1000
-//        double lastTimeDuck = 0D;
-//        double lastTimeIntake = 0D;
-//        double lastTimeArm = 0D;
-        double startDuck = 0;
-//        double lastTimeLimit = 0D;
 
-        double startArmPower = -0.15;
-        double Gate_close = 0;
-        double Gate_open = 1;
+        double startDuck = 0;
+
         double Twist_default = 0.05;
         double Twist_active = .3;
-        double Top_Start = 0.025;
-        double Close_Point = 0.015;
-        int ArmPosition = 0;
-        int Arm_default = 0;
-        int Arm_top1 = 700;
-        int Arm_top2 = 1400;
 
         boolean intakeOn = false;
         boolean duckWheelOn = false;
         boolean limitOn = false;
-        boolean armOn = false;
         boolean twistOn = false;
-        boolean gateOn = false;
-        boolean lastResetState = false;
-        boolean curResetState = false;
 
         LF = initMotor(
                 "LF",
@@ -236,15 +168,14 @@ public class MecanumDriveRed extends LinearOpMode {
         );
 
         // TODO: Uncomment tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS); statements
-        // TODO: gamepad2.rt = down, gamepad2.lt = up,
-        // TODO: Change name on DriverHub from Lift to ArmMotor
 
-        /*ArmMotor = initMotor(
+        ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );*/
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         Duck_Wheel = initMotor(
                 "Duck_Wheel",
@@ -252,12 +183,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
-        //  ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ArmMotor = hardwareMap.dcMotor.get("ArmMotor");
-        ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        ArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         Twist = hardwareMap.servo.get("Twist");
         Gate = hardwareMap.servo.get("Gate");
@@ -288,7 +213,6 @@ public class MecanumDriveRed extends LinearOpMode {
             int encoder_RB = RB.getCurrentPosition();
             int encoder_Arm = ArmMotor.getCurrentPosition();
             int heading = modernRoboticsI2cGyro.getHeading();
-            int zAccumulated;
 
 
             telemetry.addData("LF encoder: ", encoder_LF);
@@ -361,27 +285,10 @@ public class MecanumDriveRed extends LinearOpMode {
             }
 
             if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
-                //ArmPosition = 175;
                 ArmMotor.setTargetPosition(700);
                 ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ArmMotor.setPower(-0.5);
             }
-
-            /*if(gamepad1.left_trigger>0.80 && gamepad1.right_trigger<=0.1) {
-                Duck_Wheel.setPower(1);
-            }
-            else if (gamepad1.left_trigger>0.1 && gamepad1.right_trigger<=0.1) {
-                Duck_Wheel.setPower(0.56);
-            }
-            else if(gamepad1.right_trigger>0.80 && gamepad1.left_trigger<=0.1) {
-                Duck_Wheel.setPower(-1);
-            }
-            else if (gamepad1.right_trigger>0.1 && gamepad1.left_trigger<=0.1) {
-                Duck_Wheel.setPower(-0.56);
-            }
-            else {
-                Duck_Wheel.setPower(0);
-            }*/
 
             if(gamepad2.left_bumper) {
                 if (startDuck == 0) {
@@ -393,8 +300,7 @@ public class MecanumDriveRed extends LinearOpMode {
                         Duck_Wheel.setPower(1);
                     }
                 }
-            }
-            else if(gamepad2.right_bumper) {
+            } else if(gamepad2.right_bumper) {
                 if (startDuck == 0) {
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(-0.56);
@@ -409,57 +315,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 startDuck = 0;
                 Duck_Wheel.setPower(0);
             }
-            /*zAccumulated = modernRoboticsI2cGyro.getIntegratedZValue();
-             if (zAccumulated > ArmPosition - 15 && zAccumulated < ArmPosition + 15 ) {
-                if (zAccumulated < ArmPosition-5) {
-                    ArmMotor.setPower(Close_Point);
-                }
-                else if (zAccumulated > ArmPosition+5) {
-                    ArmMotor.setPower(-Close_Point);
-                }
-                else {
-                    ArmMotor.setPower(0);
-                }
-            }
-            else {
-                if (zAccumulated < ArmPosition) {
-                    ArmMotor.setPower(Top_Start);
-                }
-                else if (zAccumulated > ArmPosition) {
-                    ArmMotor.setPower(-Top_Start);
-                }
-            }*/
-
-            /*
-            if (armOn && gamepad2.dpad_up) {
-                ArmMotor.setTargetPosition(500);
-                ArmMotor.setPower(
-                        lerp(
-                                startArmPower,
-                                -0.01,
-                                (double) (ArmMotor.getCurrentPosition())/500
-                        )
-                );
-            } else if (gamepad2.dpad_up) {
-                armOn = true;
-                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                ArmMotor.setTargetPosition(500);
-                Twist.setPosition(0.25);
-                ArmMotor.getCurrentPosition();
-                ArmMotor.setPower(startArmPower);
-                ArmMotor.setTargetPosition(500);
-            } else if (armOn) {
-                armOn = false;
-            }
-
-            if (gamepad2.dpad_left) {
-                ArmMotor.setTargetPosition(-500);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(startArmPower);
-
-
-            }
-            */
         }
     }
 }
