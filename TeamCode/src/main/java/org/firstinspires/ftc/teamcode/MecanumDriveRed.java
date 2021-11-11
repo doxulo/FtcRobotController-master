@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
+import org.firstinspires.ftc.teamcode.util.Switch;
 
 @TeleOp
 public class MecanumDriveRed extends LinearOpMode {
@@ -121,6 +122,8 @@ public class MecanumDriveRed extends LinearOpMode {
                 new DebounceObject("Twist", 500)
         );
 
+        Switch armMotorSwitch = new Switch(false);
+
         double Twist_default = 0.05;
         double Twist_active = .3;
 
@@ -187,7 +190,7 @@ public class MecanumDriveRed extends LinearOpMode {
         Twist = hardwareMap.servo.get("Twist");
         
         Gate = hardwareMap.servo.get("Gate");
-        
+
         modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
@@ -271,6 +274,7 @@ public class MecanumDriveRed extends LinearOpMode {
             if (gamepad2.b) {
                 Gate.setPosition(1);
             }
+
             if (gamepad2.y) {
                 Gate.setPosition(0.8);
             }
@@ -281,28 +285,28 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setPower(-0.5);
             }
 
-            if(gamepad2.left_bumper) {
+            if (gamepad2.left_bumper) {
                 if (startDuck == 0) {
+                    armMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(0.56);
-                }
-                else {
+                } else {
                     if (System.currentTimeMillis() - startDuck > 750) {
                         Duck_Wheel.setPower(1);
                     }
                 }
-            } else if(gamepad2.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 if (startDuck == 0) {
+                    armMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(-0.56);
-                }
-                else {
+                } else {
                     if (System.currentTimeMillis() - startDuck > 750) {
                         Duck_Wheel.setPower(-1);
                     }
                 }
-            }
-            else {
+            } else if (armMotorSwitch.check()){
+                armMotorSwitch.trigger();
                 startDuck = 0;
                 Duck_Wheel.setPower(0);
             }
