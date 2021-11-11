@@ -19,6 +19,14 @@ public class DebounceObject {
         return this.lastTime;
     }
 
+    public double getAllottedTime() {
+        return this.allottedTime;
+    }
+
+    public void setAllottedTime(double allottedTime) {
+        this.allottedTime = allottedTime;
+    }
+
     public boolean check() {
         return System.currentTimeMillis() - this.lastTime > this.allottedTime;
     }

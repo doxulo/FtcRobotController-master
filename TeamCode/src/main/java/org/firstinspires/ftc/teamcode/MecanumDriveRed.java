@@ -185,7 +185,9 @@ public class MecanumDriveRed extends LinearOpMode {
         );
 
         Twist = hardwareMap.servo.get("Twist");
+        
         Gate = hardwareMap.servo.get("Gate");
+        
         modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
@@ -284,7 +286,7 @@ public class MecanumDriveRed extends LinearOpMode {
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(0.56);
                 }
-                else if (startDuck != 0) {
+                else {
                     if (System.currentTimeMillis() - startDuck > 750) {
                         Duck_Wheel.setPower(1);
                     }
@@ -294,7 +296,7 @@ public class MecanumDriveRed extends LinearOpMode {
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(-0.56);
                 }
-                else if (startDuck != 0) {
+                else {
                     if (System.currentTimeMillis() - startDuck > 750) {
                         Duck_Wheel.setPower(-1);
                     }

@@ -41,7 +41,7 @@ public class Debounce {
         return System.currentTimeMillis() - this.getObjectAssert(name).getLastTime();
     }
 
-    public boolean getTimePassedAndCheckAndReset(String name, long comparisonTime) {
+    public boolean getTimePassedAndCheck(String name, long comparisonTime) {
         return this.getTimePassed(name) >= comparisonTime;
     }
 
