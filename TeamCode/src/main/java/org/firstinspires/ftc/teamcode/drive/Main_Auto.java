@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous
-public class MainAuto extends LinearOpMode {
+public class Main_Auto extends LinearOpMode {
 
 
     /** Global comments:
@@ -178,7 +178,7 @@ public class MainAuto extends LinearOpMode {
         Duck_Wheel.setPower(0);
         drive.followTrajectorySequenceAsync(autonomousSequence);
         /**
-        // Turn left 90 degrees
+        /n/ Turn left 90 degrees
         drive.turnAsync(Math.PI/2);
         // Go to d1
         drive.followTrajectoryAsync(d1); -

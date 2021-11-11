@@ -124,8 +124,9 @@ public class MecanumDriveRed extends LinearOpMode {
 
         Switch armMotorSwitch = new Switch(false);
 
-        double Twist_default = 0.05;
-        double Twist_active = .3;
+        double Twist_default = 0.05D;
+        double Twist_active = 0.3D;
+        double defaultPower = 0.56D;
 
         long startDuck = 0;
 
@@ -310,6 +311,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 startDuck = 0;
                 Duck_Wheel.setPower(0);
             }
+
         }
     }
 }
