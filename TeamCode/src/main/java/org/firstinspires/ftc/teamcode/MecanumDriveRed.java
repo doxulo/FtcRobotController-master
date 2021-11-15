@@ -1,18 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.lifecycle.Lifecycle;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.Switch;
@@ -104,6 +100,13 @@ public class MecanumDriveRed extends LinearOpMode {
         RB.setPower(RB_power);
     }
 
+    public double lerp(double p0, double p1, double t) {
+        return (1-t)*p0 + p1*t;
+    }
+
+    public double getPowerTill(double maxPower, double targetDegrees, double currentDegrees) {
+        return lerp(maxPower, 0, targetDegrees/currentDegrees);
+    }
     /**
      * Main method that executes upon code run
      */
@@ -124,8 +127,8 @@ public class MecanumDriveRed extends LinearOpMode {
 
         Switch armMotorSwitch = new Switch(false);
 
-        double Twist_default = 0.05D;
-        double Twist_active = 0.3D;
+        double Twist_default = 0.16D;
+        double Twist_active = 0.51D;
         double defaultPower = 0.56D;
 
         long startDuck = 0;
@@ -259,10 +262,10 @@ public class MecanumDriveRed extends LinearOpMode {
 
             if (gamepad2.left_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                ArmMotor.setPower(gamepad2.left_trigger / 2);
+                ArmMotor.setPower(gamepad2.left_trigger);
             } else if (gamepad2.right_trigger > 0) {
                 ArmMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                ArmMotor.setPower(gamepad2.right_trigger / 2);
+                ArmMotor.setPower(gamepad2.right_trigger);
             } else {
                 ArmMotor.setPower(0);
             }
@@ -280,11 +283,41 @@ public class MecanumDriveRed extends LinearOpMode {
                 Gate.setPosition(0.8);
             }
 
-            if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
+            double modifiedHeading = (double) heading;
+            if (heading > 350) {
+                modifiedHeading = 0D;
+            }
+
+            if (gamepad2.dpad_up) {
+                ArmMotor.setPower(getPowerTill(-0.5, 172D, modifiedHeading));
+            } else if (gamepad2.dpad_left) {
+                ArmMotor.setPower(getPowerTill(-0.5, 190D, modifiedHeading));
+            } else if (gamepad2.dpad_down) {
+                ArmMotor.setPower(getPowerTill(-0.5, 210D, modifiedHeading));
+            }
+
+            /*
+            if (gamepad2.dpad_left && debounces.checkAndUpdate("Arm")) {
                 ArmMotor.setTargetPosition(700);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(0.5);
+            }
+            if (gamepad2.dpad_right && debounces.checkAndUpdate("Arm")) {
+                ArmMotor.setTargetPosition(850);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(0.5);
+            }
+            if (gamepad2.dpad_down && debounces.checkAndUpdate("Arm")) {
+                ArmMotor.setTargetPosition(950);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(0.5);
+            }
+            if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
+                ArmMotor.setTargetPosition(0);
                 ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ArmMotor.setPower(-0.5);
             }
+            */
 
             if (gamepad2.left_bumper) {
                 if (startDuck == 0) {
