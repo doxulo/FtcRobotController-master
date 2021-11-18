@@ -192,8 +192,6 @@ public class MecanumDriveRed extends LinearOpMode {
         );
 
         Twist = hardwareMap.servo.get("Twist");
-        
-        Gate = hardwareMap.servo.get("Gate");
 
         modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
@@ -273,14 +271,6 @@ public class MecanumDriveRed extends LinearOpMode {
             if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
                 twistOn = !twistOn;
                 Twist.setPosition(twistOn ? Twist_active : Twist_default);
-            }
-
-            if (gamepad2.b) {
-                Gate.setPosition(1);
-            }
-
-            if (gamepad2.y) {
-                Gate.setPosition(0.8);
             }
 
             double modifiedHeading = (double) heading;
