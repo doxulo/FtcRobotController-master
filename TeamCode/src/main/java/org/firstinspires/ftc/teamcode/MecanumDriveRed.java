@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.Switch;
 
+
 @TeleOp
 public class MecanumDriveRed extends LinearOpMode {
 
@@ -104,8 +105,12 @@ public class MecanumDriveRed extends LinearOpMode {
         return (1-t)*p0 + p1*t;
     }
 
-    public double getPowerTill(double maxPower, double targetDegrees, double currentDegrees) {
-        return lerp(maxPower, 0, targetDegrees/currentDegrees);
+    // 647
+    // 815
+    // 940
+    public double getPowerTill(double maxPower, double targetPosition, double currentPosition) {
+        currentPosition = currentPosition == 0 ? 0.1 : currentPosition;
+        return lerp(maxPower, 0, targetPosition/currentPosition);
     }
     /**
      * Main method that executes upon code run
@@ -137,6 +142,7 @@ public class MecanumDriveRed extends LinearOpMode {
         boolean duckWheelOn = false;
         boolean limitOn = false;
         boolean twistOn = false;
+        boolean resetArmPower = false;
 
         LF = initMotor(
                 "LF",
@@ -232,10 +238,10 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("heading", "%3d deg", heading);
-            telemetry.addData("Gate Position: ", Gate.getPosition());
-            telemetry.addData("Twist Position: ", Twist.getPosition());
-            telemetry.addData("Gate Orientation: ", Gate.getDirection());
-            telemetry.addData("Twist Orientation: ", Twist.getDirection());
+            // telemetry.addData("Gate Position: ", Gate.getPosition());
+            // telemetry.addData("Twist Position: ", Twist.getPosition());
+            // telemetry.addData("Gate Orientation: ", Gate.getDirection());
+           //  telemetry.addData("Twist Orientation: ", Twist.getDirection());
             telemetry.update();
 
             //drive train
@@ -273,18 +279,65 @@ public class MecanumDriveRed extends LinearOpMode {
                 Twist.setPosition(twistOn ? Twist_active : Twist_default);
             }
 
+            /*
             double modifiedHeading = (double) heading;
             if (heading > 350) {
                 modifiedHeading = 0D;
             }
+            modifiedHeading++;
+            if (gamepad2.dpad_up) {
+                ArmMotor.setPower(getPowerTill(-1, 150D, modifiedHeading));
+            } else if (gamepad2.dpad_left) {
+                ArmMotor.setPower(getPowerTill(-1, 190D, modifiedHeading));
+            } else if (gamepad2.dpad_down) {
+                ArmMotor.setPower(getPowerTill(-1, 220D, modifiedHeading));
+            } else if (gamepad2.x) {
+                ArmMotor.setPower(getPowerTill(-0.5, 1D, modifiedHeading));
+            }
+             */
+
+            // 647
+            // 815
+            // 940
+            /*
+            if (gamepad2.dpad_up) {
+                ArmMotor.setPower(getPowerTill(-1, 647D, encoder_Arm));
+            } else if (gamepad2.dpad_left) {
+                ArmMotor.setPower(getPowerTill(-1, 815D, encoder_Arm));
+            } else if (gamepad2.dpad_down) {
+                ArmMotor.setPower(getPowerTill(-1, 940D, encoder_Arm));
+            } else if (gamepad2.x) {
+                ArmMotor.setPower(getPowerTill(-0.5, 1D, encoder_Arm));
+            }
+             */
 
             if (gamepad2.dpad_up) {
-                ArmMotor.setPower(getPowerTill(-0.5, 172D, modifiedHeading));
+                resetArmPower = true;
+                ArmMotor.setTargetPosition(647);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(-1);
             } else if (gamepad2.dpad_left) {
-                ArmMotor.setPower(getPowerTill(-0.5, 190D, modifiedHeading));
+                resetArmPower = true;
+                ArmMotor.setTargetPosition(815);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(-1);
             } else if (gamepad2.dpad_down) {
-                ArmMotor.setPower(getPowerTill(-0.5, 210D, modifiedHeading));
+                resetArmPower = true;
+                ArmMotor.setTargetPosition(940);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(-1);
+            } else if (gamepad2.x) {
+                resetArmPower = true;
+                ArmMotor.setTargetPosition(0);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ArmMotor.setPower(-0.4);
+            } else if (resetArmPower) {
+                resetArmPower = false;
+                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                ArmMotor.setPower(0);
             }
+
+
 
             /*
             if (gamepad2.dpad_left && debounces.checkAndUpdate("Arm")) {

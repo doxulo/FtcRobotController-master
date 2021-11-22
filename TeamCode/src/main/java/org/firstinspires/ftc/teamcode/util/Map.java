@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.HashMap;
 
-class Map extends LinearOpMode {
+public class Map extends LinearOpMode {
 
     // TODO: Implement class to clean up code
     // TODO: Test class
@@ -87,5 +87,9 @@ class Map extends LinearOpMode {
                     behaviors[i]
             ));
         }
+    }
+
+    public DcMotor get(String name) {
+        return this.get(name);
     }
 }
