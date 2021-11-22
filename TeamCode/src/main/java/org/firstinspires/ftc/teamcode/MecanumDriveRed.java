@@ -313,7 +313,7 @@ public class MecanumDriveRed extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 resetArmPower = true;
-                ArmMotor.setTargetPosition(647);
+                ArmMotor.setTargetPosition(650);
                 ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ArmMotor.setPower(-1);
             } else if (gamepad2.dpad_left) {
@@ -323,7 +323,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setPower(-1);
             } else if (gamepad2.dpad_down) {
                 resetArmPower = true;
-                ArmMotor.setTargetPosition(940);
+                ArmMotor.setTargetPosition(945);
                 ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ArmMotor.setPower(-1);
             } else if (gamepad2.x) {
