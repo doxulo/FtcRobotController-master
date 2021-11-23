@@ -38,7 +38,7 @@ public class Map extends LinearOpMode {
             DcMotor.RunMode.RUN_WITHOUT_ENCODER,
             DcMotor.RunMode.RUN_WITHOUT_ENCODER,
             DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-            DcMotor.RunMode.STOP_AND_RESET_ENCODER,
+            DcMotor.RunMode.RUN_USING_ENCODER,
             DcMotor.RunMode.RUN_WITHOUT_ENCODER
     };
 

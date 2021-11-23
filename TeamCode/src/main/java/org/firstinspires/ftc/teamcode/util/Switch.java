@@ -38,4 +38,10 @@ public class Switch {
     public void trigger() {
         this.defaultState = !this.currentState;
     }
+
+    public void checkAndTrigger() {
+        if (this.check()) {
+            this.trigger();
+        }
+    }
 }
