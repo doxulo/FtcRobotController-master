@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
+import org.firstinspires.ftc.teamcode.util.Map;
 import org.firstinspires.ftc.teamcode.util.Switch;
 
 
@@ -147,6 +148,7 @@ public class MecanumDrive extends LinearOpMode {
         long startDuck = 0;
 
         int armTargetPosition = -1;
+        int lastArmPosition = 0;
 
         boolean intakeOn = false;
         boolean duckWheelOn = false;
@@ -155,8 +157,8 @@ public class MecanumDrive extends LinearOpMode {
         boolean resetArmPower = false;
         // TODO: Uncomment tfod.loadModeLFromAsset(TFOD_MODEL_ASSET, LABELS); statements
 
-        /**
-         * Initialize motors using the Map object
+        /*
+          Initialize motors using the Map object
          */
         objectMap.initMotors();
         LF = objectMap.get("LF");
@@ -169,10 +171,10 @@ public class MecanumDrive extends LinearOpMode {
 
         Twist = hardwareMap.servo.get("Twist");
 
-
-        /**
+        /*
          * Initialize gyro motor
-         */
+
+
         modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
@@ -188,12 +190,12 @@ public class MecanumDrive extends LinearOpMode {
         telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear();
         telemetry.update();
-
+         */
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         waitForStart();
 
-        /**
+        /*
          * Main loop
          */
         while (opModeIsActive()) {
@@ -205,7 +207,7 @@ public class MecanumDrive extends LinearOpMode {
             int encoder_Arm = ArmMotor.getCurrentPosition();
             int heading = modernRoboticsI2cGyro.getHeading();
 
-            /**
+            /*
              * Output to Driver Hub
              */
             telemetry.addData("LF encoder: ", encoder_LF);
@@ -222,12 +224,12 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Twist Orientation: ", Twist.getDirection());
             telemetry.update();
 
-            /**
+            /*
              * Move robot
              */
             mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            /**
+            /*
              * Movement limiter
              */
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
@@ -235,7 +237,7 @@ public class MecanumDrive extends LinearOpMode {
                 limitOn = !limitOn;
             }
 
-            /**
+            /*
              * Intake motor movement
              */
             if (gamepad1.b || gamepad1.a) {
@@ -250,7 +252,7 @@ public class MecanumDrive extends LinearOpMode {
                 }
             }
 
-            /**
+            /*
              * Arm motor movement
              */
             if (gamepad2.dpad_up) {
@@ -274,7 +276,7 @@ public class MecanumDrive extends LinearOpMode {
                 ArmMotor.setPower(0);
             }
 
-            /**
+            /*
              * Arm Run_TO_POSITION case
              */
             if (armTargetPosition != -1) {
@@ -284,7 +286,7 @@ public class MecanumDrive extends LinearOpMode {
                 ArmMotor.setPower(armPower);
             }
 
-            /**
+            /*
              * Arm accessory movement
              */
             if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
@@ -292,7 +294,7 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistOn ? Twist_active : Twist_default);
             }
 
-            /**
+            /*
              * Duck motor movement
              */
             if (gamepad2.left_bumper || gamepad2.right_bumper) {
@@ -305,7 +307,7 @@ public class MecanumDrive extends LinearOpMode {
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(0.56*multiple);
                 } else if (System.currentTimeMillis() - startDuck > 750) {
-                    Duck_Wheel.setPower(1*multiple);
+                    Duck_Wheel.setPower(multiple);
                 }
             } else if (duckMotorSwitch.checkAndTrigger()){
                 startDuck = 0;

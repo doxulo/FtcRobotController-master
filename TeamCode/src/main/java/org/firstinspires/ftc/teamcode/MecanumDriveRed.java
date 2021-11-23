@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.Switch;
 
 
@@ -40,8 +41,6 @@ public class MecanumDriveRed extends LinearOpMode {
     public DcMotor Duck_Wheel;
     public DcMotor Intake;
     public DcMotor ArmMotor;
-    IntegratingGyroscope gyro;
-    ModernRoboticsI2cGyro modernRoboticsI2cGyro;
 
     /**
      * Initialize all motors that control the robot's accessories
@@ -132,6 +131,15 @@ public class MecanumDriveRed extends LinearOpMode {
 
         Switch armMotorSwitch = new Switch(false);
 
+        PIDController controller = new PIDController(
+                0,
+                0,
+                0,
+                new double[] {
+                        0.1, -0.3
+                },
+                1440);
+
         double Twist_default = 0.16D;
         double Twist_active = 0.51D;
         double defaultPower = 0.56D;
@@ -199,33 +207,18 @@ public class MecanumDriveRed extends LinearOpMode {
 
         Twist = hardwareMap.servo.get("Twist");
 
-        modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-        gyro = (IntegratingGyroscope) modernRoboticsI2cGyro;
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
-        modernRoboticsI2cGyro.calibrate();
-        timer.reset();
-        while (!isStopRequested() && modernRoboticsI2cGyro.isCalibrating()) {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds()) % 2 == 0 ? "|.." : "..|");
-            telemetry.update();
-            sleep(50);
-        }
-
-        telemetry.log().clear();
-        telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear();
-        telemetry.update();
 
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        long lastTime = System.currentTimeMillis();
         while (opModeIsActive()) {
-            double currentSystemTime = System.currentTimeMillis();
+            long currentSystemTime = System.currentTimeMillis();
             int encoder_LF = LF.getCurrentPosition();
             int encoder_LB = LB.getCurrentPosition();
             int encoder_RF = RF.getCurrentPosition();
             int encoder_RB = RB.getCurrentPosition();
             int encoder_Arm = ArmMotor.getCurrentPosition();
-            int heading = modernRoboticsI2cGyro.getHeading();
 
 
             telemetry.addData("LF encoder: ", encoder_LF);
@@ -237,7 +230,8 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("Arm encoder: ", encoder_Arm);
             telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
-            telemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("Dt: ", currentSystemTime-lastTime);
+            lastTime = currentSystemTime;
             // telemetry.addData("Gate Position: ", Gate.getPosition());
             // telemetry.addData("Twist Position: ", Twist.getPosition());
             // telemetry.addData("Gate Orientation: ", Gate.getDirection());
@@ -245,7 +239,7 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.update();
 
             //drive train
-            mecanum(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            mecanum(-Math.pow(gamepad1.left_stick_y, 3D), Math.pow(gamepad1.left_stick_x, 3D), Math.pow(gamepad1.right_stick_x, 3D));
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
                 limit = (limitOn ? 1 : limitPower);
@@ -299,18 +293,25 @@ public class MecanumDriveRed extends LinearOpMode {
             // 647
             // 815
             // 940
-            /*
-            if (gamepad2.dpad_up) {
-                ArmMotor.setPower(getPowerTill(-1, 647D, encoder_Arm));
-            } else if (gamepad2.dpad_left) {
-                ArmMotor.setPower(getPowerTill(-1, 815D, encoder_Arm));
-            } else if (gamepad2.dpad_down) {
-                ArmMotor.setPower(getPowerTill(-1, 940D, encoder_Arm));
-            } else if (gamepad2.x) {
-                ArmMotor.setPower(getPowerTill(-0.5, 1D, encoder_Arm));
-            }
-             */
+            double power = 0;
 
+            if (gamepad2.dpad_up) {
+                power = controller.calculate(647D, encoder_Arm);
+                ArmMotor.setPower(power);
+            } else if (gamepad2.dpad_left) {
+                power = controller.calculate(815D, encoder_Arm);
+                ArmMotor.setPower(power);
+            } else if (gamepad2.dpad_down) {
+                power = controller.calculate(940D, encoder_Arm);
+                ArmMotor.setPower(power);
+            } else if (gamepad2.x) {
+                ArmMotor.setPower(controller.calculate(1D, encoder_Arm));
+            }
+
+            if (power != 0) {
+                telemetry.addData("Power: ", power);
+            }
+            /*
             if (gamepad2.dpad_up) {
                 resetArmPower = true;
                 ArmMotor.setTargetPosition(650);
@@ -337,8 +338,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setPower(0);
             }
 
-
-
+             */
             /*
             if (gamepad2.dpad_left && debounces.checkAndUpdate("Arm")) {
                 ArmMotor.setTargetPosition(700);

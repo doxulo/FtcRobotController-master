@@ -39,9 +39,12 @@ public class Switch {
         this.defaultState = !this.currentState;
     }
 
-    public void checkAndTrigger() {
+    public boolean checkAndTrigger() {
         if (this.check()) {
             this.trigger();
+            return true;
         }
+
+        return false;
     }
 }
