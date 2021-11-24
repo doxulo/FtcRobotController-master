@@ -6,6 +6,7 @@ public class PIDController {
 
     double summation = 0;
     double fullRotation;
+    double offset;
 
     double kp;
     double ki;
@@ -13,12 +14,13 @@ public class PIDController {
 
     long lastTime = System.currentTimeMillis();
 
-    public PIDController(double kp, double ki, double kd, double[] biasPoints, double fullRotation) {
+    public PIDController(double kp, double ki, double kd, double[] biasPoints, double fullRotation, double offset) {
         this.kp = kp;
         this.ki = ki;
         this.kd = kd;
         this.biasPoints = biasPoints;
         this.fullRotation = fullRotation;
+        this.offset = 0;
     }
 
     public double lerp(double p0, double p1, double t) {
@@ -31,7 +33,7 @@ public class PIDController {
         this.summation = summation + dp*dt;
         double derivative = dp/dt;
 
-        double bias = lerp(this.biasPoints[0], this.biasPoints[1], pv/this.fullRotation);
+        double bias = lerp(this.biasPoints[0], this.biasPoints[1], (pv+this.offset)/this.fullRotation);
         lastTime = System.currentTimeMillis();
         return dp*this.kp + this.summation*this.ki + derivative*this.kd + bias;
     }

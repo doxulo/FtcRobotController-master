@@ -132,16 +132,17 @@ public class MecanumDriveRed extends LinearOpMode {
         Switch armMotorSwitch = new Switch(false);
 
         PIDController controller = new PIDController(
-                0,
+                0.005,
                 0,
                 0,
                 new double[] {
-                        0.1, -0.3
+                        0.05, -0.10
                 },
-                1440);
+                1440,
+                -235);
 
-        double Twist_default = 0.16D;
-        double Twist_active = 0.51D;
+        double Twist_default = 0.0D;
+        double Twist_active = 0.7D;
         double defaultPower = 0.56D;
 
         long startDuck = 0;
@@ -218,7 +219,7 @@ public class MecanumDriveRed extends LinearOpMode {
             int encoder_LB = LB.getCurrentPosition();
             int encoder_RF = RF.getCurrentPosition();
             int encoder_RB = RB.getCurrentPosition();
-            int encoder_Arm = ArmMotor.getCurrentPosition();
+            int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
 
 
             telemetry.addData("LF encoder: ", encoder_LF);
@@ -297,18 +298,20 @@ public class MecanumDriveRed extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 power = controller.calculate(647D, encoder_Arm);
-                ArmMotor.setPower(power);
             } else if (gamepad2.dpad_left) {
                 power = controller.calculate(815D, encoder_Arm);
-                ArmMotor.setPower(power);
             } else if (gamepad2.dpad_down) {
                 power = controller.calculate(940D, encoder_Arm);
-                ArmMotor.setPower(power);
             } else if (gamepad2.x) {
-                ArmMotor.setPower(controller.calculate(1D, encoder_Arm));
+                power = controller.calculate(1D, encoder_Arm);
+            } else if (resetArmPower) {
+                resetArmPower = false;
+                power = 0;
             }
 
             if (power != 0) {
+                resetArmPower = true;
+                ArmMotor.setPower(power);
                 telemetry.addData("Power: ", power);
             }
             /*
