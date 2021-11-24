@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
@@ -41,6 +43,7 @@ public class MecanumDriveRed extends LinearOpMode {
     public DcMotor Duck_Wheel;
     public DcMotor Intake;
     public DcMotor ArmMotor;
+    public ColorSensor BoxSensor;
 
     /**
      * Initialize all motors that control the robot's accessories
@@ -126,31 +129,36 @@ public class MecanumDriveRed extends LinearOpMode {
                 new DebounceObject("Arm", 500),
                 new DebounceObject("Limit", 500),
                 new DebounceObject("Gate", 500),
-                new DebounceObject("Twist", 500)
+                new DebounceObject("Twist", 500),
+                new DebounceObject("Integral", 500),
+                new DebounceObject("Derivative", 500)
         );
 
         Switch armMotorSwitch = new Switch(false);
+        Switch duckMotorSwitch = new Switch(false);
 
+        // Change kI
         PIDController controller = new PIDController(
                 0.005,
-                0,
-                0,
+                1.0e-10,
+                0.003,
                 new double[] {
                         0.05, -0.10
                 },
                 1440,
                 -235);
-
-        double Twist_default = 0.0D;
-        double Twist_active = 0.7D;
+        
+        double[] twistPositions = new double[] {
+                0.615D, 0.7D, 0.9D
+        };
         double defaultPower = 0.56D;
-
+        double intIncrement = 0.00001;
         long startDuck = 0;
 
+        int twistIndex = -1;
         boolean intakeOn = false;
         boolean duckWheelOn = false;
         boolean limitOn = false;
-        boolean twistOn = false;
         boolean resetArmPower = false;
 
         LF = initMotor(
@@ -193,11 +201,10 @@ public class MecanumDriveRed extends LinearOpMode {
 
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
+                DcMotorSimple.Direction.REVERSE,
+                DcMotor.RunMode.RUN_USING_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
-        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         Duck_Wheel = initMotor(
                 "Duck_Wheel",
@@ -207,7 +214,7 @@ public class MecanumDriveRed extends LinearOpMode {
         );
 
         Twist = hardwareMap.servo.get("Twist");
-
+        BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
 
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -220,7 +227,7 @@ public class MecanumDriveRed extends LinearOpMode {
             int encoder_RF = RF.getCurrentPosition();
             int encoder_RB = RB.getCurrentPosition();
             int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
-
+            double power = 0;
 
             telemetry.addData("LF encoder: ", encoder_LF);
             telemetry.addData("LB encoder: ", encoder_LB);
@@ -229,16 +236,16 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
             telemetry.addData("Arm encoder: ", encoder_Arm);
-            telemetry.addData("Arm Position: ", ArmMotor.getCurrentPosition());
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime-lastTime);
-            lastTime = currentSystemTime;
-            // telemetry.addData("Gate Position: ", Gate.getPosition());
-            // telemetry.addData("Twist Position: ", Twist.getPosition());
-            // telemetry.addData("Gate Orientation: ", Gate.getDirection());
-           //  telemetry.addData("Twist Orientation: ", Twist.getDirection());
+            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", BoxSensor.red(), BoxSensor.green(), BoxSensor.blue()), "");
+            telemetry.addData("Integral: ", controller.summation);
+            telemetry.addData("kD: ", controller.kI);
+            telemetry.addData("Power: ", power);
+            telemetry.addData("Increment: ", intIncrement);
+            telemetry.addData("Buttons: ", gamepad2.dpad_right);
             telemetry.update();
-
+            lastTime = currentSystemTime;
             //drive train
             mecanum(-Math.pow(gamepad1.left_stick_y, 3D), Math.pow(gamepad1.left_stick_x, 3D), Math.pow(gamepad1.right_stick_x, 3D));
 
@@ -259,21 +266,13 @@ public class MecanumDriveRed extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.left_trigger > 0) {
-                ArmMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                ArmMotor.setPower(gamepad2.left_trigger);
-            } else if (gamepad2.right_trigger > 0) {
-                ArmMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                ArmMotor.setPower(gamepad2.right_trigger);
-            } else {
-                ArmMotor.setPower(0);
-            }
-
             if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
-                twistOn = !twistOn;
-                Twist.setPosition(twistOn ? Twist_active : Twist_default);
+                Twist.setPosition(twistPositions[0]);
+            } else if (gamepad2.b) {
+                Twist.setPosition(twistPositions[1]);
+            } else if (gamepad2.y) {
+                Twist.setPosition(twistPositions[2]);
             }
-
             /*
             double modifiedHeading = (double) heading;
             if (heading > 350) {
@@ -294,7 +293,17 @@ public class MecanumDriveRed extends LinearOpMode {
             // 647
             // 815
             // 940
-            double power = 0;
+
+
+            if (gamepad2.right_stick_button && debounces.checkAndUpdate("Integral")) {
+                controller.kI += intIncrement;
+            } else if (gamepad2.dpad_right && debounces.checkAndUpdate("Integral")) {
+                controller.kI -= intIncrement;
+            } else if (gamepad2.left_bumper && debounces.checkAndUpdate("Integral")) {
+                intIncrement *= 10;
+            } else if (gamepad2.right_bumper && debounces.checkAndUpdate("Integral")) {
+                intIncrement /= 10;
+            }
 
             if (gamepad2.dpad_up) {
                 power = controller.calculate(647D, encoder_Arm);
@@ -303,16 +312,30 @@ public class MecanumDriveRed extends LinearOpMode {
             } else if (gamepad2.dpad_down) {
                 power = controller.calculate(940D, encoder_Arm);
             } else if (gamepad2.x) {
-                power = controller.calculate(1D, encoder_Arm);
-            } else if (resetArmPower) {
+                if (encoder_Arm > 70) {
+                    power = controller.calculate(20D, encoder_Arm)/2;
+                } else if (encoder_Arm > 0) {
+                    power = controller.lerp(0.15, 0, (double) encoder_Arm/70);
+                }
+            } else if (gamepad2.left_stick_button) {
+                ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            } else if (gamepad2.left_trigger > 0) {
+                ArmMotor.setPower(-gamepad2.left_trigger);
+            } else if (gamepad2.right_trigger > 0) {
+                ArmMotor.setPower(gamepad2.right_trigger);
+            }  else if (resetArmPower) {
                 resetArmPower = false;
                 power = 0;
+                controller.pauseAndReset();
+                ArmMotor.setPower(0);
+            } else if (ArmMotor.getPower() != 0) {
+                ArmMotor.setPower(0);
             }
-
+            // 200
             if (power != 0) {
                 resetArmPower = true;
-                ArmMotor.setPower(power);
-                telemetry.addData("Power: ", power);
+                ArmMotor.setPower(power/2.5);
             }
             /*
             if (gamepad2.dpad_up) {
@@ -364,10 +387,10 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setPower(-0.5);
             }
             */
-
+            /*
             if (gamepad2.left_bumper) {
                 if (startDuck == 0) {
-                    armMotorSwitch.setTrue();
+                    duckMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(0.56);
                 } else {
@@ -377,7 +400,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 }
             } else if (gamepad2.right_bumper) {
                 if (startDuck == 0) {
-                    armMotorSwitch.setTrue();
+                    duckMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
                     Duck_Wheel.setPower(-0.56);
                 } else {
@@ -385,12 +408,14 @@ public class MecanumDriveRed extends LinearOpMode {
                         Duck_Wheel.setPower(-1);
                     }
                 }
-            } else if (armMotorSwitch.check()){
-                armMotorSwitch.trigger();
+            } else if (duckMotorSwitch.check()){
+                duckMotorSwitch.trigger();
                 startDuck = 0;
                 Duck_Wheel.setPower(0);
             }
 
+
+             */
         }
     }
 }
