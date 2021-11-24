@@ -26,16 +26,31 @@ public class PIDController {
     }
 
     public double calculate(double sp, double pv) {
-        int dt = (int) (System.currentTimeMillis() - lastTime);
+        double dt = (System.currentTimeMillis() - lastTime);
+        
         double dp = sp-pv;
-        this.summation = summation + dp*dt;
-        double derivative = dp/dt;
-
+        double derivative = dt == 0 ? 0 : dp/dt;
         double bias = lerp(this.biasPoints[0], this.biasPoints[1], pv/this.fullRotation);
+        
+        this.summation = summation + dp*dt;
         lastTime = System.currentTimeMillis();
+        
         return dp*this.kp + this.summation*this.ki + derivative*this.kd + bias;
     }
 
+    public void pauseAndReset() {
+        this.summation = 0;
+        this.pause();
+    }
+    
+    public void pause() {
+        this.paused = true;
+    }
+    
+    public void resume() {
+        this.paused = false;
+        this.lastTime = System.currentTimeMillis();
+    }
     /*
     1. Kp = 0.01, Ki = 0, Kd = 0. Tune Kp until it is a bit too much (oscillates a bit).
     2. Increase Kd until it stabilizes the controller
