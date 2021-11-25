@@ -66,7 +66,7 @@ public class Commands {
     }
 
     public void forward(double revolutions) {
-        this.setTarget((int) (revolutions*537.7 ));
+        this.setTarget((int) (revolutions*537.7));
         this.runTo();
     }
 

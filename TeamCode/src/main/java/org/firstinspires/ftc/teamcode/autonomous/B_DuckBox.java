@@ -87,11 +87,13 @@ public class B_DuckBox extends LinearOpMode {
 
 
         Commands commandUtil = new Commands(
-                IMU, RF, LF, RB, LB, 0.5
+                IMU, RF, LF, RB, LB, 0.75
         );
 
         waitForStart();
 
-        commandUtil.forward(10);
+        commandUtil.forward(10400);
+
+
     }
 }

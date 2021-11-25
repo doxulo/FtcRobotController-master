@@ -254,7 +254,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 limitOn = !limitOn;
             }
 
-            if (gamepad1.b || gamepad1.a) {
+            if (gamepad1.b || gamepad1.a && BoxSensor.red()<100) {
                 if (debounces.checkAndUpdate("Intake")) {
                     if (gamepad1.b) {
                         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -262,17 +262,16 @@ public class MecanumDriveRed extends LinearOpMode {
                         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
                     }
                     intakeOn = !intakeOn;
-                    Intake.setPower(intakeOn ? 0.56 : 0);
+                    Intake.setPower(intakeOn ? 0.525678 : 0);
                 }
             }
-
-            if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
-                Twist.setPosition(twistPositions[0]);
-            } else if (gamepad2.b) {
-                Twist.setPosition(twistPositions[1]);
-            } else if (gamepad2.y) {
-                Twist.setPosition(twistPositions[2]);
+            if (Intake.getPower()>0 && BoxSensor.red()>101) {
+                sleep(100);
+                Intake.setPower(0);
             }
+
+
+
             /*
             double modifiedHeading = (double) heading;
             if (heading > 350) {
@@ -294,8 +293,7 @@ public class MecanumDriveRed extends LinearOpMode {
             // 815
             // 940
 
-
-            if (gamepad2.right_stick_button && debounces.checkAndUpdate("Integral")) {
+            /*if (gamepad2.right_stick_button && debounces.checkAndUpdate("Integral")) {
                 controller.kI += intIncrement;
             } else if (gamepad2.dpad_right && debounces.checkAndUpdate("Integral")) {
                 controller.kI -= intIncrement;
@@ -304,7 +302,7 @@ public class MecanumDriveRed extends LinearOpMode {
             } else if (gamepad2.right_bumper && debounces.checkAndUpdate("Integral")) {
                 intIncrement /= 10;
             }
-
+            */
             if (gamepad2.dpad_up) {
                 power = controller.calculate(647D, encoder_Arm);
             } else if (gamepad2.dpad_left) {
@@ -387,7 +385,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 ArmMotor.setPower(-0.5);
             }
             */
-            /*
+
             if (gamepad2.left_bumper) {
                 if (startDuck == 0) {
                     duckMotorSwitch.setTrue();
@@ -413,9 +411,29 @@ public class MecanumDriveRed extends LinearOpMode {
                 startDuck = 0;
                 Duck_Wheel.setPower(0);
             }
+            if (BoxSensor.red()<100) {
+                Twist.setPosition(twistPositions[0]);
+            } else if (BoxSensor.red()>101 != gamepad2.y != gamepad2.a) {
+                Twist.setPosition(twistPositions[1]);
+            } else if (BoxSensor.red()>101 && gamepad2.y) {
+                Twist.setPosition(twistPositions[2]);
+                sleep(1000);
+            } else if (BoxSensor.red()> 101 && gamepad2.a) {
+                Twist.setPosition(twistPositions[0]);
+                sleep(650);
+            }
 
 
-             */
+             /*if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
+                Twist.setPosition(twistPositions[0]);
+            } else if (gamepad2.b) {
+                Twist.setPosition(twistPositions[1]);
+            } else if (gamepad2.y) {
+                Twist.setPosition(twistPositions[2]);
+            } */
+
+
+
         }
     }
 }

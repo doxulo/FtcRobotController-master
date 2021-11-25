@@ -76,7 +76,7 @@ public class SensorColor extends LinearOpMode {
   /** The relativeLayout field is used to aid in providing interesting visual feedback
    * in this sample application; you probably *don't* need this when you use a color sensor on your
    * robot. Note that you won't see anything change on the Driver Station, only on the Robot Controller. */
-  View relativeLayout;
+    View relativeLayout;
 
   /**
    * The runOpMode() method is the root of this Op Mode, as it is in all LinearOpModes.
