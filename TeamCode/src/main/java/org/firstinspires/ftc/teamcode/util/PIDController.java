@@ -49,8 +49,8 @@ public class PIDController {
 
         if (integral > 0.05) {
             integral = 0.05;
-        } else if (integral < -0.1) {
-            integral = -0.1;
+        } else if (integral < -0.15) {
+            integral = -0.15;
         }
         return error + integral + derivative + bias;
     }
