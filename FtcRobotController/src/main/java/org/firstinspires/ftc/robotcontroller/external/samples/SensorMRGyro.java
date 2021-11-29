@@ -70,8 +70,8 @@ public class SensorMRGyro extends LinearOpMode {
   @Override
   public void runOpMode() {
 
-    boolean lastResetState = false;
-    boolean curResetState  = false;
+      boolean lastResetState = false;
+      boolean curResetState  = false;
 
     // Get a reference to a Modern Robotics gyro object. We use several interfaces
     // on this object to illustrate which interfaces support which functionality.

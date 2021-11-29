@@ -38,12 +38,21 @@ public class PIDController {
         double dt = (double) (System.currentTimeMillis() - lastTime);
         double bias = lerp(this.biasPoints[0], this.biasPoints[1], pv/this.fullRotation);
         double dp = sp-pv;
-        double derivative = dt == 0 ? 0 : dp/dt;
+        double gradient = dt == 0 ? 0 : dp/dt;
+
+        double error = dp*this.kP;
+        double integral = this.summation*this.kI;
+        double derivative = gradient*this.kD;
 
         this.summation = summation + dp*dt;
         lastTime = System.currentTimeMillis();
 
-        return dp*this.kP + this.summation*this.kI + derivative*this.kD + bias;
+        if (integral > 0.05) {
+            integral = 0.05;
+        } else if (integral < -0.1) {
+            integral = -0.1;
+        }
+        return error + integral + derivative + bias;
     }
 
     public void pauseAndReset() {
