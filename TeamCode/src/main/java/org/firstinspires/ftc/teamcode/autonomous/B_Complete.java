@@ -4,11 +4,14 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.Commands;
@@ -51,6 +54,9 @@ public class B_Complete extends LinearOpMode {
     DcMotor RF;
     DcMotor RB;
     DcMotor LB;
+
+    ModernRoboticsI2cGyro orientationGyro;
+    IntegratingGyroscope orientationGyroParsed;
 
     private DcMotor initMotor(
             String motorName,
@@ -173,20 +179,26 @@ public class B_Complete extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
-        BNO055IMU IMU = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        ElapsedTime timer = new ElapsedTime();
 
-        IMU.initialize(parameters);
+        orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        orientationGyroParsed = (IntegratingGyroscope) orientationGyro;
 
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        orientationGyro.calibrate();
+
+        timer.reset();
+        while (!isStopRequested() && orientationGyro.isCalibrating())  {
+            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+            sleep(50);
+        }
+
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear(); telemetry.update();
 
         Commands commandUtil = new Commands(
-                IMU, RF, LF, RB, LB, 0.25
+                orientationGyro, RF, LF, RB, LB
         );
 
         waitForStart();

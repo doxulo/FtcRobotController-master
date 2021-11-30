@@ -1,12 +1,18 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Commands {
-    int FULL_REVOLUTION = 1440;
+    double WHEEL_DIAMETER = 2;
+    double WHEEL_CIRCUMFERENCE = 2*WHEEL_DIAMETER*Math.PI;
 
-    BNO055IMU IMU;
+    int FULL_REVOLUTION_TICKS = 1440;
+
+    double DISTANCE_PER_TICK = WHEEL_CIRCUMFERENCE/FULL_REVOLUTION_TICKS;
+
+    ModernRoboticsI2cGyro gyro;
 
     DcMotor RF;
     DcMotor LF;
@@ -14,18 +20,17 @@ public class Commands {
     DcMotor LB;
 
     DcMotor[] allMotors;
+    DcMotor[] forwardMotors;
+    DcMotor[] backwardMotors;
     DcMotor[] leftMotors;
     DcMotor[] rightMotors;
 
-    double maxPower;
-
-    public Commands(BNO055IMU IMU, DcMotor RF, DcMotor LF, DcMotor RB, DcMotor LB, double maxPower) {
-        this.IMU = IMU;
+    public Commands(ModernRoboticsI2cGyro gyro, DcMotor RF, DcMotor LF, DcMotor RB, DcMotor LB) {
+        this.gyro = gyro;
         this.RF = RF;
         this.LF = LF;
         this.RB = RB;
         this.LB = LB;
-        this.maxPower = maxPower;
         this.allMotors = new DcMotor[] {
                 RF, RB, LF, LB
         };
@@ -36,49 +41,50 @@ public class Commands {
                 LF, LB
         };
 
-        this.initModes();
-    }
-
-    public void initModes() {
-        for (DcMotor motor : this.allMotors) {
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-    }
-    public void setTarget(int encoderPosition) {
-        this.setTarget(allMotors, encoderPosition);
-    }
-
-    public void setTarget(DcMotor[] motors, int encoderPosition) {
-        for (DcMotor motor : motors) {
-            this.setTarget(motor, encoderPosition);
+        for (int i = 0; i < allMotors.length; i++) {
+            switch (allMotors[i].getDirection()) {
+                case FORWARD:
+                    forwardMotors[i] = allMotors[i];
+                    break;
+                case REVERSE:
+                    backwardMotors[i] = allMotors[i];
+                    break;
+            }
         }
     }
 
-    public void setTarget(DcMotor motor, int encoderPosition) {
-        motor.setTargetPosition(encoderPosition);
+    private void setupAllMotors(int encoderTicks) {
+        for (DcMotor motor : forwardMotors) {
+            motor.setTargetPosition(encoderTicks);
+        }
+
+        for (DcMotor motor : backwardMotors) {
+            motor.setTargetPosition(-encoderTicks);
+        }
     }
 
-    public void runTo() {
+    private void run(double power) {
         for (DcMotor motor : allMotors) {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setPower(this.maxPower);
+            motor.setPower(power);
         }
     }
 
-    public void stafeLeft() {
+    public Commands chainReset() {
+        for (DcMotor motor : allMotors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        return this;
     }
 
-    public void forward(double revolutions) {
-        this.setTarget((int) (revolutions*537.7));
-        this.runTo();
+    public void forward(double inches, double power) {
+        this.setupAllMotors((int) (inches*DISTANCE_PER_TICK));
+        this.run(power);
     }
 
-    public void backward(double revolutions) {
-        this.forward(-revolutions);
-    }
-
-    public void right() {
-        this.setTarget(rightMotors, (int) (-FULL_REVOLUTION*0.5));
-        this.setTarget(leftMotors, (int) (FULL_REVOLUTION*0.5));
+    public void backward(double inches, double power) {
+        this.forward(inches, power);
     }
 }

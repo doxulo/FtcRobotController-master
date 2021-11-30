@@ -85,10 +85,11 @@ public class AutonomousTemplate extends LinearOpMode {
         IMU.initialize(parameters);
 
 
+        /*
         Commands commandUtil = new Commands(
                 IMU, RF, LF, RB, LB, 0.75
         );
-
+*/
         waitForStart();
 
 

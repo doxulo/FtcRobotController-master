@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -148,21 +150,21 @@ public class MecanumDriveRed extends LinearOpMode {
         boolean lastResetState = false;
         boolean curResetState  = false;
 
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-        armGyroParsed = (IntegratingGyroscope)armGyro;
+            armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+            armGyroParsed = (IntegratingGyroscope)armGyro;
 
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
-        armGyro.calibrate();
+            telemetry.log().add("Gyro Calibrating. Do Not Move!");
+            armGyro.calibrate();
 
-        timer.reset();
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-            telemetry.update();
-            sleep(50);
-        }
+            timer.reset();
+            while (!isStopRequested() && armGyro.isCalibrating())  {
+                telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+                telemetry.update();
+                sleep(50);
+            }
 
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
+            telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+            telemetry.clear(); telemetry.update();
 
         orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro_center");
         centerGyroParsed = (IntegratingGyroscope)orientationGyro;
