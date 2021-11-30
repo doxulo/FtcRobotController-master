@@ -210,8 +210,8 @@ public class MecanumDriveRed extends LinearOpMode {
                 new double[] {
                         0.05, -0.10
                 },
-                1440,
-                -235);
+                360,
+                0);
 
         PIDController downController = new PIDController(
                 0.004,
@@ -221,7 +221,7 @@ public class MecanumDriveRed extends LinearOpMode {
                         0.05, -0.10
                 },
                 1440,
-                -235);
+                0);
 
         double[] twistPositions = new double[] {
                 0.615D, 0.7D, 0.9D
@@ -550,6 +550,8 @@ public class MecanumDriveRed extends LinearOpMode {
                     }
                 }
              */
+
+            /*
             if (gamepad2.right_bumper || gamepad2.left_bumper) {
                 double multiple = 1;
                 if (gamepad2.right_bumper) {
@@ -565,6 +567,27 @@ public class MecanumDriveRed extends LinearOpMode {
                     if (System.currentTimeMillis() - startDuck > 750) {
                         Duck_Wheel1.setPower(multiple);
                         Duck_Wheel2.setPower(multiple);
+                    }
+                }
+            } else if (duckMotorSwitch.check()){
+                duckMotorSwitch.trigger();
+                startDuck = 0;
+                Duck_Wheel1.setPower(0);
+                Duck_Wheel2.setPower(0);
+            }
+             */
+
+            if (gamepad2.right_bumper) {
+
+                if (startDuck == 0) {
+                    duckMotorSwitch.setTrue();
+                    startDuck = System.currentTimeMillis();
+                    Duck_Wheel1.setPower(0.56);
+                    Duck_Wheel2.setPower(-0.56);
+                } else {
+                    if (System.currentTimeMillis() - startDuck > 750) {
+                        Duck_Wheel1.setPower(1);
+                        Duck_Wheel2.setPower(-1);
                     }
                 }
             } else if (duckMotorSwitch.check()){

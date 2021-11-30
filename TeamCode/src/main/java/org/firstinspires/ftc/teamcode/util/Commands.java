@@ -41,6 +41,7 @@ public class Commands {
                 LF, LB
         };
 
+        /*
         for (int i = 0; i < allMotors.length; i++) {
             switch (allMotors[i].getDirection()) {
                 case FORWARD:
@@ -51,6 +52,8 @@ public class Commands {
                     break;
             }
         }
+
+         */
     }
 
     private void setupAllMotors(int encoderTicks) {
@@ -60,6 +63,23 @@ public class Commands {
 
         for (DcMotor motor : backwardMotors) {
             motor.setTargetPosition(-encoderTicks);
+        }
+    }
+
+    private void setupLeftRightDiagonal(int encoderTicks) {
+        LF.setTargetPosition(encoderTicks);
+        RB.setTargetPosition(encoderTicks);
+    }
+
+
+    private void setupRightLeftDiagonal(int encoderTicks) {
+        LB.setTargetPosition(encoderTicks);
+        RF.setTargetPosition(encoderTicks);
+    }
+
+    public void async() {
+        for (DcMotor motor : allMotors) {
+            // while (motor.isBusy()) {}
         }
     }
 
@@ -79,12 +99,30 @@ public class Commands {
         return this;
     }
 
-    public void forward(double inches, double power) {
+    public Commands forward(double inches, double power) {
         this.setupAllMotors((int) (inches*DISTANCE_PER_TICK));
         this.run(power);
+
+        return this;
     }
 
-    public void backward(double inches, double power) {
-        this.forward(inches, power);
+    public Commands backward(double inches, double power) {
+        return this.forward(-inches, power);
+    }
+
+    public Commands strafeLeft(double inches, double power) {
+        this.setupLeftRightDiagonal((int) (inches*DISTANCE_PER_TICK));
+        this.setupRightLeftDiagonal((int) (-inches*DISTANCE_PER_TICK));
+        this.run(power);
+
+        return this;
+    }
+
+    public Commands strafeRight(double inches, double power) {
+        this.setupLeftRightDiagonal((int) (-inches*DISTANCE_PER_TICK));
+        this.setupRightLeftDiagonal((int) (inches*DISTANCE_PER_TICK));
+        this.run(power);
+
+        return this;
     }
 }

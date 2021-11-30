@@ -8,14 +8,17 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.Map;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -54,9 +57,42 @@ public class B_Complete extends LinearOpMode {
     DcMotor RF;
     DcMotor RB;
     DcMotor LB;
+    DcMotor ArmMotor;
+    Servo Twist;
+    ColorSensor BoxSensor;
 
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
+
+    PIDController controller = new PIDController(
+            0.003,
+            0.0000001,
+            0.01,
+            new double[] {
+                    0.05, -0.10
+            },
+            360,
+            0);
+
+    PIDController downController = new PIDController(
+            0.004,
+            0,
+            0.0075,
+            new double[] {
+                    0.05, -0.10
+            },
+            1440,
+            0);
+
+    final double[] LEVEL_ANGLES = new double[] {
+            155D,
+            190D,
+            215D
+    };
+
+    final double[] twistPositions = new double[] {
+            0.615D, 0.7D, 0.9D
+    };
 
     private DcMotor initMotor(
             String motorName,
@@ -70,6 +106,19 @@ public class B_Complete extends LinearOpMode {
         motor.setZeroPowerBehavior(zeroPowerBehavior);
 
         return motor;
+    }
+
+    private void liftAndPlaceBlockAsync(double targetPosition, double theta) {
+        ElapsedTime elapsedTime = new ElapsedTime();
+        while (elapsedTime.milliseconds() < 1) {
+            ArmMotor.setPower(controller.calculate(targetPosition, theta));
+        }
+
+        Twist.setPosition(twistPositions[2]);
+        sleep(250);
+        Twist.setPosition(twistPositions[0]);
+
+        ArmMotor.setPower(controller.getFloat(theta));
     }
 
     public int getLevel(double xPosition) {
@@ -131,6 +180,8 @@ public class B_Complete extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -179,6 +230,16 @@ public class B_Complete extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        ArmMotor = initMotor(
+                "ArmMotor", // TODO: change to ArmMotor
+                DcMotorSimple.Direction.REVERSE,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
+        Twist = hardwareMap.servo.get("Twist");
+        BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
+
         ElapsedTime timer = new ElapsedTime();
 
         orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
@@ -197,13 +258,16 @@ public class B_Complete extends LinearOpMode {
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
 
+
         Commands commandUtil = new Commands(
                 orientationGyro, RF, LF, RB, LB
         );
 
         waitForStart();
 
-        int level = 0;
+        ElapsedTime elapsedTime = new ElapsedTime();
+
+        int level = -1;
 
         for (int i = 0; i < MAX_TRIES; i++) {
             level = getLevel();
@@ -213,8 +277,66 @@ public class B_Complete extends LinearOpMode {
             sleep(100);
         }
 
+        level = level == -1 ? 0 : level;
+
+
         telemetry.addData("Level: ", level);
+        telemetry.addData("Busy: ", LF.isBusy());
         telemetry.update();
+
+        commandUtil.forward(12, 0.5).async();
+        telemetry.addData("Done with forward", true);
+        telemetry.update();
+        sleep(1000);
+        commandUtil.backward(12, 0.5).async();
+        telemetry.addData("Done with backward", true);
+        telemetry.update();
+        commandUtil.forward(6, 0.5).async();
+        telemetry.addData("Done with forward", true);
+        telemetry.update();
+        commandUtil.strafeLeft(6, 0.5).async();
+        telemetry.addData("Done with strafeLeft", true);
+        telemetry.update();
+        commandUtil.strafeRight(6, 0.5).async();
+        telemetry.addData("Done with strafeRight", true);
+        telemetry.update();
+
+        /*
+        commandUtil.stafeRight(12, 1).async();
+        commandUtil.backward(12, 1).async();
+
+        liftAndPlaceBlockAsync(LEVEL_ANGLES[level], theta);
+        controller.reset();
+
+        long startTime = elapsedTime.milliseconds()
+        while (elapsedTime.milliseconds()-startTime < 1000) {
+            ArmMotor.setPower(downController.calculate(0, theta));
+        }
+        downController.reset();
+        ArmMotor.setPower(-0.1);
+
+        commandUtil.right(90, 1).async();
+        commandUtil.stafeLeft(12, 0.5).async();
+        commandUtil.forward(20, 1).async();
+
+        int[] motorPositions = commandUtil.getEncoderPositions();
+
+        while (BoxSensor.red()<85) {
+            commandUtil.forward(1, 0.2).async();
+        }
+
+        commandUtil.gotoEncoderPosition(motorPositions).async();
+        commandUtil.backward(20, 1).async();
+        commandUtil.right(90, 1).async();
+        commandUtil.forward(10, 1).async();
+        liftAndPlaceBlockAsync();
+
+        commandUtil.right(90, 1);
+        commandUtil.forward(12, 0.5);
+        commandUtil.right(90, 1);
+        commandUtil.forward(12, 0.5);
+
+         */
 
     }
 }

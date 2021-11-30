@@ -36,7 +36,7 @@ public class PIDController {
         }
 
         double dt = (double) (System.currentTimeMillis() - lastTime);
-        double bias = lerp(this.biasPoints[0], this.biasPoints[1], pv/this.fullRotation);
+        double bias = lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
         double dp = sp-pv;
         double gradient = dt == 0 ? 0 : dp/dt;
 
@@ -67,6 +67,10 @@ public class PIDController {
     public void resume() {
         this.paused = false;
         this.lastTime = System.currentTimeMillis();
+    }
+
+    public double getFloat(double theta) {
+        return lerp(this.biasPoints[0], this.biasPoints[1], (theta+offset)/this.fullRotation);
     }
     /*
     1. Kp = 0.01, Ki = 0, Kd = 0. Tune Kp until it is a bit too much (oscillates a bit).
