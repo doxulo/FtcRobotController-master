@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.Map;
 
-@Autonomous
+@Disabled
 public class B_DuckBox extends LinearOpMode {
     Map objectMap = new Map();
 

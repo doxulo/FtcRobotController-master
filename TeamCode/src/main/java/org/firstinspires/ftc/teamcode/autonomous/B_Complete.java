@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -53,11 +54,11 @@ public class B_Complete extends LinearOpMode {
 
     final int MAX_TRIES = 10;
 
-    DcMotor LF;
-    DcMotor RF;
-    DcMotor RB;
-    DcMotor LB;
-    DcMotor ArmMotor;
+    DcMotorEx LF;
+    DcMotorEx RF;
+    DcMotorEx RB;
+    DcMotorEx LB;
+    DcMotorEx ArmMotor;
     Servo Twist;
     ColorSensor BoxSensor;
 
@@ -94,13 +95,13 @@ public class B_Complete extends LinearOpMode {
             0.615D, 0.7D, 0.9D
     };
 
-    private DcMotor initMotor(
+    private DcMotorEx initMotor(
             String motorName,
             DcMotorSimple.Direction direction,
             DcMotor.RunMode runMode,
             DcMotor.ZeroPowerBehavior zeroPowerBehavior
     ) {
-        DcMotor motor = hardwareMap.dcMotor.get(motorName);
+        DcMotorEx motor = hardwareMap.get(DcMotorEx.class, motorName);
         motor.setDirection(direction);
         motor.setMode(runMode);
         motor.setZeroPowerBehavior(zeroPowerBehavior);
@@ -302,21 +303,21 @@ public class B_Complete extends LinearOpMode {
         telemetry.update();
 
         /*
-        commandUtil.stafeRight(12, 1).async();
+        commandUtil.strafeRight(12, 1).async();
         commandUtil.backward(12, 1).async();
 
         liftAndPlaceBlockAsync(LEVEL_ANGLES[level], theta);
-        controller.reset();
+        controller.pauseAndReset();
 
         long startTime = elapsedTime.milliseconds()
         while (elapsedTime.milliseconds()-startTime < 1000) {
             ArmMotor.setPower(downController.calculate(0, theta));
         }
-        downController.reset();
+        downController.pauseAndReset();
         ArmMotor.setPower(-0.1);
 
         commandUtil.right(90, 1).async();
-        commandUtil.stafeLeft(12, 0.5).async();
+        commandUtil.strafeLeft(12, 0.5).async();
         commandUtil.forward(20, 1).async();
 
         int[] motorPositions = commandUtil.getEncoderPositions();
@@ -335,8 +336,7 @@ public class B_Complete extends LinearOpMode {
         commandUtil.forward(12, 0.5);
         commandUtil.right(90, 1);
         commandUtil.forward(12, 0.5);
-
-         */
+        */
 
     }
 }
