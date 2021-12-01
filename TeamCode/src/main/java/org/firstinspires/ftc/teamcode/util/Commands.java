@@ -84,10 +84,22 @@ public class Commands {
     }
 
     public void async() {
-        for (DcMotorEx motor : this.allMotors) {
-            while (motor.isBusy()) {}
+        boolean cleanIteration = false;
+
+        while (!cleanIteration) {
+            cleanIteration = true;
+            for (DcMotorEx motor : this.allMotors) {
+                if (motor.isBusy()) {
+                    cleanIteration = false;
+                    while (motor.isBusy()) {} // Yield
+                }
+            }
+
+            if (this.adjustingOrientation) {
+                cleanIteration = false;
+                while (this.adjustingOrientation) {}
+            }
         }
-        while (adjustingOrientation) {}
     }
 
     private void run(double power) {
@@ -150,6 +162,9 @@ public class Commands {
         while (targetHeading-this.gyro.getIntegratedZValue() != 0) {
             // set power to error*kP (Possible PID controller usage)
         }
+
+        adjustingOrientation = false;
+        return this;
     }
 
     public Commands gotoEncoderPosition(int[] encoderPositions, double power) {
