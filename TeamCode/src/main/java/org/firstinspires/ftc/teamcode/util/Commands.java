@@ -4,6 +4,8 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.ArrayList;
 
 public class Commands {
@@ -24,12 +26,15 @@ public class Commands {
     DcMotorEx[] leftMotors;
     DcMotorEx[] rightMotors;
 
-    ArrayList<DcMotorEx> forwardMotors;
-    ArrayList<DcMotorEx> backwardMotors;
+    DcMotorEx[] forwardMotors;
+    DcMotorEx[] backwardMotors;
 
     boolean adjustingOrientation = true;
 
-    public Commands(ModernRoboticsI2cGyro gyro, DcMotorEx RF, DcMotorEx LF, DcMotorEx RB, DcMotorEx LB) {
+    Telemetry t;
+
+    public Commands(ModernRoboticsI2cGyro gyro, DcMotorEx RF, DcMotorEx LF, DcMotorEx RB, DcMotorEx LB, Telemetry t) {
+        this.t = t;
         this.gyro = gyro;
         this.RF = RF;
         this.LF = LF;
@@ -44,18 +49,24 @@ public class Commands {
         this.leftMotors = new DcMotorEx[] {
                 LF, LB
         };
-
-        for (int i = 0; i < allMotors.length; i++) {
-            switch (allMotors[i].getDirection()) {
+        this.forwardMotors = new DcMotorEx[] {
+                RF
+        };
+        this.backwardMotors = new DcMotorEx[] {
+            LF, LB, RB
+        };
+        /*
+        for (int i = 0; i < this.allMotors.length; i++) {
+            switch (this.allMotors[i].getDirection()) {
                 case FORWARD:
-                    forwardMotors.add(allMotors[i]);
+                    this.forwardMotors.add(this.allMotors[i]);
                     break;
                 case REVERSE:
-                    backwardMotors.add(allMotors[i]);
+                    this.backwardMotors.add(this.allMotors[i]);
                     break;
             }
         }
-
+         */
     }
 
     private double inchesToTicks(double inches) {
@@ -64,11 +75,13 @@ public class Commands {
 
     private void setupAllMotors(int encoderTicks) {
         for (DcMotorEx motor : this.forwardMotors) {
+            this.t.addData(String.format("%s encoder Postion: %d, tick Target %d: ", motor.getDeviceName(), motor.getCurrentPosition(), motor.getCurrentPosition() + encoderTicks), "");
             motor.setTargetPosition(motor.getCurrentPosition() + encoderTicks);
         }
 
         for (DcMotorEx motor : this.backwardMotors) {
-            motor.setTargetPosition(motor.getCurrentPosition() + (-encoderTicks));
+            this.t.addData(String.format("%s encoder Postion: %d, tick Target %d: ", motor.getDeviceName(), motor.getCurrentPosition(), motor.getCurrentPosition() + encoderTicks), "");
+            motor.setTargetPosition(motor.getCurrentPosition() - encoderTicks);
         }
     }
 
@@ -91,8 +104,10 @@ public class Commands {
             for (DcMotorEx motor : this.allMotors) {
                 if (motor.isBusy()) {
                     cleanIteration = false;
-                    while (motor.isBusy()) {} // Yield
                 }
+
+                this.t.addData(String.format("%s encoder Postion: %d, tick Target %d: ", motor.getDeviceName(), motor.getCurrentPosition(), motor.getTargetPosition()), "");
+                this.t.update();
             }
 
             if (this.adjustingOrientation) {
@@ -131,7 +146,7 @@ public class Commands {
     public Commands forward(double inches, double power) {
         this.setupAllMotors((int) (this.inchesToTicks(inches)));
         this.run(power);
-
+        this.t.update();
         return this;
     }
 
@@ -156,14 +171,14 @@ public class Commands {
     }
 
     public Commands turnRight(int theta) {
-        adjustingOrientation = true;
+        this.adjustingOrientation = true;
         int startHeading = this.gyro.getIntegratedZValue();
         int targetHeading = startHeading + theta;
         while (targetHeading-this.gyro.getIntegratedZValue() != 0) {
             // set power to error*kP (Possible PID controller usage)
         }
 
-        adjustingOrientation = false;
+        this.adjustingOrientation = false;
         return this;
     }
 

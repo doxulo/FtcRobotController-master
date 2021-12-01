@@ -261,7 +261,7 @@ public class B_Complete extends LinearOpMode {
 
 
         Commands commandUtil = new Commands(
-                orientationGyro, RF, LF, RB, LB
+                orientationGyro, RF, LF, RB, LB, telemetry
         );
 
         waitForStart();
@@ -285,23 +285,52 @@ public class B_Complete extends LinearOpMode {
         telemetry.addData("Busy: ", LF.isBusy());
         telemetry.update();
 
-        commandUtil.forward(12, 0.5).async();
+        /*
+        commandUtil.forward(12, 0.01).async();
         telemetry.addData("Done with forward", true);
         telemetry.update();
         sleep(1000);
-        commandUtil.backward(12, 0.5).async();
+        */
+        RF.setTargetPosition(1);
+        LF.setTargetPosition(-1);
+        LB.setTargetPosition(-1);
+        RB.setTargetPosition(-1);
+        RF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RF.setPower(0.1);
+        LF.setPower(0.1);
+        LB.setPower(0.1);
+        RB.setPower(0.1);
+        while (opModeIsActive()) {
+            long currentSystemTime = System.currentTimeMillis();
+            int encoder_LF = LF.getCurrentPosition();
+            int encoder_LB = LB.getCurrentPosition();
+            int encoder_RF = RF.getCurrentPosition();
+            int encoder_RB = RB.getCurrentPosition();
+            int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
+            double power = 0;
+
+            telemetry.addData("LF encoder: ", encoder_LF);
+            telemetry.addData("LB encoder: ", encoder_LB);
+            telemetry.addData("RF encoder: ", encoder_RF);
+            telemetry.addData("RB encoder: ", encoder_RB);
+        }
+        /*
+        commandUtil.backward(12, 0.1).async();
         telemetry.addData("Done with backward", true);
         telemetry.update();
-        commandUtil.forward(6, 0.5).async();
+        commandUtil.forward(6, 0.1).async();
         telemetry.addData("Done with forward", true);
         telemetry.update();
-        commandUtil.strafeLeft(6, 0.5).async();
+        commandUtil.strafeLeft(6, 0.1).async();
         telemetry.addData("Done with strafeLeft", true);
         telemetry.update();
-        commandUtil.strafeRight(6, 0.5).async();
+        commandUtil.strafeRight(6, 0.1).async();
         telemetry.addData("Done with strafeRight", true);
         telemetry.update();
-
+         */
         /*
         commandUtil.strafeRight(12, 1).async();
         commandUtil.backward(12, 1).async();

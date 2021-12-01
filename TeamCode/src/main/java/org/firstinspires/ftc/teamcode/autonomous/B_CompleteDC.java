@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -28,7 +28,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous
-public class AutonomousTemplate extends LinearOpMode {
+public class B_CompleteDC extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -54,16 +54,26 @@ public class AutonomousTemplate extends LinearOpMode {
 
     final int MAX_TRIES = 10;
 
-    DcMotorEx LF;
-    DcMotorEx RF;
-    DcMotorEx RB;
-    DcMotorEx LB;
-    DcMotorEx ArmMotor;
+    DcMotor LF;
+    DcMotor RF;
+    DcMotor RB;
+    DcMotor LB;
+    DcMotor ArmMotor;
     Servo Twist;
     ColorSensor BoxSensor;
 
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
+
+    PIDController movementController = new PIDController(
+            0.00001,
+            0,
+            0.001,
+            new double[] {
+                    0, 0
+            },
+            537.7,
+            0);
 
     PIDController controller = new PIDController(
             0.003,
@@ -95,13 +105,13 @@ public class AutonomousTemplate extends LinearOpMode {
             0.615D, 0.7D, 0.9D
     };
 
-    private DcMotorEx initMotor(
+    private DcMotor initMotor(
             String motorName,
             DcMotorSimple.Direction direction,
             DcMotor.RunMode runMode,
             DcMotor.ZeroPowerBehavior zeroPowerBehavior
     ) {
-        DcMotorEx motor = hardwareMap.get(DcMotorEx.class, motorName);
+        DcMotor motor = hardwareMap.get(DcMotor.class, motorName);
         motor.setDirection(direction);
         motor.setMode(runMode);
         motor.setZeroPowerBehavior(zeroPowerBehavior);
@@ -205,14 +215,14 @@ public class AutonomousTemplate extends LinearOpMode {
         LF = initMotor(
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
 
         );
@@ -220,14 +230,14 @@ public class AutonomousTemplate extends LinearOpMode {
         LB = initMotor(
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
@@ -238,6 +248,10 @@ public class AutonomousTemplate extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
+        LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Twist = hardwareMap.servo.get("Twist");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
 
@@ -259,44 +273,111 @@ public class AutonomousTemplate extends LinearOpMode {
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
 
+
+        /*
         Commands commandUtil = new Commands(
                 orientationGyro, RF, LF, RB, LB, telemetry
         );
-
+*/
         waitForStart();
 
-        LF.setPower(1);
-        RF.setPower(1);
-        LB.setPower(1);
-        RB.setPower(1);
+        /*
+        ElapsedTime elapsedTime = new ElapsedTime();
 
-        ElapsedTime e = new ElapsedTime();
+        int level = -1;
 
-        while (e.milliseconds() < 200) {
-
+        for (int i = 0; i < MAX_TRIES; i++) {
+            level = getLevel();
+            if (level != -1) {
+                break;
+            }
+            sleep(100);
         }
 
-        LF.setPower(0);
-        RF.setPower(0);
-        LB.setPower(0);
-        RB.setPower(0);
+        level = level == -1 ? 0 : level;
+
+
+        telemetry.addData("Level: ", level);
+        telemetry.addData("Busy: ", LF.isBusy());
+        telemetry.update();
+*/
+        /*
+        commandUtil.forward(12, 0.01).async();
+        telemetry.addData("Done with forward", true);
+        telemetry.update();
+        sleep(1000);
+        */
+
+        RF.setTargetPosition(1000);
+        LF.setTargetPosition(-1000);
+        LB.setTargetPosition(-1000);
+        RB.setTargetPosition(-1000);
+        RF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RF.setPower(0.1);
+        LF.setPower(0.1);
+        LB.setPower(0.1);
+        RB.setPower(0.1);
 
         /*
-        commandUtil.stafeRight(12, 1).async();
+        while (opModeIsActive()) {
+            long currentSystemTime = System.currentTimeMillis();
+            int encoder_LF = LF.getCurrentPosition();
+            int encoder_LB = LB.getCurrentPosition();
+            int encoder_RF = RF.getCurrentPosition();
+            int encoder_RB = RB.getCurrentPosition();
+            int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
+            double power = 0;
+
+            telemetry.addData("LF encoder: ", encoder_LF);
+            telemetry.addData("LB encoder: ", encoder_LB);
+            telemetry.addData("RF encoder: ", encoder_RF);
+            telemetry.addData("RB encoder: ", encoder_RB);
+            telemetry.update();
+            int rfTarget = 1000;
+            int lfTarget = -1000;
+            int lbTarget = -1000;
+            int rbTarget = -1000;
+
+            RF.setPower(movementController.calculate(rfTarget, RF.getCurrentPosition()));
+            LF.setPower(-movementController.calculate(lfTarget, LF.getCurrentPosition()));
+            LB.setPower(-movementController.calculate(lbTarget, LB.getCurrentPosition()));
+            RB.setPower(-movementController.calculate(rbTarget, RB.getCurrentPosition()));
+        }
+
+         */
+        /*
+        commandUtil.backward(12, 0.1).async();
+        telemetry.addData("Done with backward", true);
+        telemetry.update();
+        commandUtil.forward(6, 0.1).async();
+        telemetry.addData("Done with forward", true);
+        telemetry.update();
+        commandUtil.strafeLeft(6, 0.1).async();
+        telemetry.addData("Done with strafeLeft", true);
+        telemetry.update();
+        commandUtil.strafeRight(6, 0.1).async();
+        telemetry.addData("Done with strafeRight", true);
+        telemetry.update();
+         */
+        /*
+        commandUtil.strafeRight(12, 1).async();
         commandUtil.backward(12, 1).async();
 
         liftAndPlaceBlockAsync(LEVEL_ANGLES[level], theta);
-        controller.reset();
+        controller.pauseAndReset();
 
         long startTime = elapsedTime.milliseconds()
         while (elapsedTime.milliseconds()-startTime < 1000) {
             ArmMotor.setPower(downController.calculate(0, theta));
         }
-        downController.reset();
+        downController.pauseAndReset();
         ArmMotor.setPower(-0.1);
 
         commandUtil.right(90, 1).async();
-        commandUtil.stafeLeft(12, 0.5).async();
+        commandUtil.strafeLeft(12, 0.5).async();
         commandUtil.forward(20, 1).async();
 
         int[] motorPositions = commandUtil.getEncoderPositions();
@@ -315,8 +396,7 @@ public class AutonomousTemplate extends LinearOpMode {
         commandUtil.forward(12, 0.5);
         commandUtil.right(90, 1);
         commandUtil.forward(12, 0.5);
-
-         */
+        */
 
     }
 }
