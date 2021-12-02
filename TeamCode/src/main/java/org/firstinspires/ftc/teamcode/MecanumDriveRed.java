@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
@@ -33,7 +34,6 @@ public class MecanumDriveRed extends LinearOpMode {
      * GamePad1 == For movements,
      * GamePad2 == Gadgets,
      */
-
 
     /**
      * Initialize all motors that control the robot's wheels
@@ -341,6 +341,10 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("LB encoder: ", encoder_LB);
             telemetry.addData("RF encoder: ", encoder_RF);
             telemetry.addData("RB encoder: ", encoder_RB);
+            telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
+            telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
+            telemetry.addData("RF velocity: ", ((DcMotorEx) RF).getVelocity());
+            telemetry.addData("RB velocity: ", ((DcMotorEx) RB).getVelocity());
             telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
             telemetry.addData("Arm encoder: ", encoder_Arm);
