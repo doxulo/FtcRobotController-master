@@ -207,14 +207,14 @@ public class B_Complete_Velocity extends LinearOpMode {
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
 
         );
 
@@ -222,14 +222,14 @@ public class B_Complete_Velocity extends LinearOpMode {
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         ArmMotor = initMotor(
@@ -262,7 +262,7 @@ public class B_Complete_Velocity extends LinearOpMode {
 
 
         PIDController movementController = new PIDController(
-                0,
+                0.01,
                 0,
                 0,
                 new double[]{
@@ -273,7 +273,7 @@ public class B_Complete_Velocity extends LinearOpMode {
         );
 
         PIDController turnController = new PIDController(
-                0,
+                0.01,
                 0,
                 0,
                 new double[]{
@@ -284,7 +284,7 @@ public class B_Complete_Velocity extends LinearOpMode {
         );
 
         PIDCommands commandUtil = new PIDCommands(
-                orientationGyro, RF, LF, RB, LB, movementController, turnController
+                orientationGyro, RF, LF, RB, LB, movementController, turnController, telemetry
         );
 
         waitForStart();
@@ -309,7 +309,7 @@ public class B_Complete_Velocity extends LinearOpMode {
         telemetry.update();
 
 
-        commandUtil.forward(12);
+        commandUtil.forward(10);
         telemetry.addData("Done with forward", true);
         telemetry.update();
         sleep(1000);

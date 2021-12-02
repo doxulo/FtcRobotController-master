@@ -22,6 +22,7 @@
 
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -77,6 +78,7 @@ public class AprilTagDemo extends LinearOpMode
     @Override
     public void runOpMode()
     {
+        FtcDashboard dash = FtcDashboard.getInstance();
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -96,7 +98,7 @@ public class AprilTagDemo extends LinearOpMode
 
             }
         });
-
+        dash.startCameraStream(camera, 30);
         waitForStart();
 
         telemetry.setMsTransmissionInterval(50);

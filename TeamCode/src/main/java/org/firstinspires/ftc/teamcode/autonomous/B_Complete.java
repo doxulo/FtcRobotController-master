@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.Map;
+import org.firstinspires.ftc.teamcode.util.PIDCommands;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -64,6 +65,7 @@ public class B_Complete extends LinearOpMode {
 
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
+    PIDController movementController;
 
     PIDController controller = new PIDController(
             0.003,
@@ -107,6 +109,35 @@ public class B_Complete extends LinearOpMode {
         motor.setZeroPowerBehavior(zeroPowerBehavior);
 
         return motor;
+    }
+
+    private boolean isBusy(int motorPosition, int target) {
+        return Math.abs(motorPosition-target) < 0;
+    }
+
+    private void setVelocity(DcMotorEx motor, int currentPosition, int targetPosition) {
+        if (movementController.paused) {
+            movementController.resume();
+        }
+
+        double calculatedVelocity = movementController.calculate((double)targetPosition, (double) currentPosition);
+        telemetry.addLine(String.format("Power: %f", calculatedVelocity));
+        /*if (calculatedVelocity < 0) {
+            calculatedVelocity = Math.max(calculatedVelocity, -MAX_VELOCITY);
+        } else {
+            calculatedVelocity = Math.min(calculatedVelocity, MAX_VELOCITY);
+        }*/
+        telemetry.addData("Power: ", calculatedVelocity);
+        motor.setVelocity(
+                calculatedVelocity/100
+        );
+    }
+
+    private void resetVelocity() {
+        RF.setVelocity(0);
+        RB.setVelocity(0);
+        LF.setVelocity(0);
+        LB.setVelocity(0);
     }
 
     private void liftAndPlaceBlockAsync(double targetPosition, double theta) {
@@ -206,14 +237,14 @@ public class B_Complete extends LinearOpMode {
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
 
         );
 
@@ -221,14 +252,14 @@ public class B_Complete extends LinearOpMode {
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
                 DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         ArmMotor = initMotor(
@@ -290,33 +321,52 @@ public class B_Complete extends LinearOpMode {
         telemetry.addData("Done with forward", true);
         telemetry.update();
         sleep(1000);
-        */
-        RF.setTargetPosition(1);
-        LF.setTargetPosition(-1);
-        LB.setTargetPosition(-1);
-        RB.setTargetPosition(-1);
-        RF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RF.setPower(0.1);
-        LF.setPower(0.1);
-        LB.setPower(0.1);
-        RB.setPower(0.1);
-        while (opModeIsActive()) {
-            long currentSystemTime = System.currentTimeMillis();
-            int encoder_LF = LF.getCurrentPosition();
-            int encoder_LB = LB.getCurrentPosition();
-            int encoder_RF = RF.getCurrentPosition();
-            int encoder_RB = RB.getCurrentPosition();
-            int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
-            double power = 0;
 
-            telemetry.addData("LF encoder: ", encoder_LF);
-            telemetry.addData("LB encoder: ", encoder_LB);
-            telemetry.addData("RF encoder: ", encoder_RF);
-            telemetry.addData("RB encoder: ", encoder_RB);
+
+         */
+
+        movementController = new PIDController(
+                0.1,
+                0,
+                0,
+                new double[] {0, 0},
+                0,
+                0);
+        int RFCurrentPosition = RF.getCurrentPosition();
+        int LFCurrentPosition = LF.getCurrentPosition();
+        int RBCurrentPosition = RB.getCurrentPosition();
+        int LBCurrentPosition = LB.getCurrentPosition();
+
+        int RFTarget = (int) (RFCurrentPosition + 1000);
+        int LFTarget = (int) (LFCurrentPosition - 1000);
+        int RBTarget = (int) (RBCurrentPosition - 1000);
+        int LBTarget = (int) (LBCurrentPosition - 1000);
+
+        movementController.resume();
+        while (
+                !isBusy(RFCurrentPosition, RFTarget) &&
+                        !isBusy(LFCurrentPosition, LFTarget) &&
+                        !isBusy(RBCurrentPosition, RBTarget) &&
+                        !isBusy(LBCurrentPosition, LBTarget)
+        ) {
+            telemetry.addLine(String.format("%s, %d, %d", RF.getDeviceName(), RF.getCurrentPosition(), RFTarget));
+            telemetry.addLine(String.format("%s, %d, %d", LF.getDeviceName(), LF.getCurrentPosition(), RFTarget));
+            telemetry.addLine(String.format("%s, %d, %d", LB.getDeviceName(), LB.getCurrentPosition(), RFTarget));
+            telemetry.addLine(String.format("%s, %d, %d", RB.getDeviceName(), RB.getCurrentPosition(), RFTarget));
+
+            telemetry.addLine(String.format("%s, Velocity: %f, %f", RF.getDeviceName(), RF.getVelocity(), RF.getPower()));
+            telemetry.addLine(String.format("%s, Velocity: %f, %f", LF.getDeviceName(), LF.getVelocity(), LF.getPower()));
+            telemetry.addLine(String.format("%s, Velocity: %f, %f", RB.getDeviceName(), RB.getVelocity(), RB.getPower()));
+            telemetry.addLine(String.format("%s, Velocity: %f, %f", LB.getDeviceName(), LB.getVelocity(), LB.getPower()));
+            telemetry.update();
+            
+            setVelocity(RF, RFCurrentPosition, RFTarget);
+            setVelocity(LF, LFCurrentPosition, LFTarget);
+            setVelocity(RB, RBCurrentPosition, RBTarget);
+            setVelocity(LB, LBCurrentPosition, LBTarget);
         }
+        resetVelocity();
+        movementController.pauseAndReset();
         /*
         commandUtil.backward(12, 0.1).async();
         telemetry.addData("Done with backward", true);

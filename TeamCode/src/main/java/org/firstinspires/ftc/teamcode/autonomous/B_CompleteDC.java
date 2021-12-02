@@ -308,10 +308,10 @@ public class B_CompleteDC extends LinearOpMode {
         sleep(1000);
         */
 
-        RF.setTargetPosition(1000);
-        LF.setTargetPosition(-1000);
-        LB.setTargetPosition(-1000);
-        RB.setTargetPosition(-1000);
+        RF.setTargetPosition(100);
+        LF.setTargetPosition(-100);
+        LB.setTargetPosition(-100);
+        RB.setTargetPosition(-100);
         RF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LF.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -320,7 +320,10 @@ public class B_CompleteDC extends LinearOpMode {
         LF.setPower(0.1);
         LB.setPower(0.1);
         RB.setPower(0.1);
+while(LF.isBusy()){
+    sleep(10);
 
+}
         /*
         while (opModeIsActive()) {
             long currentSystemTime = System.currentTimeMillis();

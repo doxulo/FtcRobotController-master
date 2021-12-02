@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class PIDController {
 
     double[] biasPoints;
@@ -14,7 +16,7 @@ public class PIDController {
 
     long lastTime;
 
-    boolean paused;
+    public boolean paused;
 
     public PIDController(double kP, double kI, double kD, double[] biasPoints, double fullRotation, double offset) {
         this.kP = kP;
@@ -28,6 +30,33 @@ public class PIDController {
 
     public double lerp(double p0, double p1, double t) {
         return (1 - t)*p0 + p1*t;
+    }
+
+    public double calculate(double sp, double pv, Telemetry t) {
+        if (paused) {
+            this.resume();
+        }
+
+        double dt = (double) (System.currentTimeMillis() - lastTime);
+        double bias = lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
+        double dp = sp-pv;
+        double gradient = dt == 0 ? 0 : dp/dt;
+
+        double error = dp*this.kP;
+        double integral = this.summation*this.kI;
+        double derivative = gradient*this.kD;
+
+        this.summation = summation + dp*dt;
+        lastTime = System.currentTimeMillis();
+
+        if (integral > 0.05) {
+            integral = 0.05;
+        } else if (integral < -0.15) {
+            integral = -0.15;
+        }
+
+        t.addLine(String.format("%f, %f, %f, %f", error, integral, derivative, error+integral+derivative));
+        return error + integral + derivative + bias;
     }
 
     public double calculate(double sp, double pv) {
@@ -52,7 +81,7 @@ public class PIDController {
         } else if (integral < -0.15) {
             integral = -0.15;
         }
-        return error + integral + derivative + bias;
+        return (double) (error + integral + derivative);
     }
 
     public void pauseAndReset() {

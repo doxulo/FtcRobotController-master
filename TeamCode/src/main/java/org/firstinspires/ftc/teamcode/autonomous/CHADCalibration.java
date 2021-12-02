@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,26 +14,27 @@ public class CHADCalibration extends LinearOpMode {
     DcMotor backleft;
     DcMotor backright;
     //Calculate encoder conversion
-    Integer cpr = 28; //counts per rotation
-    Integer gearratio = 40;
+    Integer cpr = 537; //counts per rotation
+    Integer gearratio = 1;
     Double diameter = 4.125;
     Double cpi = (cpr * gearratio) / (Math.PI * diameter); //counts per inch -> counts per rotation / circumference
-    Double bias = 0.8;//adjust until your robot goes 20 inches
+    Double bias = 0.1;//adjust until your robot goes 20 inches
     //
     Double conversion = cpi * bias;
     //
     public void runOpMode() {
         //
-        frontleft = hardwareMap.dcMotor.get("frontleft");
-        frontright = hardwareMap.dcMotor.get("frontright");
-        backleft = hardwareMap.dcMotor.get("backleft");
-        backright = hardwareMap.dcMotor.get("backright");
-        frontright.setDirection(DcMotorSimple.Direction.REVERSE);//If your robot goes backward, switch this from right to left
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        frontleft = hardwareMap.dcMotor.get("LF");
+        frontright = hardwareMap.dcMotor.get("RF");
+        backleft = hardwareMap.dcMotor.get("LB");
+        backright = hardwareMap.dcMotor.get("RB");
+        // frontright.setDirection(DcMotorSimple.Direction.REVERSE);//If your robot goes backward, switch this from right to left
         backright.setDirection(DcMotorSimple.Direction.REVERSE);//If your robot goes backward, switch this from right to left
         //
         waitForStartify();
-        //
-        moveToPosition(20, .2);//Don't change this line, unless you want to calibrate with different speeds
+
+        moveToPosition(2, .2);//Don't change this line, unless you want to calibrate with different speeds
         //
     }
     //

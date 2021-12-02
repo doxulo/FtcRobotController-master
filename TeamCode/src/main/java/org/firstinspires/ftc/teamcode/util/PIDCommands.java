@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.util;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class PIDCommands {
-    int OFFSET_THRESHOLD = 20;
+    int OFFSET_THRESHOLD = 1;
 
     double WHEEL_DIAMETER = 2;
     double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER*Math.PI;
-    double FULL_REVOLUTION_TICKS = 360;
+    double FULL_REVOLUTION_TICKS = 537;
     double LENGTH_TO_TICKS_RATIO = WHEEL_CIRCUMFERENCE/FULL_REVOLUTION_TICKS;
     ModernRoboticsI2cGyro gyro;
 
@@ -18,12 +20,12 @@ public class PIDCommands {
     DcMotorEx LB;
 
     // TODO: find max velocity for wheels
-    double RF_MAX_VELOCITY;
-    double LF_MAX_VELOCITY;
-    double RB_MAX_VELOCITY;
-    double LB_MAX_VELOCITY;
+    double RF_MAX_VELOCITY = 2000;
+    double LF_MAX_VELOCITY = 2000;
+    double RB_MAX_VELOCITY = 2000;
+    double LB_MAX_VELOCITY = 2000;
 
-    double bias = 0.80D;
+    double bias = 0.50D;
 
     double MAX_VELOCITY = Math.min(
             Math.min(RF_MAX_VELOCITY, LF_MAX_VELOCITY),
@@ -42,6 +44,8 @@ public class PIDCommands {
     
     boolean adjustingOrientation = true;
 
+    Telemetry t;
+
     public PIDCommands(
             ModernRoboticsI2cGyro gyro, 
             DcMotorEx RF, 
@@ -49,8 +53,10 @@ public class PIDCommands {
             DcMotorEx RB, 
             DcMotorEx LB, 
             PIDController movementController,
-            PIDController turnController
+            PIDController turnController,
+            Telemetry t
     ) {
+        this.t = t;
         this.gyro = gyro;
         this.RF = RF;
         this.LF = LF;
@@ -89,23 +95,41 @@ public class PIDCommands {
         if (turnController.paused) {
             turnController.resume();
         }
+
+        double calculatedVelocity = turnController.calculate(targetAngle, currentAngle, this.t)*multiple;
+        if (calculatedVelocity < 0) {
+            calculatedVelocity = Math.max(calculatedVelocity, -this.MAX_VELOCITY);
+        } else {
+            calculatedVelocity = Math.min(calculatedVelocity, this.MAX_VELOCITY);
+        }
+        this.t.addData("Power: ", calculatedVelocity);
         motor.setVelocity(
-                Math.min(
-                    turnController.calculate(targetAngle, currentAngle)*multiple,
-                    this.MAX_VELOCITY
-                )
+                calculatedVelocity
         );
     }
     private void setVelocity(DcMotorEx motor, int currentPosition, int targetPosition) {
         if (movementController.paused) {
             movementController.resume();
         }
+
+        double calculatedVelocity = movementController.calculate((double)targetPosition, (double) currentPosition, this.t);
+        this.t.addLine(String.format("Power: %f", calculatedVelocity));
+        /*if (calculatedVelocity < 0) {
+            calculatedVelocity = Math.max(calculatedVelocity, -this.MAX_VELOCITY);
+        } else {
+            calculatedVelocity = Math.min(calculatedVelocity, this.MAX_VELOCITY);
+        }*/
+        this.t.addData("Power: ", calculatedVelocity);
         motor.setVelocity(
-                Math.min(
-                        movementController.calculate(targetPosition, currentPosition),
-                        this.MAX_VELOCITY
-                )
+                calculatedVelocity
         );
+    }
+
+    private void resetVelocity() {
+        this.RF.setVelocity(0);
+        this.RB.setVelocity(0);
+        this.LF.setVelocity(0);
+        this.LB.setVelocity(0);
     }
 
     public void async() {
@@ -139,11 +163,24 @@ public class PIDCommands {
                 !this.isBusy(RBCurrentPosition, RBTarget) &&
                 !this.isBusy(LBCurrentPosition, LBTarget)
         ) {
+            this.t.addLine(String.format("%s, %d, %d", this.RF.getDeviceName(), this.RF.getCurrentPosition(), RFTarget));
+            this.t.addLine(String.format("%s, %d, %d", this.LF.getDeviceName(), this.LF.getCurrentPosition(), RFTarget));
+            this.t.addLine(String.format("%s, %d, %d", this.LB.getDeviceName(), this.LB.getCurrentPosition(), RFTarget));
+            this.t.addLine(String.format("%s, %d, %d", this.RB.getDeviceName(), this.RB.getCurrentPosition(), RFTarget));
+
+            this.t.addLine(String.format("%s, Velocity: %f, %f", this.RF.getDeviceName(), this.RF.getVelocity(), this.RF.getPower()));
+            this.t.addLine(String.format("%s, Velocity: %f, %f", this.LF.getDeviceName(), this.LF.getVelocity(), this.LF.getPower()));
+            this.t.addLine(String.format("%s, Velocity: %f, %f", this.RB.getDeviceName(), this.RB.getVelocity(), this.RB.getPower()));
+            this.t.addLine(String.format("%s, Velocity: %f, %f", this.LB.getDeviceName(), this.LB.getVelocity(), this.LB.getPower()));
+
             this.setVelocity(this.RF, RFCurrentPosition, RFTarget);
             this.setVelocity(this.LF, LFCurrentPosition, LFTarget);
             this.setVelocity(this.RB, RBCurrentPosition, RBTarget);
             this.setVelocity(this.LB, LBCurrentPosition, LBTarget);
+            this.t.update();
+
         }
+        this.resetVelocity();
         movementController.pauseAndReset();
         return this;
     }
@@ -159,9 +196,9 @@ public class PIDCommands {
         int LBCurrentPosition = this.LB.getCurrentPosition();
 
         int RFTarget = (int) (RFCurrentPosition + this.inchesToTicks(inches));
-        int LFTarget = (int) (LFCurrentPosition - this.inchesToTicks(inches));
+        int LFTarget = (int) (LFCurrentPosition + this.inchesToTicks(inches));
         int RBTarget = (int) (RBCurrentPosition - this.inchesToTicks(inches));
-        int LBTarget = (int) (LBCurrentPosition - this.inchesToTicks(inches));
+        int LBTarget = (int) (LBCurrentPosition + this.inchesToTicks(inches));
 
         movementController.resume();
         while (
@@ -175,6 +212,7 @@ public class PIDCommands {
             this.setVelocity(this.RB, RBCurrentPosition, RBTarget);
             this.setVelocity(this.LB, LBCurrentPosition, LBTarget);
         }
+        this.resetVelocity();
         movementController.pauseAndReset();
         return this;
     }
@@ -198,7 +236,7 @@ public class PIDCommands {
             this.setTurningVelocity(this.LB, error, targetHeading, 1);
             // set power to error*kP (Possible PID controller usage)
         }
-
+        this.resetVelocity();
         turnController.pauseAndReset();
         return this;
     }
