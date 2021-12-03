@@ -177,6 +177,11 @@ public class PIDCommands {
             this.setVelocity(this.LF, LFCurrentPosition, LFTarget);
             this.setVelocity(this.RB, RBCurrentPosition, RBTarget);
             this.setVelocity(this.LB, LBCurrentPosition, LBTarget);
+            RFCurrentPosition = RF.getCurrentPosition();
+            LFCurrentPosition = LF.getCurrentPosition();
+            RBCurrentPosition = RB.getCurrentPosition();
+            LBCurrentPosition = LB.getCurrentPosition();
+            
             this.t.update();
 
         }
@@ -211,6 +216,10 @@ public class PIDCommands {
             this.setVelocity(this.LF, LFCurrentPosition, LFTarget);
             this.setVelocity(this.RB, RBCurrentPosition, RBTarget);
             this.setVelocity(this.LB, LBCurrentPosition, LBTarget);
+            RFCurrentPosition = RF.getCurrentPosition();
+            LFCurrentPosition = LF.getCurrentPosition();
+            RBCurrentPosition = RB.getCurrentPosition();
+            LBCurrentPosition = LB.getCurrentPosition();
         }
         this.resetVelocity();
         movementController.pauseAndReset();
