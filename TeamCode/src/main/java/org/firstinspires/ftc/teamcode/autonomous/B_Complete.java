@@ -364,6 +364,10 @@ public class B_Complete extends LinearOpMode {
             setVelocity(LF, LFCurrentPosition, LFTarget);
             setVelocity(RB, RBCurrentPosition, RBTarget);
             setVelocity(LB, LBCurrentPosition, LBTarget);
+            RFCurrentPosition = RF.getCurrentPosition();
+            LFCurrentPosition = LF.getCurrentPosition();
+            RBCurrentPosition = RB.getCurrentPosition();
+            LBCurrentPosition = LB.getCurrentPosition();
         }
         resetVelocity();
         movementController.pauseAndReset();
