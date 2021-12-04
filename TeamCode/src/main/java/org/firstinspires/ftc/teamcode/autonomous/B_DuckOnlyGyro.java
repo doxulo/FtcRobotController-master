@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Autonomous
-public class B_DuckBox extends LinearOpMode {
+public class B_DuckOnlyGyro extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -351,10 +351,8 @@ public class B_DuckBox extends LinearOpMode {
 
         applyPower(-0.7, 0.7, 0.7, -0.7);
         sleep(3000);
-        applyPower(-0.6, -0.5, -0.6, -0.5);
-        sleep(250);
-        //applyPower(-0.5, -0.5, -0.5, -0.5);
-        //sleep(300);
+        applyPower(-0.5, -0.5, -0.5, -0.5);
+        sleep(300);
         applyPower(0, 0, 0, 0);
         Duck_Wheel1.setPower(-0.56);
         Duck_Wheel2.setPower(-0.56);

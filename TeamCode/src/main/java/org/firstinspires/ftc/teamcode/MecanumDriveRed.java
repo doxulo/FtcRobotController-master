@@ -166,6 +166,7 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
             telemetry.clear(); telemetry.update();
 
+            /*
         orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro_center");
         centerGyroParsed = (IntegratingGyroscope)orientationGyro;
 
@@ -182,6 +183,7 @@ public class MecanumDriveRed extends LinearOpMode {
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
 
+             */
 
         limitPower = 1 / limitPower;
 
@@ -213,6 +215,11 @@ public class MecanumDriveRed extends LinearOpMode {
                 360,
                 0);
 
+
+
+
+
+
         PIDController downController = new PIDController(
                 0.004,
                 0,
@@ -233,6 +240,8 @@ public class MecanumDriveRed extends LinearOpMode {
         int twistIndex = -1;
         int framesGreater = 0;
         int lastEncoderPosition = 0;
+
+        int headingOffset = 0;
 
         boolean intakeOn = false;
         boolean duckWheelOn = false;
@@ -309,18 +318,18 @@ public class MecanumDriveRed extends LinearOpMode {
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         long lastTime = System.currentTimeMillis();
         while (opModeIsActive()) {
-            int rawX = armGyro.rawX();
-            int rawY = armGyro.rawY();
-            int rawZ = armGyro.rawZ();
+            // int rawX = armGyro.rawX();
+            // int rawY = armGyro.rawY();
+            // int rawZ = armGyro.rawZ();
             int heading = armGyro.getHeading();
             heading = heading > 350 ? 0 : heading;
-            int integratedZ = armGyro.getIntegratedZValue();
-            AngularVelocity rates = armGyroParsed.getAngularVelocity(AngleUnit.DEGREES);
-            float zAngle = armGyroParsed.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            // int integratedZ = armGyro.getIntegratedZValue();
+            // AngularVelocity rates = armGyroParsed.getAngularVelocity(AngleUnit.DEGREES);
+            // float zAngle = armGyroParsed.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
             // Read administrative information from the gyro
-            int zAxisOffset = armGyro.getZAxisOffset();
-            int zAxisScalingCoefficient = armGyro.getZAxisScalingCoefficient();
+            // int zAxisOffset = armGyro.getZAxisOffset();
+            // int zAxisScalingCoefficient = armGyro.getZAxisScalingCoefficient();
 
             try {
                 scheduler.checkAndExecute();
@@ -330,43 +339,44 @@ public class MecanumDriveRed extends LinearOpMode {
                 e.printStackTrace();
             }
             long currentSystemTime = System.currentTimeMillis();
-            int encoder_LF = LF.getCurrentPosition();
-            int encoder_LB = LB.getCurrentPosition();
-            int encoder_RF = RF.getCurrentPosition();
-            int encoder_RB = RB.getCurrentPosition();
+            // int encoder_LF = LF.getCurrentPosition();
+            // int encoder_LB = LB.getCurrentPosition();
+            // int encoder_RF = RF.getCurrentPosition();
+            // int encoder_RB = RB.getCurrentPosition();
             int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
             double power = 0;
 
-            telemetry.addData("LF encoder: ", encoder_LF);
-            telemetry.addData("LB encoder: ", encoder_LB);
-            telemetry.addData("RF encoder: ", encoder_RF);
-            telemetry.addData("RB encoder: ", encoder_RB);
-            telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
-            telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
-            telemetry.addData("RF velocity: ", ((DcMotorEx) RF).getVelocity());
-            telemetry.addData("RB velocity: ", ((DcMotorEx) RB).getVelocity());
-            telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
-            telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
-            telemetry.addData("Arm encoder: ", encoder_Arm);
+            // telemetry.addData("LF encoder: ", encoder_LF);
+            // telemetry.addData("LB encoder: ", encoder_LB);
+            //telemetry.addData("RF encoder: ", encoder_RF);
+            // telemetry.addData("RB encoder: ", encoder_RB);
+            // telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
+            // telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
+            //telemetry.addData("RF velocity: ", ((DcMotorEx) RF).getVelocity());
+
+            // telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
+            // telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
+            // telemetry.addData("Arm encoder: ", encoder_Arm);
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
+
             telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", BoxSensor.red(), BoxSensor.green(), BoxSensor.blue()), "");
-            telemetry.addData("Integral: ", controller.summation);
-            telemetry.addData("kD: ", controller.kI);
-            telemetry.addData("Increment: ", intIncrement);
-            telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
-            telemetry.addLine()
-                    .addData("dx", formatRate(rates.xRotationRate))
-                    .addData("dy", formatRate(rates.yRotationRate))
-                    .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
-            telemetry.addData("angle", "%s deg", formatFloat(zAngle));
+            // telemetry.addData("Integral: ", controller.summation);
+            // telemetry.addData("kD: ", controller.kI);
+            // telemetry.addData("Increment: ", intIncrement);
+            // telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
+            // telemetry.addLine()
+            // .addData("dx", formatRate(rates.xRotationRate))
+            //        .addData("dy", formatRate(rates.yRotationRate))
+            //        .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
+            // telemetry.addData("angle", "%s deg", formatFloat(zAngle));
             telemetry.addData("heading", "%3d deg", heading);
-            telemetry.addData("integrated Z", "%3d", integratedZ);
-            telemetry.addLine()
-                    .addData("rawX", formatRaw(rawX))
-                    .addData("rawY", formatRaw(rawY))
-                    .addData("rawZ", formatRaw(rawZ));
-            telemetry.addLine().addData("z offset", zAxisOffset).addData("z coeff", zAxisScalingCoefficient);
+            // telemetry.addData("integrated Z", "%3d", integratedZ);
+            //telemetry.addLine()
+            //        .addData("rawX", formatRaw(rawX))
+            //        .addData("rawY", formatRaw(rawY))
+            //        .addData("rawZ", formatRaw(rawZ));
+            //telemetry.addLine().addData("z offset", zAxisOffset).addData("z coeff", zAxisScalingCoefficient);
             telemetry.update();
             lastTime = currentSystemTime;
             //drive train
@@ -388,6 +398,7 @@ public class MecanumDriveRed extends LinearOpMode {
                     Intake.setPower(intakeOn ? 0.7 : 0);
                 }
             }
+
             if (Intake.getPower() > 0 && BoxSensor.red() > 101) {
                 // sleep(1200);
 
@@ -439,13 +450,13 @@ public class MecanumDriveRed extends LinearOpMode {
             }*/
 
             if (gamepad2.dpad_up) {
-                power = controller.calculate(175D, heading);
+                power = controller.calculate(172D, heading-headingOffset);
             } else if (gamepad2.dpad_left) {
-                power = controller.calculate(210D, heading);
+                power = controller.calculate(210D, heading-headingOffset);
             } else if (gamepad2.dpad_down) {
-                power = controller.calculate(240D, heading);
+                power = controller.calculate(240D, heading-headingOffset);
             } else if (gamepad2.x) {
-                power = downController.calculate(0D, heading);
+                power = downController.calculate(0D, heading-headingOffset);
             }/* else if (gamepad2.x) {
                 if (encoder_Arm > 100) {
                     lastEncoderPosition = encoder_Arm;
@@ -467,8 +478,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 }
             }*/
             else if (gamepad2.left_stick_button) {
-                ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                headingOffset = heading;
             } else if (gamepad2.left_trigger > 0) {
                 ArmMotor.setPower(-gamepad2.left_trigger/3);
             } else if (gamepad2.right_trigger > 0) {
@@ -590,8 +600,8 @@ public class MecanumDriveRed extends LinearOpMode {
                     Duck_Wheel2.setPower(-0.56);
                 } else {
                     if (System.currentTimeMillis() - startDuck > 750) {
-                        Duck_Wheel1.setPower(1);
-                        Duck_Wheel2.setPower(-1);
+                        Duck_Wheel1.setPower(0.75);
+                        Duck_Wheel2.setPower(-0.75);
                     }
                 }
             } else if (duckMotorSwitch.check()){
@@ -601,11 +611,11 @@ public class MecanumDriveRed extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
-            if (BoxSensor.red()<85  && debounces.check("Servo")) {
+            if (debounces.check("Servo") && BoxSensor.red()<85) {
                 Twist.setPosition(twistPositions[0]);
             } else if (BoxSensor.red()>86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
-            } else if (BoxSensor.red()>86 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
+            } else if (BoxSensor.red()>5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
                 // sleep(1000);
             } else if (BoxSensor.red()> 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {

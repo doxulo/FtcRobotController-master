@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Autonomous
-public class B_DuckBox extends LinearOpMode {
+public class GhostWheelAuto extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -121,23 +121,7 @@ public class B_DuckBox extends LinearOpMode {
         return Math.abs(motorPosition-target) < 0;
     }
 
-    private void setVelocity(DcMotorEx motor, int currentPosition, int targetPosition) {
-        if (movementController.paused) {
-            movementController.resume();
-        }
 
-        double calculatedVelocity = movementController.calculate((double)targetPosition, (double) currentPosition);
-        telemetry.addLine(String.format("Power: %f", calculatedVelocity));
-        if (calculatedVelocity < 0) {
-            calculatedVelocity = Math.max(calculatedVelocity, -MAX_VELOCITY);
-        } else {
-            calculatedVelocity = Math.min(calculatedVelocity, MAX_VELOCITY);
-        }
-        telemetry.addData("Power: ", calculatedVelocity);
-        motor.setVelocity(
-                calculatedVelocity
-        );
-    }
 
     private void resetVelocity() {
         RF.setVelocity(0);
@@ -222,10 +206,75 @@ public class B_DuckBox extends LinearOpMode {
         RB.setPower(RB_power);
     }
 
+    private void forward(int ticks) {
+        int RBCurrentPosition = RB.getCurrentPosition();
+        int LFCurrentPosition = LF.getCurrentPosition();
+        int LBCurrentPosition = LB.getCurrentPosition();
+        int lf = ticks+LFCurrentPosition;
+        int rb = ticks+RBCurrentPosition;
+        int lb = ticks+LBCurrentPosition;
+
+        while (
+                !isBusy(LFCurrentPosition, lf) &&
+                        !isBusy(RBCurrentPosition, rb) &&
+                        !isBusy(LBCurrentPosition, lb)
+        ) {
+
+            LFCurrentPosition = LF.getCurrentPosition();
+            RBCurrentPosition = RB.getCurrentPosition();
+            LBCurrentPosition = LB.getCurrentPosition();
+
+            RF.setPower(movementController.calculate(lf, LFCurrentPosition));
+            LF.setPower(movementController.calculate(lf, LFCurrentPosition));
+            RB.setPower(movementController.calculate(rb, RBCurrentPosition));
+            LB.setPower(movementController.calculate(lb, LBCurrentPosition));
+
+        }
+    }
+
+    private void strafe(int ticks) {
+        int RBCurrentPosition = RB.getCurrentPosition();
+        int LFCurrentPosition = LF.getCurrentPosition();
+        int LBCurrentPosition = LB.getCurrentPosition();
+        int lf = ticks-LFCurrentPosition;
+        int rb = ticks-RBCurrentPosition;
+        int lb = ticks+LBCurrentPosition;
+
+        while (
+                !isBusy(LFCurrentPosition, lf) &&
+                        !isBusy(RBCurrentPosition, rb) &&
+                        !isBusy(LBCurrentPosition, lb)
+        ) {
+
+            LFCurrentPosition = LF.getCurrentPosition();
+            RBCurrentPosition = RB.getCurrentPosition();
+            LBCurrentPosition = LB.getCurrentPosition();
+
+            RF.setPower(movementController.calculate(lb, LBCurrentPosition));
+            LF.setPower(movementController.calculate(lf, LFCurrentPosition));
+            RB.setPower(movementController.calculate(rb, RBCurrentPosition));
+            LB.setPower(movementController.calculate(lb, LBCurrentPosition));
+
+        }
+    }
+
+    private void turnRight(int theta) {
+        int heading =  orientationGyro.getHeading();
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-
+        movementController = new PIDController(
+                0.1,
+                0,
+                0,
+                new double[] {
+                        0, 0
+                },
+                0,
+                0
+        );
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -348,162 +397,6 @@ public class B_DuckBox extends LinearOpMode {
         telemetry.addData("Busy: ", LF.isBusy());
         telemetry.update();
 
-
-        applyPower(-0.7, 0.7, 0.7, -0.7);
-        sleep(3000);
-        applyPower(-0.6, -0.5, -0.6, -0.5);
-        sleep(250);
-        //applyPower(-0.5, -0.5, -0.5, -0.5);
-        //sleep(300);
-        applyPower(0, 0, 0, 0);
-        Duck_Wheel1.setPower(-0.56);
-        Duck_Wheel2.setPower(-0.56);
-        sleep(3000);
-        applyPower(0.65, 0.65, 0.65, 0.65);
-        sleep(500);
-        applyPower(-0.4, 0.4, 0.4, -0.4);
-        sleep(1000);
-
-        /*
-        sleep(100);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        sleep(300);
-        RF.setPower(0);
-        RF.setPower(0);
-        RF.setPower(0);
-        RF.setPower(0);
-         */
-        DcMotor[] Motors = new DcMotor[] {RF, LF, RB, LB};
-
-        /*while (true) {
-            for (DcMotor motor : ) {
-
-            }
-        }
-
-
-         */
-        /*
-        commandUtil.forward(12, 0.01).async();
-        telemetry.addData("Done with forward", true);
-        telemetry.update();
-        sleep(1000);
-
-
-         */
-
-
-        /*
-        movementController = new PIDController(
-                0.1,
-                0,
-                0,
-                new double[] {0, 0},
-                0,
-                0);
-        int RFCurrentPosition = RF.getCurrentPosition();
-        int LFCurrentPosition = LF.getCurrentPosition();
-        int RBCurrentPosition = RB.getCurrentPosition();
-        int LBCurrentPosition = LB.getCurrentPosition();
-
-        int RFTarget = (int) (RFCurrentPosition + 1000);
-        int LFTarget = (int) (LFCurrentPosition - 1000);
-        int RBTarget = (int) (RBCurrentPosition - 1000);
-        int LBTarget = (int) (LBCurrentPosition - 1000);
-
-        movementController.resume();
-        while (
-                !isBusy(RFCurrentPosition, RFTarget) &&
-                        !isBusy(LFCurrentPosition, LFTarget) &&
-                        !isBusy(RBCurrentPosition, RBTarget) &&
-                        !isBusy(LBCurrentPosition, LBTarget)
-        ) {
-            telemetry.addLine(String.format("%s, %d, %d", RF.getDeviceName(), RF.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", LF.getDeviceName(), LF.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", LB.getDeviceName(), LB.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", RB.getDeviceName(), RB.getCurrentPosition(), RFTarget));
-
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", RF.getDeviceName(), RF.getVelocity(), RF.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", LF.getDeviceName(), LF.getVelocity(), LF.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", RB.getDeviceName(), RB.getVelocity(), RB.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", LB.getDeviceName(), LB.getVelocity(), LB.getPower()));
-            telemetry.update();
-
-
-            setVelocity(RF, RFCurrentPosition, RFTarget);
-            setVelocity(LF, LFCurrentPosition, LFTarget);
-            setVelocity(RB, RBCurrentPosition, RBTarget);
-            setVelocity(LB, LBCurrentPosition, LBTarget);
-
-
-            RFCurrentPosition = RF.getCurrentPosition();
-            LFCurrentPosition = LF.getCurrentPosition();
-            RBCurrentPosition = RB.getCurrentPosition();
-            LBCurrentPosition = LB.getCurrentPosition();
-
-            RF.setPower(movementController.calculate(RFTarget, RFCurrentPosition));
-            LF.setPower(movementController.calculate(LFTarget, LFCurrentPosition));
-            RB.setPower(movementController.calculate(RBTarget, RBCurrentPosition));
-            LB.setPower(movementController.calculate(LBTarget, LBCurrentPosition));
-
-        }
-
-        resetVelocity();
-        movementController.pauseAndReset();
-
-        */
-        /*
-        commandUtil.backward(12, 0.1).async();
-        telemetry.addData("Done with backward", true);
-        telemetry.update();
-        commandUtil.forward(6, 0.1).async();
-        telemetry.addData("Done with forward", true);
-        telemetry.update();
-        commandUtil.strafeLeft(6, 0.1).async();
-        telemetry.addData("Done with strafeLeft", true);
-        telemetry.update();
-        commandUtil.strafeRight(6, 0.1).async();
-        telemetry.addData("Done with strafeRight", true);
-        telemetry.update();
-         */
-        /*
-        commandUtil.strafeRight(12, 1).async();
-        commandUtil.backward(12, 1).async();
-
-        liftAndPlaceBlockAsync(LEVEL_ANGLES[level], theta);
-        controller.pauseAndReset();
-
-        long startTime = elapsedTime.milliseconds()
-        while (elapsedTime.milliseconds()-startTime < 1000) {
-            ArmMotor.setPower(downController.calculate(0, theta));
-        }
-        downController.pauseAndReset();
-        ArmMotor.setPower(-0.1);
-
-        commandUtil.right(90, 1).async();
-        commandUtil.strafeLeft(12, 0.5).async();
-        commandUtil.forward(20, 1).async();
-
-        int[] motorPositions = commandUtil.getEncoderPositions();
-
-        while (BoxSensor.red()<85) {
-            commandUtil.forward(1, 0.2).async();
-        }
-
-        commandUtil.gotoEncoderPosition(motorPositions).async();
-        commandUtil.backward(20, 1).async();
-        commandUtil.right(90, 1).async();
-        commandUtil.forward(10, 1).async();
-        liftAndPlaceBlockAsync();
-
-        commandUtil.right(90, 1);
-        commandUtil.forward(12, 0.5);
-        commandUtil.right(90, 1);
-        commandUtil.forward(12, 0.5);
-        */
-
+        forward(100);
     }
 }

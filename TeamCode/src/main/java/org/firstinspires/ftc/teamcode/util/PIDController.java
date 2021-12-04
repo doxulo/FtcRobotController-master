@@ -76,11 +76,6 @@ public class PIDController {
         this.summation = summation + dp*dt;
         lastTime = System.currentTimeMillis();
 
-        if (integral > 0.05) {
-            integral = 0.05;
-        } else if (integral < -0.15) {
-            integral = -0.15;
-        }
         return (double) (error + integral + derivative + bias);
     }
 
