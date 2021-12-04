@@ -438,18 +438,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 intIncrement /= 10;
             }*/
 
-            if (gamepad1.right_bumper) {
-                RF.setPower(0.2);
-                RB.setPower(0.2);
-                LF.setPower(0.2);
-                LB.setPower(0.2);
-            } else if (gamepad1.left_bumper) {
-                RF.setPower(0);
-                RB.setPower(0);
-                LF.setPower(0);
-                LB.setPower(0);
-            }
-
             if (gamepad2.dpad_up) {
                 power = controller.calculate(175D, heading);
             } else if (gamepad2.dpad_left) {
