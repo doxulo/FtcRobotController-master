@@ -27,7 +27,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous
+@Disabled
 public class AutonomousTemplate extends LinearOpMode {
 
     OpenCvCamera camera;

@@ -205,8 +205,8 @@ public class MecanumDriveRed extends LinearOpMode {
         // Change kI
         PIDController controller = new PIDController(
                 0.003,
-                0.0000001, // TODO: Tune this
-                0.01,
+                0,// 0.000001, // TODO: Tune this
+                0.05,
                 new double[] {
                         0.05, -0.10
                 },
@@ -427,6 +427,7 @@ public class MecanumDriveRed extends LinearOpMode {
             // 815
             // 940
 
+            /*
             if (gamepad2.right_stick_button && debounces.checkAndUpdate("Integral")) {
                 controller.kI += intIncrement;
             } else if (gamepad2.dpad_right && debounces.checkAndUpdate("Integral")) {
@@ -435,15 +436,26 @@ public class MecanumDriveRed extends LinearOpMode {
                 intIncrement *= 10;
             } else if (gamepad2.right_bumper && debounces.checkAndUpdate("Integral")) {
                 intIncrement /= 10;
+            }*/
+
+            if (gamepad1.right_bumper) {
+                RF.setPower(0.2);
+                RB.setPower(0.2);
+                LF.setPower(0.2);
+                LB.setPower(0.2);
+            } else if (gamepad1.left_bumper) {
+                RF.setPower(0);
+                RB.setPower(0);
+                LF.setPower(0);
+                LB.setPower(0);
             }
 
-
             if (gamepad2.dpad_up) {
-                power = controller.calculate(155D, heading);
+                power = controller.calculate(175D, heading);
             } else if (gamepad2.dpad_left) {
-                power = controller.calculate(190D, heading);
+                power = controller.calculate(210D, heading);
             } else if (gamepad2.dpad_down) {
-                power = controller.calculate(215D, heading);
+                power = controller.calculate(240D, heading);
             } else if (gamepad2.x) {
                 power = downController.calculate(0D, heading);
             }/* else if (gamepad2.x) {

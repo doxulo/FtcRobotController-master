@@ -65,7 +65,7 @@ public class PIDController {
         }
 
         double dt = (double) (System.currentTimeMillis() - lastTime);
-        double bias = lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
+        double bias = this.fullRotation == 0 ? 0 : lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
         double dp = sp-pv;
         double gradient = dt == 0 ? 0 : dp/dt;
 
@@ -81,7 +81,7 @@ public class PIDController {
         } else if (integral < -0.15) {
             integral = -0.15;
         }
-        return (double) (error + integral + derivative);
+        return (double) (error + integral + derivative + bias);
     }
 
     public void pauseAndReset() {

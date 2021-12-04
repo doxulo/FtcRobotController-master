@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Autonomous
-public class Storage extends LinearOpMode {
+public class B_WarehouseOnly extends LinearOpMode {
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -89,11 +89,11 @@ public class Storage extends LinearOpMode {
 
         waitForStart();
         applyPower(0.4, 0.4, 0.4 ,0.4);
-        sleep(1750);
-         applyPower(0,0,0,0);
+        sleep(950);
+        applyPower(0,0,0,0);
         sleep(100);
         applyPower(-0.4, 0.4, 0.4, -0.4);
-        sleep(1750);
+        sleep(1500);
         applyPower(0, 0, 0, 0);
     }
 }

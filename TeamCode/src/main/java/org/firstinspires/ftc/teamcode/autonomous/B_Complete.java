@@ -27,6 +27,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @Autonomous
 public class B_Complete extends LinearOpMode {
@@ -60,6 +61,8 @@ public class B_Complete extends LinearOpMode {
     DcMotorEx RB;
     DcMotorEx LB;
     DcMotorEx ArmMotor;
+    DcMotor Duck_Wheel1;
+    DcMotor Duck_Wheel2;
     Servo Twist;
     ColorSensor BoxSensor;
 
@@ -97,6 +100,9 @@ public class B_Complete extends LinearOpMode {
             0.615D, 0.7D, 0.9D
     };
 
+    double MAX_VELOCITY = 1200;
+    double kP = 0.0001D;
+
     private DcMotorEx initMotor(
             String motorName,
             DcMotorSimple.Direction direction,
@@ -122,14 +128,14 @@ public class B_Complete extends LinearOpMode {
 
         double calculatedVelocity = movementController.calculate((double)targetPosition, (double) currentPosition);
         telemetry.addLine(String.format("Power: %f", calculatedVelocity));
-        /*if (calculatedVelocity < 0) {
+        if (calculatedVelocity < 0) {
             calculatedVelocity = Math.max(calculatedVelocity, -MAX_VELOCITY);
         } else {
             calculatedVelocity = Math.min(calculatedVelocity, MAX_VELOCITY);
-        }*/
+        }
         telemetry.addData("Power: ", calculatedVelocity);
         motor.setVelocity(
-                calculatedVelocity/100
+                calculatedVelocity
         );
     }
 
@@ -209,6 +215,13 @@ public class B_Complete extends LinearOpMode {
         return -1;
     }
 
+    private void applyPower(double LF_power, double RF_power, double LB_power, double RB_power) {
+        LF.setPower(LF_power);
+        RF.setPower(RF_power);
+        LB.setPower(LB_power);
+        RB.setPower(RB_power);
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -236,14 +249,14 @@ public class B_Complete extends LinearOpMode {
         LF = initMotor(
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
 
         );
@@ -251,14 +264,14 @@ public class B_Complete extends LinearOpMode {
         LB = initMotor(
                 "LB",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         RB = initMotor(
                 "RB",
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
@@ -268,6 +281,25 @@ public class B_Complete extends LinearOpMode {
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
+
+        Duck_Wheel1 = initMotor(
+                "Duck_Wheel1",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
+        Duck_Wheel2 = initMotor(
+                "Duck_Wheel2",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
+        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         Twist = hardwareMap.servo.get("Twist");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
@@ -316,6 +348,42 @@ public class B_Complete extends LinearOpMode {
         telemetry.addData("Busy: ", LF.isBusy());
         telemetry.update();
 
+
+        applyPower(-0.7, 0.7, 0.7, -0.7);
+        sleep(3000);
+        applyPower(-0.5, -0.5, -0.5, -0.5);
+        sleep(300);
+        applyPower(0, 0, 0, 0);
+        Duck_Wheel1.setPower(-0.56);
+        Duck_Wheel2.setPower(-0.56);
+        sleep(3000);
+        applyPower(0.65, 0.65, 0.65, 0.65);
+        sleep(500);
+        applyPower(-0.4, 0.4, 0.4, -0.4);
+        sleep(1000);
+
+        /*
+        sleep(100);
+        RF.setPower(-0.2);
+        RF.setPower(-0.2);
+        RF.setPower(-0.2);
+        RF.setPower(-0.2);
+        sleep(300);
+        RF.setPower(0);
+        RF.setPower(0);
+        RF.setPower(0);
+        RF.setPower(0);
+         */
+        DcMotor[] Motors = new DcMotor[] {RF, LF, RB, LB};
+
+        /*while (true) {
+            for (DcMotor motor : ) {
+
+            }
+        }
+
+
+         */
         /*
         commandUtil.forward(12, 0.01).async();
         telemetry.addData("Done with forward", true);
@@ -325,6 +393,8 @@ public class B_Complete extends LinearOpMode {
 
          */
 
+
+        /*
         movementController = new PIDController(
                 0.1,
                 0,
@@ -359,18 +429,30 @@ public class B_Complete extends LinearOpMode {
             telemetry.addLine(String.format("%s, Velocity: %f, %f", RB.getDeviceName(), RB.getVelocity(), RB.getPower()));
             telemetry.addLine(String.format("%s, Velocity: %f, %f", LB.getDeviceName(), LB.getVelocity(), LB.getPower()));
             telemetry.update();
-            
+
+
             setVelocity(RF, RFCurrentPosition, RFTarget);
             setVelocity(LF, LFCurrentPosition, LFTarget);
             setVelocity(RB, RBCurrentPosition, RBTarget);
             setVelocity(LB, LBCurrentPosition, LBTarget);
+
+
             RFCurrentPosition = RF.getCurrentPosition();
             LFCurrentPosition = LF.getCurrentPosition();
             RBCurrentPosition = RB.getCurrentPosition();
             LBCurrentPosition = LB.getCurrentPosition();
+
+            RF.setPower(movementController.calculate(RFTarget, RFCurrentPosition));
+            LF.setPower(movementController.calculate(LFTarget, LFCurrentPosition));
+            RB.setPower(movementController.calculate(RBTarget, RBCurrentPosition));
+            LB.setPower(movementController.calculate(LBTarget, LBCurrentPosition));
+
         }
+
         resetVelocity();
         movementController.pauseAndReset();
+
+        */
         /*
         commandUtil.backward(12, 0.1).async();
         telemetry.addData("Done with backward", true);

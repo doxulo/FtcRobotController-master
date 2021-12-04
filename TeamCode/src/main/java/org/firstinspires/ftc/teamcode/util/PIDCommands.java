@@ -5,13 +5,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.HashMap;
+
 public class PIDCommands {
     int OFFSET_THRESHOLD = 1;
 
-    double WHEEL_DIAMETER = 2;
-    double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER*Math.PI;
-    double FULL_REVOLUTION_TICKS = 537;
-    double LENGTH_TO_TICKS_RATIO = WHEEL_CIRCUMFERENCE/FULL_REVOLUTION_TICKS;
+    public static double WHEEL_DIAMETER = 2;
+    public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER*Math.PI;
+    public static double FULL_REVOLUTION_TICKS = 537;
+    public static double LENGTH_TO_TICKS_RATIO = WHEEL_CIRCUMFERENCE/FULL_REVOLUTION_TICKS;
     ModernRoboticsI2cGyro gyro;
 
     DcMotorEx RF;
@@ -83,8 +85,8 @@ public class PIDCommands {
         this.turnController.pauseAndReset();
     }
 
-    private double inchesToTicks(double inches) {
-        return inches/this.LENGTH_TO_TICKS_RATIO;
+    public static double inchesToTicks(double inches) {
+        return inches/LENGTH_TO_TICKS_RATIO;
     }
 
     private boolean isBusy(int motorPosition, int target) {
@@ -254,7 +256,10 @@ public class PIDCommands {
         return this.turnRight(-theta);
     }
 
-    public PIDCommands gotoEncoderPosition(DcMotorEx[] motors, int[] encoderPositions) {
+    public PIDCommands gotoEncoderPosition(HashMap<String, Integer>[] encoderPosition) {
+        for (HashMap<String, Integer> position : encoderPosition) {
+
+        }
 
         return this;
     }
