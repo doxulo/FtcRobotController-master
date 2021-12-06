@@ -2,10 +2,9 @@ package org.firstinspires.ftc.teamcode.util;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class PIDController {
+public class OldPIDController {
 
     double[] biasPoints;
-    double[] integralBounds;
 
     public double summation = 0;
     double fullRotation;
@@ -16,23 +15,48 @@ public class PIDController {
     public double kD;
 
     long lastTime;
-    double lastError;
 
     public boolean paused;
 
-    public PIDController(double kP, double kI, double kD, double[] biasPoints, double fullRotation, double offset, double[] integralBounds) {
+    public OldPIDController(double kP, double kI, double kD, double[] biasPoints, double fullRotation, double offset) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
         this.biasPoints = biasPoints;
         this.fullRotation = fullRotation;
         this.offset = offset;
-        this.integralBounds = integralBounds;
         this.paused = true;
     }
 
     public double lerp(double p0, double p1, double t) {
         return (1 - t)*p0 + p1*t;
+    }
+
+    public double calculate(double sp, double pv, Telemetry t) {
+        if (paused) {
+            this.resume();
+        }
+
+        double dt = (double) (System.currentTimeMillis() - lastTime);
+        double bias = lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
+        double dp = sp-pv;
+        double gradient = dt == 0 ? 0 : dp/dt;
+
+        double error = dp*this.kP;
+        double integral = this.summation*this.kI;
+        double derivative = gradient*this.kD;
+
+        this.summation = summation + dp*dt;
+        lastTime = System.currentTimeMillis();
+
+        if (integral > 0.05) {
+            integral = 0.05;
+        } else if (integral < -0.15) {
+            integral = -0.15;
+        }
+
+        t.addLine(String.format("%f, %f, %f, %f", error, integral, derivative, error+integral+derivative));
+        return error + integral + derivative + bias;
     }
 
     public double calculate(double sp, double pv) {
@@ -43,29 +67,16 @@ public class PIDController {
         double dt = (double) (System.currentTimeMillis() - lastTime);
         double bias = this.fullRotation == 0 ? 0 : lerp(this.biasPoints[0], this.biasPoints[1], (pv+offset)/this.fullRotation);
         double dp = sp-pv;
-        double gradient = dt == 0 ? 0 : (dp-this.lastError)/dt;
-
-
-        if (this.integralBounds.length == 3 && dp > this.integralBounds[2]) {
-            this.summation = summation + dp*dt;
-        } else {
-            this.summation = 0;
-        }
+        double gradient = dt == 0 ? 0 : dp/dt;
 
         double error = dp*this.kP;
         double integral = this.summation*this.kI;
         double derivative = gradient*this.kD;
 
-        if (integral < this.integralBounds[0]) {
-            integral = this.integralBounds[0];
-        } else if (integral > this.integralBounds[1]) {
-            integral = this.integralBounds[1];
-        }
+        this.summation = summation + dp*dt;
+        lastTime = System.currentTimeMillis();
 
-        this.lastTime = System.currentTimeMillis();
-        this.lastError = dp;
-
-        return (error + integral + derivative + bias);
+        return (double) (error + integral + derivative + bias);
     }
 
     public void pauseAndReset() {

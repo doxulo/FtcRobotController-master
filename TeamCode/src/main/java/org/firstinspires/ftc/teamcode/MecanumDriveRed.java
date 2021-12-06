@@ -1,25 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
+import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.Scheduler;
 import org.firstinspires.ftc.teamcode.util.Switch;
@@ -147,6 +142,8 @@ public class MecanumDriveRed extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        FtcDashboard dash = FtcDashboard.getInstance();
+
         boolean lastResetState = false;
         boolean curResetState  = false;
 
@@ -206,21 +203,19 @@ public class MecanumDriveRed extends LinearOpMode {
         Scheduler scheduler = new Scheduler();
         // Change kI
         PIDController controller = new PIDController(
-                0.003,
-                0,// 0.000001, // TODO: Tune this
-                0.05,
+                0.006,
+                0.001,// 0.000001, // TODO: Tune this
+                1,
                 new double[] {
                         0.05, -0.10
                 },
                 360,
-                0);
+                0,
+                new double[] {
+                        -0.15, 0.05, 130
+                });
 
-
-
-
-
-
-        PIDController downController = new PIDController(
+        OldPIDController downController = new OldPIDController(
                 0.004,
                 0,
                 0.0075,
@@ -323,6 +318,7 @@ public class MecanumDriveRed extends LinearOpMode {
             // int rawZ = armGyro.rawZ();
             int heading = armGyro.getHeading();
             heading = heading > 350 ? 0 : heading;
+            int redColor = BoxSensor.red();
             // int integratedZ = armGyro.getIntegratedZValue();
             // AngularVelocity rates = armGyroParsed.getAngularVelocity(AngleUnit.DEGREES);
             // float zAngle = armGyroParsed.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
@@ -348,11 +344,11 @@ public class MecanumDriveRed extends LinearOpMode {
 
             // telemetry.addData("LF encoder: ", encoder_LF);
             // telemetry.addData("LB encoder: ", encoder_LB);
-            //telemetry.addData("RF encoder: ", encoder_RF);
+            telemetry.addData("RF encoder: ", RF.getCurrentPosition());
             // telemetry.addData("RB encoder: ", encoder_RB);
-            // telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
-            // telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
-            //telemetry.addData("RF velocity: ", ((DcMotorEx) RF).getVelocity());
+            telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
+            telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
+            telemetry.addData("RF velocity: ", ((DcMotorEx) RF).getVelocity());
 
             // telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             // telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
@@ -360,8 +356,8 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
 
-            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", BoxSensor.red(), BoxSensor.green(), BoxSensor.blue()), "");
-            // telemetry.addData("Integral: ", controller.summation);
+            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
+            telemetry.addData("Integral: ", controller.summation);
             // telemetry.addData("kD: ", controller.kI);
             // telemetry.addData("Increment: ", intIncrement);
             // telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
@@ -387,7 +383,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 limitOn = !limitOn;
             }
 
-            if (gamepad1.b || gamepad1.a && BoxSensor.red() < 100) {
+            if (gamepad1.b || gamepad1.a && redColor < 100) {
                 if (debounces.checkAndUpdate("Intake")) {
                     if (gamepad1.b) {
                         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -399,7 +395,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 }
             }
 
-            if (Intake.getPower() > 0 && BoxSensor.red() > 101) {
+            if (Intake.getPower() > 0 && redColor > 101) {
                 // sleep(1200);
 
                 try {
@@ -450,7 +446,7 @@ public class MecanumDriveRed extends LinearOpMode {
             }*/
 
             if (gamepad2.dpad_up) {
-                power = controller.calculate(172D, heading-headingOffset);
+                power = controller.calculate(162D, heading-headingOffset);
             } else if (gamepad2.dpad_left) {
                 power = controller.calculate(210D, heading-headingOffset);
             } else if (gamepad2.dpad_down) {
@@ -611,14 +607,14 @@ public class MecanumDriveRed extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
-            if (debounces.check("Servo") && BoxSensor.red()<85) {
+            if (debounces.check("Servo") && redColor <85) {
                 Twist.setPosition(twistPositions[0]);
-            } else if (BoxSensor.red()>86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
+            } else if (redColor>86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
-            } else if (BoxSensor.red()>5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
+            } else if (redColor>5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
                 // sleep(1000);
-            } else if (BoxSensor.red()> 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
+            } else if (redColor> 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
                 // sleep(650);
             }

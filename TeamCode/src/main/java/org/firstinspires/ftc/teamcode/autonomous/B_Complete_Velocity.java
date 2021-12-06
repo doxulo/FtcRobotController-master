@@ -1,13 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import androidx.renderscript.ScriptIntrinsicBLAS;
-
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -19,10 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.util.Commands;
-import org.firstinspires.ftc.teamcode.util.Map;
 import org.firstinspires.ftc.teamcode.util.PIDCommands;
-import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -68,7 +59,7 @@ public class B_Complete_Velocity extends LinearOpMode {
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
 
-    PIDController controller = new PIDController(
+    OldPIDController controller = new OldPIDController(
             0.003,
             0.0000001,
             0.01,
@@ -78,7 +69,7 @@ public class B_Complete_Velocity extends LinearOpMode {
             360,
             0);
 
-    PIDController downController = new PIDController(
+    OldPIDController downController = new OldPIDController(
             0.004,
             0,
             0.0075,
@@ -263,7 +254,7 @@ public class B_Complete_Velocity extends LinearOpMode {
         telemetry.clear(); telemetry.update();
 
 
-        PIDController movementController = new PIDController(
+        OldPIDController movementController = new OldPIDController(
                 0.01,
                 0,
                 0,
@@ -274,7 +265,7 @@ public class B_Complete_Velocity extends LinearOpMode {
                 0
         );
 
-        PIDController turnController = new PIDController(
+        OldPIDController turnController = new OldPIDController(
                 0.01,
                 0,
                 0,

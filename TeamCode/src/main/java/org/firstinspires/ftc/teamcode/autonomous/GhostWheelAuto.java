@@ -1,12 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,8 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.Commands;
-import org.firstinspires.ftc.teamcode.util.Map;
-import org.firstinspires.ftc.teamcode.util.PIDCommands;
+import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -27,7 +21,6 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 @Autonomous
 public class GhostWheelAuto extends LinearOpMode {
@@ -68,27 +61,7 @@ public class GhostWheelAuto extends LinearOpMode {
 
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
-    PIDController movementController;
-
-    PIDController controller = new PIDController(
-            0.003,
-            0.0000001,
-            0.01,
-            new double[] {
-                    0.05, -0.10
-            },
-            360,
-            0);
-
-    PIDController downController = new PIDController(
-            0.004,
-            0,
-            0.0075,
-            new double[] {
-                    0.05, -0.10
-            },
-            1440,
-            0);
+    OldPIDController movementController;
 
     final double[] LEVEL_ANGLES = new double[] {
             155D,
@@ -128,19 +101,6 @@ public class GhostWheelAuto extends LinearOpMode {
         RB.setVelocity(0);
         LF.setVelocity(0);
         LB.setVelocity(0);
-    }
-
-    private void liftAndPlaceBlockAsync(double targetPosition, double theta) {
-        ElapsedTime elapsedTime = new ElapsedTime();
-        while (elapsedTime.milliseconds() < 1) {
-            ArmMotor.setPower(controller.calculate(targetPosition, theta));
-        }
-
-        Twist.setPosition(twistPositions[2]);
-        sleep(250);
-        Twist.setPosition(twistPositions[0]);
-
-        ArmMotor.setPower(controller.getFloat(theta));
     }
 
     public int getLevel(double xPosition) {
@@ -210,50 +170,59 @@ public class GhostWheelAuto extends LinearOpMode {
         int RBCurrentPosition = RB.getCurrentPosition();
         int LFCurrentPosition = LF.getCurrentPosition();
         int LBCurrentPosition = LB.getCurrentPosition();
+        int RFCurrentPosition = RF.getCurrentPosition();
+
         int lf = ticks+LFCurrentPosition;
         int rb = ticks+RBCurrentPosition;
         int lb = ticks+LBCurrentPosition;
+        int rf = ticks-RFCurrentPosition;
 
         while (
                 !isBusy(LFCurrentPosition, lf) &&
                         !isBusy(RBCurrentPosition, rb) &&
-                        !isBusy(LBCurrentPosition, lb)
+                        !isBusy(LBCurrentPosition, lb) &&
+                        !isBusy(RFCurrentPosition, rf)
         ) {
 
             LFCurrentPosition = LF.getCurrentPosition();
             RBCurrentPosition = RB.getCurrentPosition();
             LBCurrentPosition = LB.getCurrentPosition();
+            RFCurrentPosition = RF.getCurrentPosition();
 
-            RF.setPower(movementController.calculate(lf, LFCurrentPosition));
-            LF.setPower(movementController.calculate(lf, LFCurrentPosition));
-            RB.setPower(movementController.calculate(rb, RBCurrentPosition));
-            LB.setPower(movementController.calculate(lb, LBCurrentPosition));
+            RF.setPower(movementController.calculate(Math.abs(rf), Math.abs(RFCurrentPosition)));
+            LF.setPower(movementController.calculate(Math.abs(lf), Math.abs(LFCurrentPosition)));
+            RB.setPower(movementController.calculate(Math.abs(rb), Math.abs(RBCurrentPosition)));
+            LB.setPower(movementController.calculate(Math.abs(lb), Math.abs(LBCurrentPosition)));
 
         }
     }
-
     private void strafe(int ticks) {
         int RBCurrentPosition = RB.getCurrentPosition();
         int LFCurrentPosition = LF.getCurrentPosition();
         int LBCurrentPosition = LB.getCurrentPosition();
+        int RFCurrentPosition = RF.getCurrentPosition();
+
         int lf = ticks-LFCurrentPosition;
         int rb = ticks-RBCurrentPosition;
         int lb = ticks+LBCurrentPosition;
+        int rf = ticks-RFCurrentPosition;
 
         while (
                 !isBusy(LFCurrentPosition, lf) &&
                         !isBusy(RBCurrentPosition, rb) &&
-                        !isBusy(LBCurrentPosition, lb)
+                        !isBusy(LBCurrentPosition, lb) &&
+                        !isBusy(RFCurrentPosition, rf)
         ) {
 
             LFCurrentPosition = LF.getCurrentPosition();
             RBCurrentPosition = RB.getCurrentPosition();
             LBCurrentPosition = LB.getCurrentPosition();
+            RFCurrentPosition = RF.getCurrentPosition();
 
-            RF.setPower(movementController.calculate(lb, LBCurrentPosition));
-            LF.setPower(movementController.calculate(lf, LFCurrentPosition));
-            RB.setPower(movementController.calculate(rb, RBCurrentPosition));
-            LB.setPower(movementController.calculate(lb, LBCurrentPosition));
+            RF.setPower(movementController.calculate(Math.abs(rf), Math.abs(RFCurrentPosition)));
+            LF.setPower(movementController.calculate(Math.abs(lf), Math.abs(LFCurrentPosition)));
+            RB.setPower(movementController.calculate(Math.abs(rb), Math.abs(RBCurrentPosition)));
+            LB.setPower(movementController.calculate(Math.abs(lb), Math.abs(LBCurrentPosition)));
 
         }
     }
@@ -265,14 +234,14 @@ public class GhostWheelAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        movementController = new PIDController(
+        movementController = new OldPIDController(
+                0.003,
+                0,
                 0.1,
-                0,
-                0,
                 new double[] {
                         0, 0
                 },
-                0,
+                537,
                 0
         );
 
@@ -345,10 +314,10 @@ public class GhostWheelAuto extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
-        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         Twist = hardwareMap.servo.get("Twist");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");

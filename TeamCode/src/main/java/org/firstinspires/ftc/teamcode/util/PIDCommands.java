@@ -41,8 +41,8 @@ public class PIDCommands {
     DcMotorEx[] forwardMotors;
     DcMotorEx[] backwardMotors;
 
-    PIDController movementController;
-    PIDController turnController;
+    OldPIDController movementController;
+    OldPIDController turnController;
     
     boolean adjustingOrientation = true;
 
@@ -54,8 +54,8 @@ public class PIDCommands {
             DcMotorEx LF, 
             DcMotorEx RB, 
             DcMotorEx LB, 
-            PIDController movementController,
-            PIDController turnController,
+            OldPIDController movementController,
+            OldPIDController turnController,
             Telemetry t
     ) {
         this.t = t;
