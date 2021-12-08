@@ -12,9 +12,7 @@ public class Scheduler {
     long currentTime;
 
     public void checkAndExecute() throws InvocationTargetException, IllegalAccessException {
-        if (this.exhaustTime.size() == 0) {
-
-        } else {
+        if (!(this.exhaustTime.size() == 0)) {
             this.currentTime = System.currentTimeMillis();
             if (this.exhaustTime.get(0) <= this.currentTime) {
                 this.callbacks.get(0).invoke(this.objects.get(0), this.parameters.get(0));
@@ -27,6 +25,7 @@ public class Scheduler {
             }
         }
     }
+
     public int getIndex(long objectTime) {
         for (int i = 0; i < exhaustTime.size(); i++) {
             if (objectTime <= exhaustTime.get(i)) {

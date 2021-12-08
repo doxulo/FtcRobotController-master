@@ -144,24 +144,21 @@ public class MecanumDriveRed extends LinearOpMode {
 
         FtcDashboard dash = FtcDashboard.getInstance();
 
-        boolean lastResetState = false;
-        boolean curResetState  = false;
+        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        armGyroParsed = (IntegratingGyroscope)armGyro;
 
-            armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-            armGyroParsed = (IntegratingGyroscope)armGyro;
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        armGyro.calibrate();
 
-            telemetry.log().add("Gyro Calibrating. Do Not Move!");
-            armGyro.calibrate();
+        timer.reset();
+        while (!isStopRequested() && armGyro.isCalibrating())  {
+            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+            sleep(50);
+        }
 
-            timer.reset();
-            while (!isStopRequested() && armGyro.isCalibrating())  {
-                telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-                telemetry.update();
-                sleep(50);
-            }
-
-            telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-            telemetry.clear(); telemetry.update();
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear(); telemetry.update();
 
             /*
         orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro_center");
@@ -196,7 +193,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 new DebounceObject("Servo", 300)
         );
 
-        Switch armMotorSwitch = new Switch(false);
         Switch duckMotorSwitch = new Switch(false);
 
 
@@ -226,25 +222,21 @@ public class MecanumDriveRed extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.615D, 0.7D, 0.9D
+                0.42D, 0.52D, 0.74D
         };
         double defaultPower = 0.56D;
         double intIncrement = 0.00001;
         long startDuck = 0;
 
-        int twistIndex = -1;
-        int framesGreater = 0;
-        int lastEncoderPosition = 0;
-
+        int lastLevel = 0;
+        int currentLevel = 0;
         int headingOffset = 0;
 
         boolean intakeOn = false;
-        boolean duckWheelOn = false;
-        boolean limitOn = false;
+        boolean limitOn = true;
         boolean resetArmPower = false;
 
         limit = limitPower;
-        limitOn = true;
 
         LF = initMotor(
                 "LF",
@@ -334,12 +326,13 @@ public class MecanumDriveRed extends LinearOpMode {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+
             long currentSystemTime = System.currentTimeMillis();
             // int encoder_LF = LF.getCurrentPosition();
             // int encoder_LB = LB.getCurrentPosition();
             // int encoder_RF = RF.getCurrentPosition();
             // int encoder_RB = RB.getCurrentPosition();
-            int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
+            // int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
             double power = 0;
 
             // telemetry.addData("LF encoder: ", encoder_LF);
@@ -385,13 +378,13 @@ public class MecanumDriveRed extends LinearOpMode {
 
             if (gamepad1.b || gamepad1.a && redColor < 100) {
                 if (debounces.checkAndUpdate("Intake")) {
+                    int multiple = 1;
                     if (gamepad1.b) {
-                        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
-                    } else {
-                        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
+                        multiple = -1;
                     }
+
                     intakeOn = !intakeOn;
-                    Intake.setPower(intakeOn ? 0.7 : 0);
+                    Intake.setPower(intakeOn ? 0.7*multiple : 0);
                 }
             }
 
@@ -411,25 +404,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 // Intake.setPower(0);
             }
 
-
-
-            /*
-            double modifiedHeading = (double) heading;
-            if (heading > 350) {
-                modifiedHeading = 0D;
-            }
-            modifiedHeading++;
-            if (gamepad2.dpad_up) {
-                ArmMotor.setPower(getPowerTill(-1, 150D, modifiedHeading));
-            } else if (gamepad2.dpad_left) {
-                ArmMotor.setPower(getPowerTill(-1, 190D, modifiedHeading));
-            } else if (gamepad2.dpad_down) {
-                ArmMotor.setPower(getPowerTill(-1, 220D, modifiedHeading));
-            } else if (gamepad2.x) {
-                ArmMotor.setPower(getPowerTill(-0.5, 1D, modifiedHeading));
-            }
-             */
-
             // 647
             // 815
             // 940
@@ -446,34 +420,17 @@ public class MecanumDriveRed extends LinearOpMode {
             }*/
 
             if (gamepad2.dpad_up) {
+                currentLevel = 1;
                 power = controller.calculate(162D, heading-headingOffset);
             } else if (gamepad2.dpad_left) {
+                currentLevel = 2;
                 power = controller.calculate(210D, heading-headingOffset);
             } else if (gamepad2.dpad_down) {
+                currentLevel = 3;
                 power = controller.calculate(240D, heading-headingOffset);
             } else if (gamepad2.x) {
                 power = downController.calculate(0D, heading-headingOffset);
-            }/* else if (gamepad2.x) {
-                if (encoder_Arm > 100) {
-                    lastEncoderPosition = encoder_Arm;
-                    power = controllerDown.calculate(0D, encoder_Arm) / 2;
-                } else {
-                    if (lastEncoderPosition > encoder_Arm) {
-                        power = 0.1;
-                        lastEncoderPosition = encoder_Arm;
-                    } else if (lastEncoderPosition <= encoder_Arm) {
-                        sleep(350);
-                        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                        power = 0;
-                        lastEncoderPosition = 0;
-                        encoder_Arm = 0;
-                    }
-
-                    power = -0.001;
-                }
-            }*/
-            else if (gamepad2.left_stick_button) {
+            } else if (gamepad2.left_stick_button) {
                 headingOffset = heading;
             } else if (gamepad2.left_trigger > 0) {
                 ArmMotor.setPower(-gamepad2.left_trigger/3);
@@ -482,71 +439,22 @@ public class MecanumDriveRed extends LinearOpMode {
             }  else if (resetArmPower) {
                 resetArmPower = false;
                 power = 0;
+                currentLevel = 0;
                 controller.pauseAndReset();
                 ArmMotor.setPower(0);
-                lastEncoderPosition = 0;
             } else if (ArmMotor.getPower() != 0) {
-                lastEncoderPosition = 0;
                 ArmMotor.setPower(0);
             }
             // 200
-            if (power != 0) {
-                lastEncoderPosition = encoder_Arm;
+            if (!(power == 0)) {
+                if (currentLevel != lastLevel) {
+                    controller.pauseAndReset();
+                    controller.resume();
+                }
+                lastLevel = currentLevel;
                 resetArmPower = true;
                 ArmMotor.setPower(power);
             }
-
-            /*
-            if (gamepad2.dpad_up) {
-                resetArmPower = true;
-                ArmMotor.setTargetPosition(650);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(-1);
-            } else if (gamepad2.dpad_left) {
-                resetArmPower = true;
-                ArmMotor.setTargetPosition(815);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(-1);
-            } else if (gamepad2.dpad_down) {
-                resetArmPower = true;
-                ArmMotor.setTargetPosition(945);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(-1);
-            } else if (gamepad2.x) {
-                resetArmPower = true;
-                ArmMotor.setTargetPosition(0);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(-0.4);
-            } else if (resetArmPower) {
-                resetArmPower = false;
-                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                ArmMotor.setPower(0);
-            }
-
-             */
-            /*
-            if (gamepad2.dpad_left && debounces.checkAndUpdate("Arm")) {
-                ArmMotor.setTargetPosition(700);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(0.5);
-            }
-            if (gamepad2.dpad_right && debounces.checkAndUpdate("Arm")) {
-                ArmMotor.setTargetPosition(850);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(0.5);
-            }
-            if (gamepad2.dpad_down && debounces.checkAndUpdate("Arm")) {
-                ArmMotor.setTargetPosition(950);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(0.5);
-            }
-            if (gamepad2.dpad_up && debounces.checkAndUpdate("Arm")) {
-                ArmMotor.setTargetPosition(0);
-                ArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ArmMotor.setPower(-0.5);
-            }
-            */
-
 
             /*
             if (gamepad2.left_bumper) {
@@ -592,13 +500,11 @@ public class MecanumDriveRed extends LinearOpMode {
                 if (startDuck == 0) {
                     duckMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
-                    Duck_Wheel1.setPower(0.56);
-                    Duck_Wheel2.setPower(-0.56);
-                } else {
-                    if (System.currentTimeMillis() - startDuck > 750) {
-                        Duck_Wheel1.setPower(0.75);
-                        Duck_Wheel2.setPower(-0.75);
-                    }
+                    Duck_Wheel1.setPower(defaultPower);
+                    Duck_Wheel2.setPower(-defaultPower);
+                } else if (System.currentTimeMillis() - startDuck > 750) {
+                    Duck_Wheel1.setPower(0.75);
+                    Duck_Wheel2.setPower(-0.75);
                 }
             } else if (duckMotorSwitch.check()){
                 duckMotorSwitch.trigger();
@@ -609,12 +515,12 @@ public class MecanumDriveRed extends LinearOpMode {
 
             if (debounces.check("Servo") && redColor <85) {
                 Twist.setPosition(twistPositions[0]);
-            } else if (redColor>86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
+            } else if (redColor > 86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
-            } else if (redColor>5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
+            } else if (redColor > 5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
                 // sleep(1000);
-            } else if (redColor> 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
+            } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
                 // sleep(650);
             }
