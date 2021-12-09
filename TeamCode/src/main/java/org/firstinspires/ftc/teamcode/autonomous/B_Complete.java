@@ -57,6 +57,7 @@ public class B_Complete extends LinearOpMode {
     DcMotor Duck_Wheel2;
     Servo Twist;
     ColorSensor BoxSensor;
+    public Servo[] odometryServos = new Servo[3];
 
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
@@ -153,11 +154,11 @@ public class B_Complete extends LinearOpMode {
 
     public int getLevel(double xPosition) {
         if (xPosition < -0.35) {
-            return 1;
+            return 0;
         } else if (xPosition > -0.35 && xPosition < 0.2) {
-            return 2;
+            return 1;
         } else {
-            return 3;
+            return 2;
         }
     }
 
@@ -295,7 +296,11 @@ public class B_Complete extends LinearOpMode {
 
         Twist = hardwareMap.servo.get("Twist");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
-
+        odometryServos = new Servo[] {
+                hardwareMap.servo.get("LeftOdometryServo"),
+                hardwareMap.servo.get("FrontOdometryServo"),
+                hardwareMap.servo.get("RightOdometryServo"),
+        };
         ElapsedTime timer = new ElapsedTime();
 
         orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
@@ -314,186 +319,24 @@ public class B_Complete extends LinearOpMode {
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
 
-
-        Commands commandUtil = new Commands(
-                orientationGyro, RF, LF, RB, LB, telemetry
-        );
-
-        waitForStart();
-
-        ElapsedTime elapsedTime = new ElapsedTime();
-
+        double servoOnPosition = 0.36D;
         int level = -1;
 
-        for (int i = 0; i < MAX_TRIES; i++) {
-            level = getLevel();
-            if (level != -1) {
-                break;
+        while (!opModeIsActive()) {
+            for (int i = 0; i < MAX_TRIES; i++) {
+                level = getLevel();
+                if (level != -1) {
+                    break;
+                }
+                sleep(100);
             }
-            sleep(100);
         }
 
         level = level == -1 ? 0 : level;
 
-
-        telemetry.addData("Level: ", level);
-        telemetry.addData("Busy: ", LF.isBusy());
-        telemetry.update();
-
-
-        applyPower(-0.7, 0.7, 0.7, -0.7);
-        sleep(3000);
-        applyPower(-0.5, -0.5, -0.5, -0.5);
-        sleep(300);
-        applyPower(0, 0, 0, 0);
-        Duck_Wheel1.setPower(-0.56);
-        Duck_Wheel2.setPower(-0.56);
-        sleep(3000);
-        applyPower(0.65, 0.65, 0.65, 0.65);
-        sleep(500);
-        applyPower(-0.4, 0.4, 0.4, -0.4);
-        sleep(1000);
-
-        /*
-        sleep(100);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        RF.setPower(-0.2);
-        sleep(300);
-        RF.setPower(0);
-        RF.setPower(0);
-        RF.setPower(0);
-        RF.setPower(0);
-         */
-        DcMotor[] Motors = new DcMotor[] {RF, LF, RB, LB};
-
-        /*while (true) {
-            for (DcMotor motor : ) {
-
-            }
+        for (Servo odometryServo : odometryServos) {
+            odometryServo.setPosition(servoOnPosition);
         }
-
-
-         */
-        /*
-        commandUtil.forward(12, 0.01).async();
-        telemetry.addData("Done with forward", true);
-        telemetry.update();
-        sleep(1000);
-
-
-         */
-
-
-        /*
-        movementController = new PIDController(
-                0.1,
-                0,
-                0,
-                new double[] {0, 0},
-                0,
-                0);
-        int RFCurrentPosition = RF.getCurrentPosition();
-        int LFCurrentPosition = LF.getCurrentPosition();
-        int RBCurrentPosition = RB.getCurrentPosition();
-        int LBCurrentPosition = LB.getCurrentPosition();
-
-        int RFTarget = (int) (RFCurrentPosition + 1000);
-        int LFTarget = (int) (LFCurrentPosition - 1000);
-        int RBTarget = (int) (RBCurrentPosition - 1000);
-        int LBTarget = (int) (LBCurrentPosition - 1000);
-
-        movementController.resume();
-        while (
-                !isBusy(RFCurrentPosition, RFTarget) &&
-                        !isBusy(LFCurrentPosition, LFTarget) &&
-                        !isBusy(RBCurrentPosition, RBTarget) &&
-                        !isBusy(LBCurrentPosition, LBTarget)
-        ) {
-            telemetry.addLine(String.format("%s, %d, %d", RF.getDeviceName(), RF.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", LF.getDeviceName(), LF.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", LB.getDeviceName(), LB.getCurrentPosition(), RFTarget));
-            telemetry.addLine(String.format("%s, %d, %d", RB.getDeviceName(), RB.getCurrentPosition(), RFTarget));
-
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", RF.getDeviceName(), RF.getVelocity(), RF.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", LF.getDeviceName(), LF.getVelocity(), LF.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", RB.getDeviceName(), RB.getVelocity(), RB.getPower()));
-            telemetry.addLine(String.format("%s, Velocity: %f, %f", LB.getDeviceName(), LB.getVelocity(), LB.getPower()));
-            telemetry.update();
-
-
-            setVelocity(RF, RFCurrentPosition, RFTarget);
-            setVelocity(LF, LFCurrentPosition, LFTarget);
-            setVelocity(RB, RBCurrentPosition, RBTarget);
-            setVelocity(LB, LBCurrentPosition, LBTarget);
-
-
-            RFCurrentPosition = RF.getCurrentPosition();
-            LFCurrentPosition = LF.getCurrentPosition();
-            RBCurrentPosition = RB.getCurrentPosition();
-            LBCurrentPosition = LB.getCurrentPosition();
-
-            RF.setPower(movementController.calculate(RFTarget, RFCurrentPosition));
-            LF.setPower(movementController.calculate(LFTarget, LFCurrentPosition));
-            RB.setPower(movementController.calculate(RBTarget, RBCurrentPosition));
-            LB.setPower(movementController.calculate(LBTarget, LBCurrentPosition));
-
-        }
-
-        resetVelocity();
-        movementController.pauseAndReset();
-
-        */
-        /*
-        commandUtil.backward(12, 0.1).async();
-        telemetry.addData("Done with backward", true);
-        telemetry.update();
-        commandUtil.forward(6, 0.1).async();
-        telemetry.addData("Done with forward", true);
-        telemetry.update();
-        commandUtil.strafeLeft(6, 0.1).async();
-        telemetry.addData("Done with strafeLeft", true);
-        telemetry.update();
-        commandUtil.strafeRight(6, 0.1).async();
-        telemetry.addData("Done with strafeRight", true);
-        telemetry.update();
-         */
-        /*
-        commandUtil.strafeRight(12, 1).async();
-        commandUtil.backward(12, 1).async();
-
-        liftAndPlaceBlockAsync(LEVEL_ANGLES[level], theta);
-        controller.pauseAndReset();
-
-        long startTime = elapsedTime.milliseconds()
-        while (elapsedTime.milliseconds()-startTime < 1000) {
-            ArmMotor.setPower(downController.calculate(0, theta));
-        }
-        downController.pauseAndReset();
-        ArmMotor.setPower(-0.1);
-
-        commandUtil.right(90, 1).async();
-        commandUtil.strafeLeft(12, 0.5).async();
-        commandUtil.forward(20, 1).async();
-
-        int[] motorPositions = commandUtil.getEncoderPositions();
-
-        while (BoxSensor.red()<85) {
-            commandUtil.forward(1, 0.2).async();
-        }
-
-        commandUtil.gotoEncoderPosition(motorPositions).async();
-        commandUtil.backward(20, 1).async();
-        commandUtil.right(90, 1).async();
-        commandUtil.forward(10, 1).async();
-        liftAndPlaceBlockAsync();
-
-        commandUtil.right(90, 1);
-        commandUtil.forward(12, 0.5);
-        commandUtil.right(90, 1);
-        commandUtil.forward(12, 0.5);
-        */
 
     }
 }

@@ -49,6 +49,7 @@ public class MecanumDriveRed extends LinearOpMode {
     public DcMotor Intake;
     public DcMotor ArmMotor;
     public ColorSensor BoxSensor;
+    public Servo[] odometryServos = new Servo[3];
 
     /**
      * Initialize all motors that control the robot's accessories
@@ -225,7 +226,10 @@ public class MecanumDriveRed extends LinearOpMode {
                 0.42D, 0.52D, 0.74D
         };
         double defaultPower = 0.56D;
-        double intIncrement = 0.00001;
+        double intIncrement = 0.00001D;
+        double targetOdometryPosition = 0.36D;
+        double defaultOdometryPosition = 0D;
+
         long startDuck = 0;
 
         int lastLevel = 0;
@@ -299,7 +303,11 @@ public class MecanumDriveRed extends LinearOpMode {
 
         Twist = hardwareMap.servo.get("Twist");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
-
+        odometryServos = new Servo[] {
+                hardwareMap.servo.get("LeftOdometryServo"),
+                hardwareMap.servo.get("FrontOdometryServo"),
+                hardwareMap.servo.get("RightOdometryServo"),
+        };
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -338,6 +346,10 @@ public class MecanumDriveRed extends LinearOpMode {
             // telemetry.addData("LF encoder: ", encoder_LF);
             // telemetry.addData("LB encoder: ", encoder_LB);
             telemetry.addData("RF encoder: ", RF.getCurrentPosition());
+            telemetry.addData("LF Power: ", LF.getPower());
+            telemetry.addData("RB Power: ", RB.getPower());
+            telemetry.addData("LB Power: ", LB.getPower());
+            telemetry.addData("RF Power: ", RF.getPower());
             // telemetry.addData("RB encoder: ", encoder_RB);
             telemetry.addData("LF velocity: ", ((DcMotorEx) LF).getVelocity());
             telemetry.addData("LB velocity: ", ((DcMotorEx) LB).getVelocity());
@@ -429,6 +441,7 @@ public class MecanumDriveRed extends LinearOpMode {
                 currentLevel = 3;
                 power = controller.calculate(240D, heading-headingOffset);
             } else if (gamepad2.x) {
+                currentLevel = 0;
                 power = downController.calculate(0D, heading-headingOffset);
             } else if (gamepad2.left_stick_button) {
                 headingOffset = heading;
@@ -525,6 +538,12 @@ public class MecanumDriveRed extends LinearOpMode {
                 // sleep(650);
             }
 
+            for (Servo odometryServo : odometryServos) {
+                if (odometryServo.getPosition() != targetOdometryPosition) {
+                    odometryServo.setPosition(targetOdometryPosition);
+                }
+            }
+
 
              /*if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
                 Twist.setPosition(twistPositions[0]);
@@ -534,6 +553,10 @@ public class MecanumDriveRed extends LinearOpMode {
                 Twist.setPosition(twistPositions[2]);
             } */
 
+        }
+
+        for (Servo odometryServo : odometryServos) {
+            odometryServo.setPosition(defaultOdometryPosition);
         }
 
     }
