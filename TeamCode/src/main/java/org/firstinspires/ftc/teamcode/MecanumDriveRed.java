@@ -224,12 +224,14 @@ public class MecanumDriveRed extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.42D, 0.52D, 0.74D
+                0D, 0.12D, 0.34D
         };
+        double[] activeOdometryPosition = new double[] {
+                0.3666D, 0.3666D, 0.3666D
+        };
+
         double defaultPower = 0.56D;
         double intIncrement = 0.00001D;
-        double targetOdometryPosition = 0.36D;
-        double defaultOdometryPosition = 0D;
 
         long startDuck = 0;
 
@@ -364,6 +366,7 @@ public class MecanumDriveRed extends LinearOpMode {
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
 
             telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
+            telemetry.addData("Red: ", redColor);
             telemetry.addData("Integral: ", controller.summation);
             // telemetry.addData("kD: ", controller.kI);
             // telemetry.addData("Increment: ", intIncrement);
@@ -533,9 +536,9 @@ public class MecanumDriveRed extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
-            if (debounces.check("Servo") && redColor  <85) {
+            if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
-            } else if (redColor > 86 != gamepad2.y != gamepad2.a && debounces.check("Servo")) {
+            } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
             } else if (redColor > 5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
@@ -552,11 +555,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 }
             }*/
 
-            if (debounces.checkAndUpdate("OdometryServo")) {
-                up = !up;
-                odometryServos[0].setPosition(up ? 1 : 0);
-            }
-
              /*if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
                 Twist.setPosition(twistPositions[0]);
             } else if (gamepad2.b) {
@@ -564,12 +562,15 @@ public class MecanumDriveRed extends LinearOpMode {
             } else if (gamepad2.y) {
                 Twist.setPosition(twistPositions[2]);
             } */
-
+            for (Servo odometryServo : odometryServos) {
+                odometryServo.setPosition(0);
+            }
         }
 
-        for (Servo odometryServo : odometryServos) {
-            odometryServo.setPosition(defaultOdometryPosition);
+        for (int i = 0; i < activeOdometryPosition.length; i++) {
+            odometryServos[i].setPosition(activeOdometryPosition[i]);
         }
 
     }
+
 }
