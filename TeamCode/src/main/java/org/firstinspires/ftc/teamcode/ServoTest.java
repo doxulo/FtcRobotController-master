@@ -13,7 +13,7 @@ public class ServoTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        twist = hardwareMap.servo.get("LeftOdometryServo");
+        twist = hardwareMap.servo.get("Twist");
         waitForStart();
 
         twist.setPosition(1);

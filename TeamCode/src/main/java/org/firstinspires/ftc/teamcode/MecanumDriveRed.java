@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.util.Scheduler;
 import org.firstinspires.ftc.teamcode.util.Switch;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 
 @TeleOp
@@ -49,6 +51,7 @@ public class MecanumDriveRed extends LinearOpMode {
     public DcMotor Intake;
     public DcMotor ArmMotor;
     public ColorSensor BoxSensor;
+    private CRServo tapeExtension;
     public Servo[] odometryServos = new Servo[3];
 
     /**
@@ -61,7 +64,6 @@ public class MecanumDriveRed extends LinearOpMode {
 
     public double limit = 1.0D;
     public double limitPower = 0.75D;
-
     /**
      * Possible function to initialize and setup future motors
      *
@@ -181,7 +183,7 @@ public class MecanumDriveRed extends LinearOpMode {
              */
 
         limitPower = 1 / limitPower;
-
+        
         Debounce debounces = new Debounce(
                 new DebounceObject("Duck", 750),
                 new DebounceObject("Intake", 500),
@@ -305,18 +307,34 @@ public class MecanumDriveRed extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
-        Twist = hardwareMap.servo.get("Twist");
+        Twist = hardwareMap.servo.get("Twisty");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
+        tapeExtension = hardwareMap.crservo.get("Tape");
+
         odometryServos = new Servo[] {
                 hardwareMap.servo.get("LeftOdometryServo"),
                 hardwareMap.servo.get("FrontOdometryServo"),
                 hardwareMap.servo.get("RightOdometryServo"),
         };
+        
+        
+        Method setPowerMethod = null;
+
+        try {
+            setPowerMethod = Intake.getClass().getMethod("setPower", double.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
         waitForStart();
+        /*
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        */
         long lastTime = System.currentTimeMillis();
-        while (opModeIsActive()) {
+         
+        while (true) {
+            long currentSystemTime = System.currentTimeMillis();
             // int rawX = armGyro.rawX();
             // int rawY = armGyro.rawY();
             // int rawZ = armGyro.rawZ();
@@ -339,7 +357,6 @@ public class MecanumDriveRed extends LinearOpMode {
                 e.printStackTrace();
             }
 
-            long currentSystemTime = System.currentTimeMillis();
             // int encoder_LF = LF.getCurrentPosition();
             // int encoder_LB = LB.getCurrentPosition();
             // int encoder_RF = RF.getCurrentPosition();
@@ -406,26 +423,32 @@ public class MecanumDriveRed extends LinearOpMode {
                     }
 
                     intakeOn = !intakeOn;
-                    Intake.setPower(intakeOn ? 0.7*multiple : 0);
+                    Intake.setPower(intakeOn ? multiple : 0);
                 }
             }
 
             if (Intake.getPower() > 0 && redColor > 101) {
                 // sleep(1200);
-
-                try {
-                    scheduler.add(
-                            Intake.getClass().getMethod("setPower", double.class),
-                            Intake,
-                            0,
-                            1000);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        1000
+                );
 
                 // Intake.setPower(0);
             }
 
+            if (gamepad1.dpad_up || gamepad1.dpad_down) {
+
+                int multiple = 1;
+
+                if (gamepad1.dpad_down) {
+                    multiple = -1;
+                }
+
+                tapeExtension.setPower(0.1*multiple);
+            }
             // 647
             // 815
             // 940
@@ -562,13 +585,17 @@ public class MecanumDriveRed extends LinearOpMode {
             } else if (gamepad2.y) {
                 Twist.setPosition(twistPositions[2]);
             } */
-            for (Servo odometryServo : odometryServos) {
-                odometryServo.setPosition(0);
-            }
-        }
 
-        for (int i = 0; i < activeOdometryPosition.length; i++) {
-            odometryServos[i].setPosition(activeOdometryPosition[i]);
+            if (opModeIsActive()) {
+                for (Servo odometryServo : odometryServos) {
+                    odometryServo.setPosition(0.01);
+                }
+            } else {
+                for (int i = 0; i < activeOdometryPosition.length; i++) {
+                    odometryServos[i].setPosition(activeOdometryPosition[i]);
+                }
+                break;
+            }
         }
 
     }

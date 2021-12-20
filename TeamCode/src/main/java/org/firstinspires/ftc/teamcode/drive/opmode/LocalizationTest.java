@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -15,8 +16,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-// @TeleOp(group = "drive")
-@Disabled
+@TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -24,7 +24,16 @@ public class LocalizationTest extends LinearOpMode {
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
+        Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
+        Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
+        Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
+
         waitForStart();
+
+        leftOdometryServo.setPosition(0.37);
+        rightOdometryServo.setPosition(0.37);
+        frontOdometryServo.setPosition(0.37);
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(
