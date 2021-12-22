@@ -161,7 +161,7 @@ public class MecanumDrive extends LinearOpMode {
         while (!isStopRequested() && armGyro.isCalibrating())  {
             telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
             telemetry.update();
-            tapeVerticalOrientation.setPower(0.5);
+            tapeVerticalOrientation.setPower(-0.5);
             sleep(50);
         }
 
@@ -441,14 +441,14 @@ public class MecanumDrive extends LinearOpMode {
                 currentHorizontalOrientation += 0.005;
             }
 
-            /*
+
             if (currentHorizontalOrientation > 1) {
                 currentHorizontalOrientation = 1;
             } else if (currentHorizontalOrientation < -1) {
                 currentHorizontalOrientation = -1;
             }
-            
-             */
+
+
 
             if (currentVerticalOrientation > 360) {
                 currentVerticalOrientation = 360;
