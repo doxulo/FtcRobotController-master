@@ -45,8 +45,7 @@ public class PIDController {
         double dp = sp-pv;
         double gradient = dt == 0 ? 0 : (dp-this.lastError)/dt;
 
-
-        if (this.integralBounds.length == 3 && dp > this.integralBounds[2]) {
+        if (this.integralBounds.length == 3 && dp <= this.integralBounds[2]) {
             this.summation = summation + dp*dt;
         } else {
             this.summation = 0;
