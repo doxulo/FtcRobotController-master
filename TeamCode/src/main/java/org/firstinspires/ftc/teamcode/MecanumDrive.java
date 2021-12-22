@@ -441,19 +441,23 @@ public class MecanumDrive extends LinearOpMode {
                 currentHorizontalOrientation += 0.005;
             }
 
+            /*
             if (currentHorizontalOrientation > 1) {
                 currentHorizontalOrientation = 1;
             } else if (currentHorizontalOrientation < -1) {
                 currentHorizontalOrientation = -1;
             }
+            
+             */
 
             if (currentVerticalOrientation > 360) {
                 currentVerticalOrientation = 360;
             } else if (currentVerticalOrientation < 0) {
                 currentVerticalOrientation = 0;
             }
-            tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
 
+            // tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
+            // tapeVerticalOrientation.setPower(tapeController.calculate());
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
                 targetHeading = 162D;
