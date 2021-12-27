@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
@@ -30,7 +31,7 @@ public class MecanumDrive extends LinearOpMode {
     private enum LiftStates {
         LEVEL_1, LEVEL_2, LEVEL_3, RESET
     }
-    
+
     /** Global comments:
      * GamePad1 == For movements,
      * GamePad2 == Gadgets,
@@ -143,10 +144,9 @@ public class MecanumDrive extends LinearOpMode {
      * Main method that executes upon code run
      */
     ElapsedTime timer = new ElapsedTime();
-    IntegratingGyroscope armGyroParsed;
-    IntegratingGyroscope centerGyroParsed;
+
     ModernRoboticsI2cGyro armGyro;
-    ModernRoboticsI2cGyro orientationGyro;
+    ModernRoboticsI2cGyro tapeGyro;
 
     @Override
     public void runOpMode() {
@@ -156,25 +156,22 @@ public class MecanumDrive extends LinearOpMode {
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-        armGyroParsed = (IntegratingGyroscope)armGyro;
+        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
+        tapeGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "TapeGyro");
 
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        telemetry.log().add("Gyros Calibrating. Do Not Move!");
         armGyro.calibrate();
-
-        tapeHorizontalOrientation.setPower(1);
+        // tapeGyro.calibrate();
 
         timer.reset();
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+        while (!isStopRequested() && armGyro.isCalibrating() || !isStopRequested() && tapeGyro.isCalibrating())  {
+            telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
             telemetry.update();
-            tapeVerticalOrientation.setPower(-0.1);
             sleep(50);
         }
 
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
-
+        telemetry.addLine("Done calibrating");
+        telemetry.update();
         limitPower = 1 / limitPower;
 
         Debounce debounces = new Debounce(
@@ -226,7 +223,6 @@ public class MecanumDrive extends LinearOpMode {
         };
 
         double defaultPower = 0.56D;
-        double intIncrement = 0.00001D;
         double targetHeading = 0D;
         double currentHorizontalOrientation = 1D;
         double currentVerticalOrientation = 0D;
@@ -240,9 +236,6 @@ public class MecanumDrive extends LinearOpMode {
         boolean intakeOn = false;
         boolean limitOn = true;
         boolean resetArmPower = false;
-        boolean up = false;
-
-
 
         limit = limitPower;
 
@@ -348,34 +341,18 @@ public class MecanumDrive extends LinearOpMode {
                 e.printStackTrace();
             }
 
-            // int encoder_LF = LF.getCurrentPosition();
-            // int encoder_LB = LB.getCurrentPosition();
-            // int encoder_RF = RF.getCurrentPosition();
-            // int encoder_RB = RB.getCurrentPosition();
-            // int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
             double power = 0;
 
-            // telemetry.addData("LF encoder: ", encoder_LF);
-            // telemetry.addData("LB encoder: ", encoder_LB);
-
-            // telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
-            // telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
-            // telemetry.addData("Arm encoder: ", encoder_Arm);
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
 
-            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
+            // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
-            telemetry.addData("Integral: ", controller.summation);
-            // telemetry.addData("kD: ", controller.kI);
-            // telemetry.addData("Increment: ", intIncrement);
-            // telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
-            // telemetry.addLine()
-            // .addData("dx", formatRate(rates.xRotationRate))
-            //        .addData("dy", formatRate(rates.yRotationRate))
-            //        .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
-            // telemetry.addData("angle", "%s deg", formatFloat(zAngle));
-            telemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("tape measurer heading: ", tapeGyro.getHeading());
+            telemetry.addData("tape measurer x orientation: ", tapeGyro.rawX());
+            telemetry.addData("tape measurer y orientation: ", tapeGyro.rawY());
+            telemetry.addData("tape measurer z orientation: ", tapeGyro.rawZ());
+            telemetry.addData("arm heading: ", "%3d deg", heading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
             for (Servo s : odometryServos) {
@@ -538,6 +515,7 @@ public class MecanumDrive extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
+
             /*
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
@@ -554,13 +532,15 @@ public class MecanumDrive extends LinearOpMode {
              */
 
 
-            if (opModeIsActive()) {
-                for (Servo odometryServo : odometryServos) {
-                    if (odometryServo.getPosition() != 0.01) {
-                        odometryServo.setPosition(0.01);
-                    }
-                }
-            } else {
+
+
+//            if (opModeIsActive()) {
+//                for (Servo odometryServo : odometryServos) {
+//                    if (odometryServo.getPosition() != 0.01) {
+//                        odometryServo.setPosition(0.01);
+//                    }
+//                }
+            if (!opModeIsActive()) {
                 for (int i = 0; i < activeOdometryPosition.length; i++) {
                     odometryServos[i].setPosition(activeOdometryPosition[i]);
                 }

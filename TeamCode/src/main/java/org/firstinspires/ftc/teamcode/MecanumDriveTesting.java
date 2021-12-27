@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,7 +13,6 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
@@ -25,13 +23,13 @@ import org.firstinspires.ftc.teamcode.util.Switch;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@Config
+
 @TeleOp
 public class MecanumDriveTesting extends LinearOpMode {
 
-    public static double P_CONSTANT = 0.01;
-    public static double I_CONSTANT = 0.000001;
-    public static double D_CONSTANT = 0.05;
+    private enum LiftStates {
+        LEVEL_1, LEVEL_2, LEVEL_3, RESET
+    }
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -57,7 +55,9 @@ public class MecanumDriveTesting extends LinearOpMode {
     public DcMotor Intake;
     public DcMotor ArmMotor;
     public ColorSensor BoxSensor;
-    private CRServo tapeExtension;
+    public CRServo tapeExtension;
+    public CRServo tapeVerticalOrientation;
+    public CRServo tapeHorizontalOrientation;
     public Servo[] odometryServos = new Servo[3];
 
     /**
@@ -152,7 +152,9 @@ public class MecanumDriveTesting extends LinearOpMode {
     public void runOpMode() {
 
         FtcDashboard dash = FtcDashboard.getInstance();
-        Telemetry dashTelemetry = dash.getTelemetry();
+
+        tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
+        tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
         armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         armGyroParsed = (IntegratingGyroscope)armGyro;
@@ -160,37 +162,21 @@ public class MecanumDriveTesting extends LinearOpMode {
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
         armGyro.calibrate();
 
+        tapeHorizontalOrientation.setPower(1);
+
         timer.reset();
         while (!isStopRequested() && armGyro.isCalibrating())  {
             telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
             telemetry.update();
+            tapeVerticalOrientation.setPower(-0.1);
             sleep(50);
         }
 
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
-
-            /*
-        orientationGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro_center");
-        centerGyroParsed = (IntegratingGyroscope)orientationGyro;
-
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
-        orientationGyro.calibrate();
-
-        timer.reset();
-        while (!isStopRequested() && orientationGyro.isCalibrating())  {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-            telemetry.update();
-            sleep(50);
-        }
-
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
-
-             */
 
         limitPower = 1 / limitPower;
-        
+
         Debounce debounces = new Debounce(
                 new DebounceObject("Duck", 750),
                 new DebounceObject("Intake", 500),
@@ -210,17 +196,27 @@ public class MecanumDriveTesting extends LinearOpMode {
         Scheduler scheduler = new Scheduler();
         // Change kI
         PIDController controller = new PIDController(
-                0.006,
-                0.001,// 0.000001, // TODO: Tune this
-                1,
+                0.01,
+                0.000001,// 0.000001, // TODO: Tune this
+                0.05,
                 new double[] {
                         0.05, -0.10
                 },
                 360,
                 0,
                 new double[] {
-                        -0.15D, 0.15D, 25D
+                        -0.15, 0.15, 25D
                 });
+
+        OldPIDController downController = new OldPIDController(
+                0.004,
+                0,
+                0.0075,
+                new double[] {
+                        0.05, -0.10
+                },
+                1440,
+                0);
 
         double[] twistPositions = new double[] {
                 0D, 0.12D, 0.34D
@@ -232,6 +228,8 @@ public class MecanumDriveTesting extends LinearOpMode {
         double defaultPower = 0.56D;
         double intIncrement = 0.00001D;
         double targetHeading = 0D;
+        double currentHorizontalOrientation = 1D;
+        double currentVerticalOrientation = 0D;
 
         long startDuck = 0;
 
@@ -243,6 +241,8 @@ public class MecanumDriveTesting extends LinearOpMode {
         boolean limitOn = true;
         boolean resetArmPower = false;
         boolean up = false;
+
+        LiftStates currentArmState = LiftStates.RESET;
 
         limit = limitPower;
 
@@ -307,15 +307,15 @@ public class MecanumDriveTesting extends LinearOpMode {
 
         Twist = hardwareMap.servo.get("Twisty");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
-        // tapeExtension = hardwareMap.crservo.get("Tape");
+        tapeExtension = hardwareMap.crservo.get("TapeExtension");
 
         odometryServos = new Servo[] {
                 hardwareMap.servo.get("LeftOdometryServo"),
                 hardwareMap.servo.get("FrontOdometryServo"),
                 hardwareMap.servo.get("RightOdometryServo"),
         };
-        
-        
+
+
         Method setPowerMethod = null;
 
         try {
@@ -324,32 +324,21 @@ public class MecanumDriveTesting extends LinearOpMode {
             e.printStackTrace();
         }
 
+        tapeVerticalOrientation.setPower(0);
+
         waitForStart();
         /*
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
         long lastTime = System.currentTimeMillis();
-         
+
         while (true) {
             long currentSystemTime = System.currentTimeMillis();
 
-            controller.kP = P_CONSTANT;
-            controller.kI = I_CONSTANT;
-            controller.kD = D_CONSTANT;
-            // int rawX = armGyro.rawX();
-            // int rawY = armGyro.rawY();
-            // int rawZ = armGyro.rawZ();
             int heading = armGyro.getHeading();
-            heading = heading > 300 ? 0 : heading;
+            heading = heading > 350 ? 0 : heading;
             int redColor = BoxSensor.red();
-            // int integratedZ = armGyro.getIntegratedZValue();
-            // AngularVelocity rates = armGyroParsed.getAngularVelocity(AngleUnit.DEGREES);
-            // float zAngle = armGyroParsed.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-
-            // Read administrative information from the gyro
-            // int zAxisOffset = armGyro.getZAxisOffset();
-            // int zAxisScalingCoefficient = armGyro.getZAxisScalingCoefficient();
 
             try {
                 scheduler.checkAndExecute();
@@ -366,17 +355,18 @@ public class MecanumDriveTesting extends LinearOpMode {
             // int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
             double power = 0;
 
-
+            // telemetry.addData("LF encoder: ", encoder_LF);
+            // telemetry.addData("LB encoder: ", encoder_LB);
 
             // telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
             // telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
-//             telemetry.addData("Arm encoder: ", encoder_Arm);
-//            dashTelemetry.addData("Arm Power: ", ArmMotor.getPower());
-            dashTelemetry.addData("Dt: ", currentSystemTime - lastTime);
+            // telemetry.addData("Arm encoder: ", encoder_Arm);
+            telemetry.addData("Arm Power: ", ArmMotor.getPower());
+            telemetry.addData("Dt: ", currentSystemTime - lastTime);
 
-
-//            dashTelemetry.addData("Integral: ", controller.summation);
-            // dashTelemetry.addData("Target Heading: ", targetHeading);
+            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
+            telemetry.addData("Red: ", redColor);
+            telemetry.addData("Integral: ", controller.summation);
             // telemetry.addData("kD: ", controller.kI);
             // telemetry.addData("Increment: ", intIncrement);
             // telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
@@ -385,10 +375,11 @@ public class MecanumDriveTesting extends LinearOpMode {
             //        .addData("dy", formatRate(rates.yRotationRate))
             //        .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
             // telemetry.addData("angle", "%s deg", formatFloat(zAngle));
-            // dashTelemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("Twist position: ", Twist.getPosition());
 
             for (Servo s : odometryServos) {
-//                dashTelemetry.addData("Odometry servo position: ", s.getPosition());
+                telemetry.addData("Odometry servo position: ", s.getPosition());
             }
             // telemetry.addData("integrated Z", "%3d", integratedZ);
             //telemetry.addLine()
@@ -396,7 +387,7 @@ public class MecanumDriveTesting extends LinearOpMode {
             //        .addData("rawY", formatRaw(rawY))
             //        .addData("rawZ", formatRaw(rawZ));
             //telemetry.addLine().addData("z offset", zAxisOffset).addData("z coeff", zAxisScalingCoefficient);
-            dashTelemetry.update();
+            telemetry.update();
             lastTime = currentSystemTime;
             //drive train
             mecanum(-Math.pow(gamepad1.left_stick_y, 3D), Math.pow(gamepad1.left_stick_x, 3D), Math.pow(gamepad1.right_stick_x, 3D));
@@ -430,31 +421,76 @@ public class MecanumDriveTesting extends LinearOpMode {
                 // Intake.setPower(0);
             }
 
-            if (gamepad1.dpad_up || gamepad1.dpad_down) {
-
-                int multiple = 1;
-
-                if (gamepad1.dpad_down) {
-                    multiple = -1;
-                }
-
-               //  tapeExtension.setPower(0.1*multiple);
+            if (gamepad1.dpad_up) {
+                tapeExtension.setPower(-1);
+            } else if (gamepad1.dpad_down) {
+                tapeExtension.setPower(1);
+            } else {
+                tapeExtension.setPower(0);
             }
-            // 647
-            // 815
-            // 940
+
+
+            if (gamepad1.left_trigger > 0) {
+                tapeVerticalOrientation.setPower(-gamepad1.left_trigger/1.75);
+            } else if (gamepad1.right_trigger > 0) {
+                tapeVerticalOrientation.setPower(gamepad1.right_trigger/1.75);
+            } else {
+                tapeVerticalOrientation.setPower(0);
+            }
+
+
+            if (gamepad1.left_trigger > 0) {
+                currentVerticalOrientation += gamepad1.left_trigger/10;
+            } else if (gamepad1.right_trigger > 0) {
+                currentVerticalOrientation -= gamepad1.right_trigger/10;
+            }
+
+            if (gamepad1.left_bumper) {
+                currentHorizontalOrientation += 0.005;
+            } else if (gamepad1.right_bumper) {
+                currentHorizontalOrientation -= 0.005;
+            }
+
+
+            if (currentHorizontalOrientation > 1) {
+                currentHorizontalOrientation = 1;
+            } else if (currentHorizontalOrientation < -1) {
+                currentHorizontalOrientation = -1;
+            }
+
+
 
             /*
-            if (gamepad2.right_stick_button && debounces.checkAndUpdate("Integral")) {
-                controller.kI += intIncrement;
-            } else if (gamepad2.dpad_right && debounces.checkAndUpdate("Integral")) {
-                controller.kI -= intIncrement;
-            } else if (gamepad2.left_bumper && debounces.checkAndUpdate("Integral")) {
-                intIncrement *= 10;
-            } else if (gamepad2.right_bumper && debounces.checkAndUpdate("Integral")) {
-                intIncrement /= 10;
-            }*/
+            if (currentVerticalOrientation > 360) {
+                currentVerticalOrientation = 360;
+            } else if (currentVerticalOrientation < 0) {
+                currentVerticalOrientation = 0;
+            }
 
+             */
+
+            tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
+            // tapeVerticalOrientation.setPower(tapeController.calculate(currentVerticalOrientation, tapeMeasureGyro.));
+
+            switch (currentArmState) {
+                case RESET:
+                    if (gamepad2.dpad_up) {
+                        currentArmState = LiftStates.LEVEL_1;
+                    } else if (gamepad2.dpad_left) {
+                        currentArmState = LiftStates.LEVEL_2;
+                    } else if (gamepad2.dpad_down) {
+                        currentArmState = LiftStates.LEVEL_3;
+                    } else {
+                        currentArmState = LiftStates.RESET;
+                    }
+
+                    power = controller.calculate(0D, heading-headingOffset);
+
+                    break;
+                case LEVEL_1:
+
+            }
+            /*
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
                 targetHeading = 162D;
@@ -486,62 +522,25 @@ public class MecanumDriveTesting extends LinearOpMode {
             } else if (ArmMotor.getPower() != 0) {
                 ArmMotor.setPower(0);
             }
-            // 200
+
+             */
+
             if (targetHeading != -1) {
                 power = controller.calculate(targetHeading, heading-headingOffset);
 
                 if (targetHeading == 0) {
                     power *= 0.75;
                 }
- /*               if (currentLevel != lastLevel) {
+                if (currentLevel != lastLevel) {
                     controller.pauseAndReset();
                     controller.resume();
                 }
 
-  */
+
                 lastLevel = currentLevel;
                 resetArmPower = true;
                 ArmMotor.setPower(power);
             }
-
-            /*
-            if (gamepad2.left_bumper) {
-                if (startDuck == 0) {
-                    duckMotorSwitch.setTrue();
-                    startDuck = System.currentTimeMillis();
-                    Duck_Wheel.setPower(0.56);
-                } else {
-                    if (System.currentTimeMillis() - startDuck > 750) {
-                        Duck_Wheel.setPower(1);
-                    }
-                }
-             */
-
-            /*
-            if (gamepad2.right_bumper || gamepad2.left_bumper) {
-                double multiple = 1;
-                if (gamepad2.right_bumper) {
-                    multiple = -1;
-                }
-
-                if (startDuck == 0) {
-                    duckMotorSwitch.setTrue();
-                    startDuck = System.currentTimeMillis();
-                    Duck_Wheel1.setPower(0.56*multiple);
-                    Duck_Wheel2.setPower(0.56*multiple);
-                } else {
-                    if (System.currentTimeMillis() - startDuck > 750) {
-                        Duck_Wheel1.setPower(multiple);
-                        Duck_Wheel2.setPower(multiple);
-                    }
-                }
-            } else if (duckMotorSwitch.check()){
-                duckMotorSwitch.trigger();
-                startDuck = 0;
-                Duck_Wheel1.setPower(0);
-                Duck_Wheel2.setPower(0);
-            }
-             */
 
             if (gamepad2.right_bumper) {
 
@@ -574,36 +573,22 @@ public class MecanumDriveTesting extends LinearOpMode {
                 // sleep(650);
             }
 
-
              */
-            /*
-            for (Servo odometryServo : odometryServos) {
-                if (odometryServo.getPosition() != targetOdometryPosition) {
-                    odometryServo.setPosition(targetOdometryPosition);
-                }
-            }*/
 
-             /*if (gamepad2.a && debounces.checkAndUpdate("Twist")) {
-                Twist.setPosition(twistPositions[0]);
-            } else if (gamepad2.b) {
-                Twist.setPosition(twistPositions[1]);
-            } else if (gamepad2.y) {
-                Twist.setPosition(twistPositions[2]);
-            } */
 
-            /*
             if (opModeIsActive()) {
                 for (Servo odometryServo : odometryServos) {
-                    odometryServo.setPosition(0.01);
+                    if (odometryServo.getPosition() != 0.01) {
+                        odometryServo.setPosition(0.01);
+                    }
                 }
             } else {
                 for (int i = 0; i < activeOdometryPosition.length; i++) {
                     odometryServos[i].setPosition(activeOdometryPosition[i]);
                 }
+                sleep(100);
                 break;
             }
-
-             */
         }
 
     }
