@@ -591,7 +591,7 @@ public class MecanumDriveTesting extends LinearOpMode {
                 Twist.setPosition(twistPositions[2]);
             } */
 
-
+            /*
             if (opModeIsActive()) {
                 for (Servo odometryServo : odometryServos) {
                     odometryServo.setPosition(0.01);
@@ -603,7 +603,7 @@ public class MecanumDriveTesting extends LinearOpMode {
                 break;
             }
 
-
+             */
         }
 
     }

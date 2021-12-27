@@ -27,6 +27,10 @@ import java.lang.reflect.Method;
 @TeleOp
 public class MecanumDrive extends LinearOpMode {
 
+    private enum LiftStates {
+        LEVEL_1, LEVEL_2, LEVEL_3, RESET
+    }
+    
     /** Global comments:
      * GamePad1 == For movements,
      * GamePad2 == Gadgets,
@@ -150,6 +154,7 @@ public class MecanumDrive extends LinearOpMode {
         FtcDashboard dash = FtcDashboard.getInstance();
 
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
+        tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
         armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
         armGyroParsed = (IntegratingGyroscope)armGyro;
@@ -157,11 +162,13 @@ public class MecanumDrive extends LinearOpMode {
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
         armGyro.calibrate();
 
+        tapeHorizontalOrientation.setPower(1);
+
         timer.reset();
         while (!isStopRequested() && armGyro.isCalibrating())  {
             telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
             telemetry.update();
-            tapeVerticalOrientation.setPower(-0.5);
+            tapeVerticalOrientation.setPower(-0.1);
             sleep(50);
         }
 
@@ -235,6 +242,8 @@ public class MecanumDrive extends LinearOpMode {
         boolean resetArmPower = false;
         boolean up = false;
 
+
+
         limit = limitPower;
 
         LF = initMotor(
@@ -299,7 +308,6 @@ public class MecanumDrive extends LinearOpMode {
         Twist = hardwareMap.servo.get("Twisty");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
         tapeExtension = hardwareMap.crservo.get("TapeExtension");
-        tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
         odometryServos = new Servo[] {
                 hardwareMap.servo.get("LeftOdometryServo"),
@@ -315,6 +323,8 @@ public class MecanumDrive extends LinearOpMode {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+
+        tapeVerticalOrientation.setPower(0);
 
         waitForStart();
         /*
@@ -421,9 +431,9 @@ public class MecanumDrive extends LinearOpMode {
 
 
             if (gamepad1.left_trigger > 0) {
-                tapeVerticalOrientation.setPower(-gamepad1.left_trigger);
+                tapeVerticalOrientation.setPower(-gamepad1.left_trigger/1.75);
             } else if (gamepad1.right_trigger > 0) {
-                tapeVerticalOrientation.setPower(gamepad1.right_trigger);
+                tapeVerticalOrientation.setPower(gamepad1.right_trigger/1.75);
             } else {
                 tapeVerticalOrientation.setPower(0);
             }
@@ -436,9 +446,9 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad1.left_bumper) {
-                currentHorizontalOrientation -= 0.005;
-            } else if (gamepad1.right_bumper) {
                 currentHorizontalOrientation += 0.005;
+            } else if (gamepad1.right_bumper) {
+                currentHorizontalOrientation -= 0.005;
             }
 
 
@@ -450,14 +460,17 @@ public class MecanumDrive extends LinearOpMode {
 
 
 
+            /*
             if (currentVerticalOrientation > 360) {
                 currentVerticalOrientation = 360;
             } else if (currentVerticalOrientation < 0) {
                 currentVerticalOrientation = 0;
             }
 
-            // tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
-            // tapeVerticalOrientation.setPower(tapeController.calculate());
+             */
+
+            tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
+            // tapeVerticalOrientation.setPower(tapeController.calculate(currentVerticalOrientation, tapeMeasureGyro.));
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
                 targetHeading = 162D;
@@ -551,6 +564,7 @@ public class MecanumDrive extends LinearOpMode {
                 for (int i = 0; i < activeOdometryPosition.length; i++) {
                     odometryServos[i].setPosition(activeOdometryPosition[i]);
                 }
+                sleep(100);
                 break;
             }
         }
