@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -13,23 +14,31 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.teamcode.util.Debounce;
 import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.Scheduler;
 import org.firstinspires.ftc.teamcode.util.Switch;
+import org.firstinspires.ftc.teamcode.util.MathUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-
+@Config
 @TeleOp
 public class MecanumDriveTesting extends LinearOpMode {
 
     private enum LiftStates {
         LEVEL_1, LEVEL_2, LEVEL_3, RESET
     }
+
+
+    public static double kP = 0.02; // 0.1
+    public static double kI = 0.0001;
+    public static double kD = 0.01; // 0.02
+    public static double targetVerticalOrientation = 20;
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -143,10 +152,9 @@ public class MecanumDriveTesting extends LinearOpMode {
      * Main method that executes upon code run
      */
     ElapsedTime timer = new ElapsedTime();
-    IntegratingGyroscope armGyroParsed;
-    IntegratingGyroscope centerGyroParsed;
+
     ModernRoboticsI2cGyro armGyro;
-    ModernRoboticsI2cGyro orientationGyro;
+    ModernRoboticsI2cGyro tapeGyro;
 
     @Override
     public void runOpMode() {
@@ -155,26 +163,31 @@ public class MecanumDriveTesting extends LinearOpMode {
 
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
+        tapeVerticalOrientation.setPower(.5);
 
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
-        armGyroParsed = (IntegratingGyroscope)armGyro;
+        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
+        tapeGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "TapeGyro");
 
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        telemetry.log().add("Gyros Calibrating. Do Not Move!");
         armGyro.calibrate();
-
-        tapeHorizontalOrientation.setPower(1);
 
         timer.reset();
         while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+            telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
             telemetry.update();
-            tapeVerticalOrientation.setPower(-0.1);
             sleep(50);
         }
 
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
+        tapeVerticalOrientation.setPower(0);
+        tapeGyro.calibrate();
+        while (!isStopRequested() && armGyro.isCalibrating())  {
+            telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
+            telemetry.update();
+            sleep(50);
+        }
 
+        telemetry.addLine("Done calibrating");
+        telemetry.update();
         limitPower = 1 / limitPower;
 
         Debounce debounces = new Debounce(
@@ -208,6 +221,34 @@ public class MecanumDriveTesting extends LinearOpMode {
                         -0.15, 0.15, 25D
                 });
 
+        PIDController tapeController = new PIDController(
+                0,
+                0,
+                0,
+                new double[] {
+                        0, 0
+                },
+                360,
+                0,
+                new double[] {
+                        -0.25, 0.25, 10D
+                }
+        );
+
+        PIDController initTapeController = new PIDController(
+                0.01,
+                0,
+                0,
+                new double[] {
+                        0, 0
+                },
+                360,
+                0,
+                new double[] {
+                        -0.05, 0.005, 10D
+                }
+        );
+
         OldPIDController downController = new OldPIDController(
                 0.004,
                 0,
@@ -226,10 +267,9 @@ public class MecanumDriveTesting extends LinearOpMode {
         };
 
         double defaultPower = 0.56D;
-        double intIncrement = 0.00001D;
         double targetHeading = 0D;
         double currentHorizontalOrientation = 1D;
-        double currentVerticalOrientation = 0D;
+        // double targetVerticalOrientation = 20D;
 
         long startDuck = 0;
 
@@ -240,9 +280,6 @@ public class MecanumDriveTesting extends LinearOpMode {
         boolean intakeOn = false;
         boolean limitOn = true;
         boolean resetArmPower = false;
-        boolean up = false;
-
-        LiftStates currentArmState = LiftStates.RESET;
 
         limit = limitPower;
 
@@ -334,9 +371,20 @@ public class MecanumDriveTesting extends LinearOpMode {
         long lastTime = System.currentTimeMillis();
 
         while (true) {
+            tapeController.kP = kP;
+            tapeController.kI = kI;
+            tapeController.kD = kD;
+
+
             long currentSystemTime = System.currentTimeMillis();
 
             int heading = armGyro.getHeading();
+            int tapeGyroHeading = tapeGyro.getHeading();
+
+            if (tapeGyroHeading > 280) {
+                tapeGyroHeading = 0;
+            }
+
             heading = heading > 350 ? 0 : heading;
             int redColor = BoxSensor.red();
 
@@ -348,34 +396,18 @@ public class MecanumDriveTesting extends LinearOpMode {
                 e.printStackTrace();
             }
 
-            // int encoder_LF = LF.getCurrentPosition();
-            // int encoder_LB = LB.getCurrentPosition();
-            // int encoder_RF = RF.getCurrentPosition();
-            // int encoder_RB = RB.getCurrentPosition();
-            // int encoder_Arm = Math.abs(ArmMotor.getCurrentPosition());
             double power = 0;
 
-            // telemetry.addData("LF encoder: ", encoder_LF);
-            // telemetry.addData("LB encoder: ", encoder_LB);
-
-            // telemetry.addData("Left Trigger: ", gamepad2.left_trigger);
-            // telemetry.addData("Right Trigger: ", gamepad2.right_trigger);
-            // telemetry.addData("Arm encoder: ", encoder_Arm);
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
 
-            telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
+            // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
-            telemetry.addData("Integral: ", controller.summation);
-            // telemetry.addData("kD: ", controller.kI);
-            // telemetry.addData("Increment: ", intIncrement);
-            // telemetry.addData("Last Encoder Position: ", lastEncoderPosition);
-            // telemetry.addLine()
-            // .addData("dx", formatRate(rates.xRotationRate))
-            //        .addData("dy", formatRate(rates.yRotationRate))
-            //        .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
-            // telemetry.addData("angle", "%s deg", formatFloat(zAngle));
-            telemetry.addData("heading", "%3d deg", heading);
+            telemetry.addData("Coefficients: ", "%f, %f, %f", kP, kI, kD);
+            telemetry.addData("tape measurer heading: ", tapeGyroHeading);
+            telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
+            telemetry.addData("Summation: ", tapeController.summation);
+            telemetry.addData("arm heading: ", "%3d deg", heading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
             for (Servo s : odometryServos) {
@@ -430,67 +462,55 @@ public class MecanumDriveTesting extends LinearOpMode {
             }
 
 
-            if (gamepad1.left_trigger > 0) {
-                tapeVerticalOrientation.setPower(-gamepad1.left_trigger/1.75);
-            } else if (gamepad1.right_trigger > 0) {
-                tapeVerticalOrientation.setPower(gamepad1.right_trigger/1.75);
+
+            if (gamepad1.y) {
+                tapeVerticalOrientation.setPower(-1);
+            } else if (gamepad1.right_stick_button) {
+                tapeVerticalOrientation.setPower(1);
             } else {
                 tapeVerticalOrientation.setPower(0);
             }
 
 
+
+
             if (gamepad1.left_trigger > 0) {
-                currentVerticalOrientation += gamepad1.left_trigger/10;
+                targetVerticalOrientation += gamepad1.left_trigger/2;
             } else if (gamepad1.right_trigger > 0) {
-                currentVerticalOrientation -= gamepad1.right_trigger/10;
+                targetVerticalOrientation -= gamepad1.right_trigger/2;
             }
 
             if (gamepad1.left_bumper) {
-                currentHorizontalOrientation += 0.005;
+                currentHorizontalOrientation -= 0.0025;
             } else if (gamepad1.right_bumper) {
-                currentHorizontalOrientation -= 0.005;
+                currentHorizontalOrientation += 0.0025;
             }
 
 
             if (currentHorizontalOrientation > 1) {
-                currentHorizontalOrientation = 1;
+                currentHorizontalOrientation = 1.5;
             } else if (currentHorizontalOrientation < -1) {
-                currentHorizontalOrientation = -1;
+                currentHorizontalOrientation = -1.5;
             }
 
-
-
-            /*
-            if (currentVerticalOrientation > 360) {
-                currentVerticalOrientation = 360;
-            } else if (currentVerticalOrientation < 0) {
-                currentVerticalOrientation = 0;
+            if (targetVerticalOrientation < 0) {
+                targetVerticalOrientation = 0;
+            } else if (targetVerticalOrientation > 360) {
+                targetVerticalOrientation = 360;
             }
 
-             */
+            if (targetVerticalOrientation == tapeGyroHeading) {
+                tapeController.pauseAndReset();
+                tapeController.resume();
+            }
+
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
-            // tapeVerticalOrientation.setPower(tapeController.calculate(currentVerticalOrientation, tapeMeasureGyro.));
 
-            switch (currentArmState) {
-                case RESET:
-                    if (gamepad2.dpad_up) {
-                        currentArmState = LiftStates.LEVEL_1;
-                    } else if (gamepad2.dpad_left) {
-                        currentArmState = LiftStates.LEVEL_2;
-                    } else if (gamepad2.dpad_down) {
-                        currentArmState = LiftStates.LEVEL_3;
-                    } else {
-                        currentArmState = LiftStates.RESET;
-                    }
+            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
+            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
-                    power = controller.calculate(0D, heading-headingOffset);
 
-                    break;
-                case LEVEL_1:
-
-            }
-            /*
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
                 targetHeading = 162D;
@@ -522,8 +542,6 @@ public class MecanumDriveTesting extends LinearOpMode {
             } else if (ArmMotor.getPower() != 0) {
                 ArmMotor.setPower(0);
             }
-
-             */
 
             if (targetHeading != -1) {
                 power = controller.calculate(targetHeading, heading-headingOffset);
@@ -560,7 +578,6 @@ public class MecanumDriveTesting extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
-            /*
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
             } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && debounces.check("Servo")) {
@@ -573,16 +590,18 @@ public class MecanumDriveTesting extends LinearOpMode {
                 // sleep(650);
             }
 
-             */
 
 
-            if (opModeIsActive()) {
-                for (Servo odometryServo : odometryServos) {
-                    if (odometryServo.getPosition() != 0.01) {
-                        odometryServo.setPosition(0.01);
-                    }
-                }
-            } else {
+
+
+
+//            if (opModeIsActive()) {
+//                for (Servo odometryServo : odometryServos) {
+//                    if (odometryServo.getPosition() != 0.01) {
+//                        odometryServo.setPosition(0.01);
+//                    }
+//                }
+            if (!opModeIsActive()) {
                 for (int i = 0; i < activeOdometryPosition.length; i++) {
                     odometryServos[i].setPosition(activeOdometryPosition[i]);
                 }
