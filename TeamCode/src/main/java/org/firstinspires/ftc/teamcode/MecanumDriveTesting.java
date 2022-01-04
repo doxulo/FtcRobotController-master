@@ -200,7 +200,8 @@ public class MecanumDriveTesting extends LinearOpMode {
                 new DebounceObject("Integral", 500),
                 new DebounceObject("Derivative", 500),
                 new DebounceObject("Servo", 300),
-                new DebounceObject("OdometryServo", 1000)
+                new DebounceObject("OdometryServo", 1000),
+                new DebounceObject("Test.", 1000)
         );
 
         Switch duckMotorSwitch = new Switch(false);
@@ -260,8 +261,13 @@ public class MecanumDriveTesting extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0D, 0.12D, 0.34D
+                0.35D, 0.58D, 0.74D
         };
+
+        double[] testPositions = new double[] {
+                0D, 1D
+        };
+
         double[] activeOdometryPosition = new double[] {
                 0.3666D, 0.3666D, 0.3666D
         };
@@ -280,6 +286,8 @@ public class MecanumDriveTesting extends LinearOpMode {
         boolean intakeOn = false;
         boolean limitOn = true;
         boolean resetArmPower = false;
+        boolean targetSet = false;
+        boolean on = false;
 
         limit = limitPower;
 
@@ -475,8 +483,12 @@ public class MecanumDriveTesting extends LinearOpMode {
 
 
             if (gamepad1.left_trigger > 0) {
+                // targetSet = false;
+                // tapeVerticalOrientation.setPower(-gamepad1.left_trigger/2);
                 targetVerticalOrientation += gamepad1.left_trigger/2;
             } else if (gamepad1.right_trigger > 0) {
+                // targetSet = false;
+                // tapeVerticalOrientation.setPower(gamepad1.right_trigger/2);
                 targetVerticalOrientation -= gamepad1.right_trigger/2;
             }
 
@@ -485,7 +497,6 @@ public class MecanumDriveTesting extends LinearOpMode {
             } else if (gamepad1.right_bumper) {
                 currentHorizontalOrientation += 0.0025;
             }
-
 
             if (currentHorizontalOrientation > 1) {
                 currentHorizontalOrientation = 1.5;
@@ -506,10 +517,8 @@ public class MecanumDriveTesting extends LinearOpMode {
 
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
-
             tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
             telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
-
 
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
@@ -558,6 +567,8 @@ public class MecanumDriveTesting extends LinearOpMode {
                 lastLevel = currentLevel;
                 resetArmPower = true;
                 ArmMotor.setPower(power);
+            } else {
+                controller.pauseAndReset();
             }
 
             if (gamepad2.right_bumper) {
@@ -578,6 +589,7 @@ public class MecanumDriveTesting extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
+
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
             } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && debounces.check("Servo")) {
@@ -589,8 +601,6 @@ public class MecanumDriveTesting extends LinearOpMode {
                 Twist.setPosition(twistPositions[0]);
                 // sleep(650);
             }
-
-
 
 
 
