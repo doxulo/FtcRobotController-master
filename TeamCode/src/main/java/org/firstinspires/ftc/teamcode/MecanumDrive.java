@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -25,13 +26,14 @@ import org.firstinspires.ftc.teamcode.util.MathUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-
 @TeleOp
 public class MecanumDrive extends LinearOpMode {
 
     private enum LiftStates {
         LEVEL_1, LEVEL_2, LEVEL_3, RESET
     }
+
+    public static double targetVerticalOrientation = 20D;
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -156,7 +158,7 @@ public class MecanumDrive extends LinearOpMode {
 
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
-        tapeVerticalOrientation.setPower(1);
+        tapeVerticalOrientation.setPower(.5);
 
         armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
         tapeGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "TapeGyro");
@@ -193,18 +195,19 @@ public class MecanumDrive extends LinearOpMode {
                 new DebounceObject("Integral", 500),
                 new DebounceObject("Derivative", 500),
                 new DebounceObject("Servo", 300),
-                new DebounceObject("OdometryServo", 1000)
+                new DebounceObject("OdometryServo", 1000),
+                new DebounceObject("Test.", 1000)
         );
 
         Switch duckMotorSwitch = new Switch(false);
 
 
         Scheduler scheduler = new Scheduler();
-        // Change kI
+
         PIDController controller = new PIDController(
-                0.01,
-                0.000001,// 0.000001, // TODO: Tune this
-                0.05,
+                0.001,
+                0,// 0.000001,// 0.000001, // TODO: Tune this
+                0,// 0.05,
                 new double[] {
                         0.05, -0.10
                 },
@@ -215,8 +218,22 @@ public class MecanumDrive extends LinearOpMode {
                 });
 
         PIDController tapeController = new PIDController(
-                0.1,
-                0.1,
+                0.02,
+                0,// 0.0001,
+                0.01,
+                new double[] {
+                        0, 0
+                },
+                360,
+                0,
+                new double[] {
+                        -0.25, 0.25, 10D
+                }
+        );
+
+        PIDController initTapeController = new PIDController(
+                0.01,
+                0,
                 0,
                 new double[] {
                         0, 0
@@ -224,7 +241,7 @@ public class MecanumDrive extends LinearOpMode {
                 360,
                 0,
                 new double[] {
-                        -0.15, 0.15, 25D
+                        -0.05, 0.005, 10D
                 }
         );
 
@@ -239,8 +256,13 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0D, 0.12D, 0.34D
+                0.35D, 0.58D, 0.74D
         };
+
+        double[] testPositions = new double[] {
+                0D, 1D
+        };
+
         double[] activeOdometryPosition = new double[] {
                 0.3666D, 0.3666D, 0.3666D
         };
@@ -248,7 +270,7 @@ public class MecanumDrive extends LinearOpMode {
         double defaultPower = 0.56D;
         double targetHeading = 0D;
         double currentHorizontalOrientation = 1D;
-        double targetVerticalOrientation = 20D;
+        // double targetVerticalOrientation = 20D;
 
         long startDuck = 0;
 
@@ -259,6 +281,8 @@ public class MecanumDrive extends LinearOpMode {
         boolean intakeOn = false;
         boolean limitOn = true;
         boolean resetArmPower = false;
+        boolean targetSet = false;
+        boolean on = false;
 
         limit = limitPower;
 
@@ -379,6 +403,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Red: ", redColor);
             telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
+            telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", "%3d deg", heading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
@@ -447,22 +472,25 @@ public class MecanumDrive extends LinearOpMode {
 
 
             if (gamepad1.left_trigger > 0) {
-                targetVerticalOrientation += 1;
+                // targetSet = false;
+                // tapeVerticalOrientation.setPower(-gamepad1.left_trigger/2);
+                targetVerticalOrientation += gamepad1.left_trigger/2;
             } else if (gamepad1.right_trigger > 0) {
-                targetVerticalOrientation -= 1;
+                // targetSet = false;
+                // tapeVerticalOrientation.setPower(gamepad1.right_trigger/2);
+                targetVerticalOrientation -= gamepad1.right_trigger/2;
             }
 
             if (gamepad1.left_bumper) {
-                currentHorizontalOrientation += 0.005;
+                currentHorizontalOrientation -= 0.0025;
             } else if (gamepad1.right_bumper) {
-                currentHorizontalOrientation -= 0.005;
+                currentHorizontalOrientation += 0.0025;
             }
 
-
             if (currentHorizontalOrientation > 1) {
-                currentHorizontalOrientation = 1;
+                currentHorizontalOrientation = 1.5;
             } else if (currentHorizontalOrientation < -1) {
-                currentHorizontalOrientation = -1;
+                currentHorizontalOrientation = -1.5;
             }
 
             if (targetVerticalOrientation < 0) {
@@ -471,13 +499,14 @@ public class MecanumDrive extends LinearOpMode {
                 targetVerticalOrientation = 360;
             }
 
-
+            if (targetVerticalOrientation == tapeGyroHeading) {
+                tapeController.pauseAndReset();
+                tapeController.resume();
+            }
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
-
-            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(targetVerticalOrientation, tapeGyroHeading), -1, 1));
-            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(targetVerticalOrientation, tapeGyroHeading), -1, 1));
-
+            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
+            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
@@ -546,6 +575,7 @@ public class MecanumDrive extends LinearOpMode {
                 Duck_Wheel2.setPower(0);
             }
 
+
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
             } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && debounces.check("Servo")) {
@@ -557,8 +587,6 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistPositions[0]);
                 // sleep(650);
             }
-
-
 
 
 

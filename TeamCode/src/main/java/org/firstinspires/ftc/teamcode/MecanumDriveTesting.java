@@ -26,19 +26,19 @@ import org.firstinspires.ftc.teamcode.util.MathUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@Config
 @TeleOp
+@Config
 public class MecanumDriveTesting extends LinearOpMode {
 
     private enum LiftStates {
         LEVEL_1, LEVEL_2, LEVEL_3, RESET
     }
 
+    public static double kP = 0.002;
+    public static double kI = 0;
+    public static double kD = 0;
 
-    public static double kP = 0.02; // 0.1
-    public static double kI = 0.0001;
-    public static double kD = 0.01; // 0.02
-    public static double targetVerticalOrientation = 20;
+    public static double targetVerticalOrientation = 20D;
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -208,11 +208,11 @@ public class MecanumDriveTesting extends LinearOpMode {
 
 
         Scheduler scheduler = new Scheduler();
-        // Change kI
+
         PIDController controller = new PIDController(
-                0.01,
-                0.000001,// 0.000001, // TODO: Tune this
-                0.05,
+                0.001,
+                0,// 0.000001,// 0.000001, // TODO: Tune this
+                0,// 0.05,
                 new double[] {
                         0.05, -0.10
                 },
@@ -223,9 +223,9 @@ public class MecanumDriveTesting extends LinearOpMode {
                 });
 
         PIDController tapeController = new PIDController(
-                0,
-                0,
-                0,
+                0.02,
+                0.0001,
+                0.01,
                 new double[] {
                         0, 0
                 },
@@ -379,10 +379,9 @@ public class MecanumDriveTesting extends LinearOpMode {
         long lastTime = System.currentTimeMillis();
 
         while (true) {
-            tapeController.kP = kP;
-            tapeController.kI = kI;
-            tapeController.kD = kD;
-
+            controller.kP = kP;
+            controller.kI = kI;
+            controller.kD = kD;
 
             long currentSystemTime = System.currentTimeMillis();
 
@@ -411,11 +410,11 @@ public class MecanumDriveTesting extends LinearOpMode {
 
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
-            telemetry.addData("Coefficients: ", "%f, %f, %f", kP, kI, kD);
             telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", "%3d deg", heading);
+            telemetry.addData("Arm target position: ", targetHeading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
             for (Servo s : odometryServos) {
@@ -469,8 +468,6 @@ public class MecanumDriveTesting extends LinearOpMode {
                 tapeExtension.setPower(0);
             }
 
-
-
             if (gamepad1.y) {
                 tapeVerticalOrientation.setPower(-1);
             } else if (gamepad1.right_stick_button) {
@@ -478,9 +475,6 @@ public class MecanumDriveTesting extends LinearOpMode {
             } else {
                 tapeVerticalOrientation.setPower(0);
             }
-
-
-
 
             if (gamepad1.left_trigger > 0) {
                 // targetSet = false;
@@ -514,7 +508,6 @@ public class MecanumDriveTesting extends LinearOpMode {
                 tapeController.pauseAndReset();
                 tapeController.resume();
             }
-
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
             tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
@@ -567,8 +560,6 @@ public class MecanumDriveTesting extends LinearOpMode {
                 lastLevel = currentLevel;
                 resetArmPower = true;
                 ArmMotor.setPower(power);
-            } else {
-                controller.pauseAndReset();
             }
 
             if (gamepad2.right_bumper) {
