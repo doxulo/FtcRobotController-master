@@ -205,9 +205,9 @@ public class MecanumDrive extends LinearOpMode {
         Scheduler scheduler = new Scheduler();
 
         PIDController controller = new PIDController(
-                0.001,
-                0,// 0.000001,// 0.000001, // TODO: Tune this
-                0,// 0.05,
+                0.01,
+                0.000001,// 0.000001, // TODO: Tune this
+                0.05,
                 new double[] {
                         0.05, -0.10
                 },
@@ -256,11 +256,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.35D, 0.58D, 0.74D
-        };
-
-        double[] testPositions = new double[] {
-                0D, 1D
+                0.35D, 0.58D, 0.84D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -327,7 +323,7 @@ public class MecanumDrive extends LinearOpMode {
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
@@ -356,7 +352,7 @@ public class MecanumDrive extends LinearOpMode {
         };
 
 
-        Method setPowerMethod = null;
+        final Method setPowerMethod;
 
         try {
             setPowerMethod = Intake.getClass().getMethod("setPower", double.class);
@@ -367,11 +363,18 @@ public class MecanumDrive extends LinearOpMode {
         tapeVerticalOrientation.setPower(0);
 
         waitForStart();
+
         /*
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
         long lastTime = System.currentTimeMillis();
+
+        /*
+        for (Servo odometryServo : odometryServos) {
+            odometryServo.setPosition(0);
+        }
+         */
 
         while (true) {
             long currentSystemTime = System.currentTimeMillis();
@@ -405,6 +408,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", "%3d deg", heading);
+            telemetry.addData("Target arm heading: ", targetHeading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
             for (Servo s : odometryServos) {
@@ -510,16 +514,24 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
-                targetHeading = 162D;
+                targetHeading = 150D;
             } else if (gamepad2.dpad_left) {
                 currentLevel = 2;
-                targetHeading = 210D;
+                targetHeading = 200D;
             } else if (gamepad2.dpad_down) {
                 currentLevel = 3;
-                targetHeading = 240D;
+                targetHeading = 220D;
             } else if (gamepad2.x) {
                 currentLevel = 0;
                 targetHeading = 0D;
+                Intake.setPower(-0.5);
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        1000
+                );
             } else if (gamepad2.left_stick_button) {
                 headingOffset = heading;
             } else if (gamepad2.left_trigger > 0) {
@@ -533,7 +545,7 @@ public class MecanumDrive extends LinearOpMode {
             }  else if (resetArmPower) {
                 resetArmPower = false;
                 targetHeading = -1;
-                currentLevel = 0;
+                currentLevel = -1;
                 controller.pauseAndReset();
                 ArmMotor.setPower(0);
             } else if (ArmMotor.getPower() != 0) {
@@ -544,7 +556,7 @@ public class MecanumDrive extends LinearOpMode {
                 power = controller.calculate(targetHeading, heading-headingOffset);
 
                 if (targetHeading == 0) {
-                    power *= 0.75;
+                    power *= 0.5;
                 }
                 if (currentLevel != lastLevel) {
                     controller.pauseAndReset();
@@ -554,6 +566,7 @@ public class MecanumDrive extends LinearOpMode {
 
                 lastLevel = currentLevel;
                 resetArmPower = true;
+
                 ArmMotor.setPower(power);
             }
 
