@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -16,8 +18,14 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
+@Config
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
+
+    public static double LEFT_POSITION = 0.6175D;
+    public static double RIGHT_POSITION = 0.135D;
+    public static double FRONT_POSITION = 0.70D;
+
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -31,9 +39,11 @@ public class LocalizationTest extends LinearOpMode {
 
         waitForStart();
 
-        leftOdometryServo.setPosition(0.37);
-        rightOdometryServo.setPosition(0.37);
-        frontOdometryServo.setPosition(0.37);
+//
+//        leftOdometryServo.setPosition(0.63);
+//
+//        rightOdometryServo.setPosition(0.37);
+//        frontOdometryServo.setPosition(0.37);
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(
@@ -50,6 +60,13 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+            leftOdometryServo.setPosition(LEFT_POSITION);
+            rightOdometryServo.setPosition(RIGHT_POSITION);
+            frontOdometryServo.setPosition(FRONT_POSITION);
+            telemetry.addData("Left Servo Position: ", leftOdometryServo.getPosition());
+            telemetry.addData("Front Servo Position: ", frontOdometryServo.getPosition());
+            telemetry.addData("Right Servo Position: ", rightOdometryServo.getPosition());
+            telemetry.update();
             telemetry.update();
         }
     }

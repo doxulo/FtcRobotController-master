@@ -351,8 +351,13 @@ public class MecanumDrive extends LinearOpMode {
                 hardwareMap.servo.get("RightOdometryServo"),
         };
 
+        double[] restingPositions = new double[] {
+                0.46D,
+                0.89D,
+                0.28D
+        };
 
-        final Method setPowerMethod;
+        Method setPowerMethod = null;
 
         try {
             setPowerMethod = Intake.getClass().getMethod("setPower", double.class);
@@ -370,11 +375,9 @@ public class MecanumDrive extends LinearOpMode {
         */
         long lastTime = System.currentTimeMillis();
 
-        /*
-        for (Servo odometryServo : odometryServos) {
-            odometryServo.setPosition(0);
+        for (int i = 0; i < odometryServos.length; i++) {
+            odometryServos[i].setPosition(restingPositions[i]);
         }
-         */
 
         while (true) {
             long currentSystemTime = System.currentTimeMillis();
@@ -410,6 +413,11 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("arm heading: ", "%3d deg", heading);
             telemetry.addData("Target arm heading: ", targetHeading);
             telemetry.addData("Twist position: ", Twist.getPosition());
+
+            telemetry.addData("Left Servo Position: ", odometryServos[0].getPosition());
+            telemetry.addData("Front Servo Position: ", odometryServos[1].getPosition());
+            telemetry.addData("Right Servo Position: ", odometryServos[2].getPosition());
+
 
             for (Servo s : odometryServos) {
                 telemetry.addData("Odometry servo position: ", s.getPosition());
@@ -462,16 +470,18 @@ public class MecanumDrive extends LinearOpMode {
                 tapeExtension.setPower(0);
             }
 
-
-
             if (gamepad1.y) {
-                tapeVerticalOrientation.setPower(-1);
-            } else if (gamepad1.right_stick_button) {
-                tapeVerticalOrientation.setPower(1);
-            } else {
-                tapeVerticalOrientation.setPower(0);
+                for (Servo s : odometryServos) {
+                    s.setPosition(0);
+                }
             }
 
+
+            if (gamepad1.b) {
+                for (Servo s : odometryServos) {
+                    s.setPosition(1);
+                }
+            }
 
 
 
@@ -616,6 +626,10 @@ public class MecanumDrive extends LinearOpMode {
                 }
                 sleep(100);
                 break;
+            } else {
+                for (int i = 0; i < odometryServos.length; i++) {
+                    odometryServos[i].setPosition(restingPositions[i]);
+                }
             }
         }
 
