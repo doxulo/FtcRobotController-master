@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -26,16 +27,19 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
  */
 @Config
-@Disabled
-// @Autonomous(group = "drive")
+@Autonomous(group = "drive")
 public class BackAndForth extends LinearOpMode {
 
     public static double DISTANCE = 50;
-
+    public static double LEFT_POSITION = 0.6175D;
+    public static double RIGHT_POSITION = 0.135D;
+    public static double FRONT_POSITION = 0.70D;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
+        Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
+        Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
+        Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)
                 .build();
@@ -45,7 +49,9 @@ public class BackAndForth extends LinearOpMode {
                 .build();
 
         waitForStart();
-
+        leftOdometryServo.setPosition(LEFT_POSITION);
+        rightOdometryServo.setPosition(RIGHT_POSITION);
+        frontOdometryServo.setPosition(FRONT_POSITION);
         while (opModeIsActive() && !isStopRequested()) {
             drive.followTrajectory(trajectoryForward);
             drive.followTrajectory(trajectoryBackward);

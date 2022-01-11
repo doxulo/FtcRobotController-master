@@ -418,6 +418,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Front Servo Position: ", odometryServos[1].getPosition());
             telemetry.addData("Right Servo Position: ", odometryServos[2].getPosition());
 
+            telemetry.addData("Position: ", tapeHorizontalOrientation.getPower());
 
             for (Servo s : odometryServos) {
                 telemetry.addData("Odometry servo position: ", s.getPosition());
@@ -501,9 +502,9 @@ public class MecanumDrive extends LinearOpMode {
                 currentHorizontalOrientation += 0.0025;
             }
 
-            if (currentHorizontalOrientation > 1) {
+            if (currentHorizontalOrientation > 1.5) {
                 currentHorizontalOrientation = 1.5;
-            } else if (currentHorizontalOrientation < -1) {
+            } else if (currentHorizontalOrientation < -1.5) {
                 currentHorizontalOrientation = -1.5;
             }
 
@@ -516,7 +517,7 @@ public class MecanumDrive extends LinearOpMode {
             if (targetVerticalOrientation == tapeGyroHeading) {
                 tapeController.pauseAndReset();
                 tapeController.resume();
-            }
+            } 
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
             tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));

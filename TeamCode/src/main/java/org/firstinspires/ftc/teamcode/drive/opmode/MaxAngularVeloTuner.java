@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -23,13 +24,16 @@ import java.util.Objects;
  */
 
 @Config
-// @Autonomous(group = "drive")
-@Disabled
+@Autonomous(group = "drive")
 public class MaxAngularVeloTuner extends LinearOpMode {
     public static double RUNTIME = 4.0;
 
     private ElapsedTime timer;
     private double maxAngVelocity = 0.0;
+
+    public static double LEFT_POSITION = 0.6175D;
+    public static double RIGHT_POSITION = 0.135D;
+    public static double FRONT_POSITION = 0.70D;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -39,6 +43,10 @@ public class MaxAngularVeloTuner extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
+        Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
+        Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
+
         telemetry.addLine("Your bot will turn at full speed for " + RUNTIME + " seconds.");
         telemetry.addLine("Please ensure you have enough space cleared.");
         telemetry.addLine("");
@@ -46,6 +54,10 @@ public class MaxAngularVeloTuner extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+
+        leftOdometryServo.setPosition(LEFT_POSITION);
+        rightOdometryServo.setPosition(RIGHT_POSITION);
+        frontOdometryServo.setPosition(FRONT_POSITION);
 
         telemetry.clearAll();
         telemetry.update();

@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -23,21 +24,26 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * These coefficients can be tuned live in dashboard.
  */
 @Config
-// @Autonomous(group = "drive")
-@Disabled
+@Autonomous(group = "drive")
 public class FollowerPIDTuner extends LinearOpMode {
     public static double DISTANCE = 48; // in
-
+    public static double LEFT_POSITION = 0.6175D;
+    public static double RIGHT_POSITION = 0.135D;
+    public static double FRONT_POSITION = 0.70D;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
+        Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
+        Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
+        Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
 
         drive.setPoseEstimate(startPose);
 
         waitForStart();
-
+        leftOdometryServo.setPosition(LEFT_POSITION);
+        rightOdometryServo.setPosition(RIGHT_POSITION);
+        frontOdometryServo.setPosition(FRONT_POSITION);
         if (isStopRequested()) return;
 
         while (!isStopRequested()) {

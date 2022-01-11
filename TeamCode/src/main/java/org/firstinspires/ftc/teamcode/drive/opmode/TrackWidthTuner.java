@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
@@ -24,13 +25,14 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * accurate track width estimate is important or else the angular constraints will be thrown off.
  */
 @Config
-// @Autonomous(group = "drive")
-@Disabled
+@Autonomous(group = "drive")
 public class TrackWidthTuner extends LinearOpMode {
     public static double ANGLE = 180; // deg
-    public static int NUM_TRIALS = 5;
+    public static int NUM_TRIALS = 100;
     public static int DELAY = 1000; // ms
-
+    public static double LEFT_POSITION = 0.6175D;
+    public static double RIGHT_POSITION = 0.135D;
+    public static double FRONT_POSITION = 0.70D;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -39,12 +41,18 @@ public class TrackWidthTuner extends LinearOpMode {
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         // drive encoders for computing the heading
 
+        Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
+        Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
+        Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
+
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
         waitForStart();
-
+        leftOdometryServo.setPosition(LEFT_POSITION);
+        rightOdometryServo.setPosition(RIGHT_POSITION);
+        frontOdometryServo.setPosition(FRONT_POSITION);
         if (isStopRequested()) return;
 
         telemetry.clearAll();
