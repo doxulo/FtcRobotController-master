@@ -404,7 +404,10 @@ public class MecanumDrive extends LinearOpMode {
 
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
-
+            telemetry.addData("Power RF: ", RF.getPower());
+            telemetry.addData("Power LF: ", LF.getPower());
+            telemetry.addData("Power RB: ", RB.getPower());
+            telemetry.addData("Power LB: ", LB.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
             telemetry.addData("tape measurer heading: ", tapeGyroHeading);
@@ -517,7 +520,7 @@ public class MecanumDrive extends LinearOpMode {
             if (targetVerticalOrientation == tapeGyroHeading) {
                 tapeController.pauseAndReset();
                 tapeController.resume();
-            } 
+            }
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
             tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
