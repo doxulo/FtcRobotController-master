@@ -256,7 +256,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.35D, 0.58D, 0.84D
+                0.35D, 0.58D, 1D
         };
 
         double[] activeOdometryPosition = new double[] {

@@ -88,6 +88,7 @@ public class Storage extends LinearOpMode {
         );
 
         waitForStart();
+        
         applyPower(0.4, 0.4, 0.4 ,0.4);
         sleep(1750);
          applyPower(0,0,0,0);
