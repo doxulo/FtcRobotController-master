@@ -40,7 +40,7 @@ import java.util.List;
 
 
 @Autonomous
-public class B_Cycle extends LinearOpMode {
+public class R_Cycle extends LinearOpMode {
 
     DcMotorEx LF;
     DcMotorEx RF;
@@ -121,30 +121,41 @@ public class B_Cycle extends LinearOpMode {
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
 
-        waitForStart();
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setPoseEstimate(new Pose2d(0, 0, -180));
 
-        Trajectory linearToHub = drive.trajectoryBuilder(new Pose2d(0, 0, -180))
-                .lineToConstantHeading(new Vector2d(-18, -26))
+        Trajectory splineToHub = drive.trajectoryBuilder(new Pose2d())
+                .splineToConstantHeading(new Vector2d(-18, 26), 0)
                 .build();
 
-        TrajectorySequence hubToBlocks = drive.trajectorySequenceBuilder(linearToHub.end())
-                .lineToLinearHeading(new Pose2d(0, 10, -90))
-                .lineTo(new Vector2d(15, 0))
+        Trajectory splineToStartPosition = drive.trajectoryBuilder(splineToHub.end())
+                .splineToLinearHeading(new Pose2d(0, 0, -90), 0)
                 .build();
+
+        Trajectory forwardToBlocks = drive.trajectoryBuilder(splineToStartPosition.end())
+              .forward(33)
+                .build();
+
+//        TrajectorySequence path = drive.trajectorySequenceBuilder(new Pose2d())
+//                .lineToConstantHeading(new Vector2d(-18, 26))
+//                .lineToLinearHeading(new Pose2d(0, 0, -90))
+//                .forward(33)
+//                .build();
 
 
         waitForStart();
 
         if(isStopRequested()) return;
 
-        drive.followTrajectory(linearToHub);
+        // drive.followTrajectorySequence(path);
+        drive.followTrajectory(splineToHub);
         // Put Block
-        drive.followTrajectorySequence(hubToBlocks);
+        drive.followTrajectory(splineToStartPosition);
+        drive.followTrajectory(forwardToBlocks);
         // Get Block
-        drive.followTrajectory(linearToHub);
+        // drive.followTrajectory(linearToStartPosition);
+        // drive.followTrajectory(linearToHub);
     }
 }
