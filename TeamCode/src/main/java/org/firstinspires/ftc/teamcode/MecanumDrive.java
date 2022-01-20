@@ -60,7 +60,7 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor ArmMotor;
     public ColorSensor BoxSensor;
     public CRServo tapeExtension;
-    public CRServo tapeVerticalOrientation;
+    public Servo tapeVerticalOrientation;
     public CRServo tapeHorizontalOrientation;
     public Servo[] odometryServos = new Servo[3];
 
@@ -156,25 +156,15 @@ public class MecanumDrive extends LinearOpMode {
 
         FtcDashboard dash = FtcDashboard.getInstance();
 
-        tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
+        tapeVerticalOrientation = hardwareMap.servo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
-        tapeVerticalOrientation.setPower(.5);
 
         armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
-        tapeGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "TapeGyro");
 
         telemetry.log().add("Gyros Calibrating. Do Not Move!");
         armGyro.calibrate();
 
         timer.reset();
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
-            telemetry.update();
-            sleep(50);
-        }
-
-        tapeVerticalOrientation.setPower(0);
-        tapeGyro.calibrate();
         while (!isStopRequested() && armGyro.isCalibrating())  {
             telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
             telemetry.update();
@@ -365,8 +355,6 @@ public class MecanumDrive extends LinearOpMode {
             e.printStackTrace();
         }
 
-        tapeVerticalOrientation.setPower(0);
-
         waitForStart();
 
         /*
@@ -383,11 +371,11 @@ public class MecanumDrive extends LinearOpMode {
             long currentSystemTime = System.currentTimeMillis();
 
             int heading = armGyro.getHeading();
-            int tapeGyroHeading = tapeGyro.getHeading();
+            // int tapeGyroHeading = tapeGyro.getHeading();
 
-            if (tapeGyroHeading > 280) {
-                tapeGyroHeading = 0;
-            }
+            // if (tapeGyroHeading > 280) {
+            //    tapeGyroHeading = 0;
+            // }
 
             heading = heading > 350 ? 0 : heading;
             int redColor = BoxSensor.red();
@@ -410,7 +398,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Power LB: ", LB.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
-            telemetry.addData("tape measurer heading: ", tapeGyroHeading);
+            // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", "%3d deg", heading);
@@ -474,29 +462,14 @@ public class MecanumDrive extends LinearOpMode {
                 tapeExtension.setPower(0);
             }
 
-            if (gamepad1.y) {
-                for (Servo s : odometryServos) {
-                    s.setPosition(0);
-                }
-            }
-
-
-            if (gamepad1.b) {
-                for (Servo s : odometryServos) {
-                    s.setPosition(1);
-                }
-            }
-
-
-
             if (gamepad1.left_trigger > 0) {
                 // targetSet = false;
                 // tapeVerticalOrientation.setPower(-gamepad1.left_trigger/2);
-                targetVerticalOrientation += gamepad1.left_trigger/2;
+                targetVerticalOrientation += gamepad1.left_trigger/50;
             } else if (gamepad1.right_trigger > 0) {
                 // targetSet = false;
                 // tapeVerticalOrientation.setPower(gamepad1.right_trigger/2);
-                targetVerticalOrientation -= gamepad1.right_trigger/2;
+                targetVerticalOrientation -= gamepad1.right_trigger/50;
             }
 
             if (gamepad1.left_bumper) {
@@ -505,26 +478,27 @@ public class MecanumDrive extends LinearOpMode {
                 currentHorizontalOrientation += 0.0025;
             }
 
-            if (currentHorizontalOrientation > 1.5) {
-                currentHorizontalOrientation = 1.5;
-            } else if (currentHorizontalOrientation < -1.5) {
-                currentHorizontalOrientation = -1.5;
+            if (currentHorizontalOrientation > 1) {
+                currentHorizontalOrientation = 1;
+            } else if (currentHorizontalOrientation < -1) {
+                currentHorizontalOrientation = -1;
             }
 
-            if (targetVerticalOrientation < 0) {
-                targetVerticalOrientation = 0;
-            } else if (targetVerticalOrientation > 360) {
-                targetVerticalOrientation = 360;
-            }
+//            if (targetVerticalOrientation == tapeGyroHeading) {
+//                tapeController.pauseAndReset();
+//                tapeController.resume();
+//            }
 
-            if (targetVerticalOrientation == tapeGyroHeading) {
-                tapeController.pauseAndReset();
-                tapeController.resume();
+            if (targetVerticalOrientation > 1) {
+                targetVerticalOrientation = 1;
+            } else if (targetVerticalOrientation < -1) {
+                targetVerticalOrientation = -1;
             }
 
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
-            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
-            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
+            tapeVerticalOrientation.setPosition(targetVerticalOrientation);
+//            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
+//            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
