@@ -2,6 +2,7 @@ package com.example.meepmeeptesting;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.profile.VelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.noahbres.meepmeep.MeepMeep;
@@ -22,17 +23,19 @@ public class MeepMeepTesting {
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                                 .setReversed(true)
-                                .splineToConstantHeading(new Vector2d(22, 25), Math.toRadians(90))
+                                .splineToConstantHeading(new Vector2d(25, 18), Math.toRadians(90))
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(0, 0, Math.toRadians(180)), Math.toRadians(200))
+                                .lineToLinearHeading(new Pose2d(5, -1.5, Math.toRadians(180)))
                                 .setReversed(true)
-                                .forward(36)
-                                .back(36)
-                                .splineToSplineHeading(new Pose2d(22, 25, Math.toRadians(270)), Math.toRadians(90))
+                                .forward(33)
+                                .strafeTo(new Vector2d(-33, 10))
+                                .strafeTo(new Vector2d(-28, -1.5))
+                                .back(35)
+                                .splineToSplineHeading(new Pose2d(25, 18, Math.toRadians(270)), Math.toRadians(90))
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(0, 0, Math.toRadians(180)), Math.toRadians(200))
+                                .splineToSplineHeading(new Pose2d(5, -1.5, Math.toRadians(180)), Math.toRadians(200))
                                 .setReversed(true)
-                                .forward(36)
+                                .forward(30)
                                 .build()
                 );
         meepMeep.setBackground(MeepMeep.Background.FIELD_FREIGHTFRENZY_OFFICIAL)

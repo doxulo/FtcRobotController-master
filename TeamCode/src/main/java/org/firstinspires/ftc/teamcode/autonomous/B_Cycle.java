@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Commands;
@@ -49,7 +50,13 @@ public class B_Cycle extends LinearOpMode {
     DcMotorEx ArmMotor;
     Servo Twist;
     ColorSensor BoxSensor;
+    OpenCvWebcam webcam;
 
+    public enum ArmStates {
+        REST, LEVEL_1, LEVEL_2, LEVEL_3
+    }
+
+    ArmStates currentArmState;
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
 
@@ -65,6 +72,34 @@ public class B_Cycle extends LinearOpMode {
         motor.setZeroPowerBehavior(zeroPowerBehavior);
 
         return motor;
+    }
+
+    public double getArmTargetDegrees(ArmStates currentArmStates) {
+        double targetDegrees = 0D;
+        switch (currentArmStates) {
+            case REST:
+                targetDegrees = 0D;
+                break;
+            case LEVEL_1:
+                targetDegrees = 150D;
+                break;
+            case LEVEL_2:
+                targetDegrees = 200D;
+                break;
+            case LEVEL_3:
+                targetDegrees = 220D;
+                break;
+        }
+
+        return targetDegrees;
+    }
+
+    public void run() {
+        while (opModeIsActive()) {
+            double targetArmDegrees = getArmTargetDegrees(currentArmState);
+            double power = 0;
+            ArmMotor.setPower(power);
+        }
     }
 
     @Override
@@ -121,30 +156,85 @@ public class B_Cycle extends LinearOpMode {
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
 
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        // OR...  Do Not Activate the Camera Monitor View
+        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        BarcodeDetector detector = new BarcodeDetector(telemetry);
+        webcam.setPipeline(detector);
+        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
+
         waitForStart();
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        drive.setPoseEstimate(new Pose2d(0, 0, -180));
+//        drive.setPoseEstimate(new Pose2d(0, 0, -180));
 
-        Trajectory linearToHub = drive.trajectoryBuilder(new Pose2d(0, 0, -180))
-                .lineToConstantHeading(new Vector2d(-18, -26))
+//        Trajectory linearToHub = drive.trajectoryBuilder(new Pose2d(0, 0, -180))
+//                .lineToConstantHeading(new Vector2d(-18, -26))
+//                .build();
+//        TrajectorySequence hubToBlocks = drive.trajectorySequenceBuilder(linearToHub.end())
+//                .lineToLinearHeading(new Pose2d(0, 10, -90))
+//                .lineTo(new Vector2d(15, 0))
+//                .build();
+
+        drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
+        TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setReversed(true)
+                .strafeTo(new Vector2d(25, 18))
+                .setReversed(false)
+                .lineToLinearHeading(new Pose2d(5, -1.5, Math.toRadians(180)))
+                .setReversed(true)
+                .forward(30)
+                .strafeTo(new Vector2d(-30, 10))
+                .strafeTo(new Vector2d(-28, -1.5))
+                .back(35)
+                .splineToSplineHeading(new Pose2d(25, 18, Math.toRadians(270)), Math.toRadians(90))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(5, -1.5, Math.toRadians(180)), Math.toRadians(200))
+                .setReversed(true)
+                .forward(30)
                 .build();
-
-        TrajectorySequence hubToBlocks = drive.trajectorySequenceBuilder(linearToHub.end())
-                .lineToLinearHeading(new Pose2d(0, 10, -90))
-                .lineTo(new Vector2d(15, 0))
-                .build();
-
 
         waitForStart();
+        BarcodeDetector.Location barcode = detector.getLocation();
+        webcam.stopStreaming();
+        switch (barcode) {
+            case LEFT:
+                telemetry.addData("location: ", "left");
+                break;
+            case RIGHT:
+                telemetry.addData("location: ", "right");
+                break;
+            case MIDDLE:
+                telemetry.addData("location: ", "middle");
+        }
+        telemetry.update();
 
         if(isStopRequested()) return;
-
-        drive.followTrajectory(linearToHub);
-        // Put Block
-        drive.followTrajectorySequence(hubToBlocks);
-        // Get Block
-        drive.followTrajectory(linearToHub);
+        drive.followTrajectorySequence(full);
+//        drive.followTrajectory(linearToHub);
+//        // Put Block
+//        drive.followTrajectorySequence(hubToBlocks);
+//        // Get Block
+//        drive.followTrajectory(linearToHub);
     }
 }
