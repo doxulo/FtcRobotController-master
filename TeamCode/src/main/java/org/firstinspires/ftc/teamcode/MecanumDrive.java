@@ -27,13 +27,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @TeleOp
+@Config
 public class MecanumDrive extends LinearOpMode {
 
     private enum LiftStates {
         LEVEL_1, LEVEL_2, LEVEL_3, RESET
     }
-
-    public static double targetVerticalOrientation = 20D;
 
     /** Global comments:
      * GamePad1 == For movements,
@@ -63,6 +62,16 @@ public class MecanumDrive extends LinearOpMode {
     public Servo tapeVerticalOrientation;
     public CRServo tapeHorizontalOrientation;
     public Servo[] odometryServos = new Servo[3];
+
+    public static double rest = 0.46D;
+    public static double close = 0.89D;
+    public static double end = 0.28D;
+
+    double[] restingPositions = new double[] {
+            0.35D,
+            0.5D,
+            0.1D
+    };
 
     /**
      * Initialize all motors that control the robot's accessories
@@ -246,7 +255,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.35D, 0.58D, 1D
+                0.48D, 0.58D, 1D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -255,8 +264,8 @@ public class MecanumDrive extends LinearOpMode {
 
         double defaultPower = 0.56D;
         double targetHeading = 0D;
-        double currentHorizontalOrientation = 1D;
-        // double targetVerticalOrientation = 20D;
+        double currentHorizontalOrientation = 0.5D;
+        double targetVerticalOrientation = 0D;
 
         long startDuck = 0;
 
@@ -357,10 +366,10 @@ public class MecanumDrive extends LinearOpMode {
 
         waitForStart();
 
-        /*
-        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        */
+       /*
+       ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       */
         long lastTime = System.currentTimeMillis();
 
         for (int i = 0; i < odometryServos.length; i++) {
@@ -368,6 +377,8 @@ public class MecanumDrive extends LinearOpMode {
         }
 
         while (true) {
+
+
             long currentSystemTime = System.currentTimeMillis();
 
             int heading = armGyro.getHeading();
@@ -392,10 +403,6 @@ public class MecanumDrive extends LinearOpMode {
 
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
-            telemetry.addData("Power RF: ", RF.getPower());
-            telemetry.addData("Power LF: ", LF.getPower());
-            telemetry.addData("Power RB: ", RB.getPower());
-            telemetry.addData("Power LB: ", LB.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
             // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
@@ -405,15 +412,10 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Target arm heading: ", targetHeading);
             telemetry.addData("Twist position: ", Twist.getPosition());
 
-            telemetry.addData("Left Servo Position: ", odometryServos[0].getPosition());
-            telemetry.addData("Front Servo Position: ", odometryServos[1].getPosition());
-            telemetry.addData("Right Servo Position: ", odometryServos[2].getPosition());
+            telemetry.addData("Horizontal Position: ", tapeHorizontalOrientation.getPower());
+            telemetry.addData("Vertical position: ", tapeVerticalOrientation.getPosition());
+            telemetry.addData("target", targetVerticalOrientation);
 
-            telemetry.addData("Position: ", tapeHorizontalOrientation.getPower());
-
-            for (Servo s : odometryServos) {
-                telemetry.addData("Odometry servo position: ", s.getPosition());
-            }
             // telemetry.addData("integrated Z", "%3d", integratedZ);
             //telemetry.addLine()
             //        .addData("rawX", formatRaw(rawX))
@@ -463,40 +465,28 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad1.left_trigger > 0) {
-                // targetSet = false;
-                // tapeVerticalOrientation.setPower(-gamepad1.left_trigger/2);
-                targetVerticalOrientation += gamepad1.left_trigger/50;
+                currentHorizontalOrientation = gamepad1.left_trigger/3;
             } else if (gamepad1.right_trigger > 0) {
-                // targetSet = false;
-                // tapeVerticalOrientation.setPower(gamepad1.right_trigger/2);
-                targetVerticalOrientation -= gamepad1.right_trigger/50;
+                currentHorizontalOrientation = -gamepad1.right_trigger/3;
+            } else {
+                currentHorizontalOrientation = 0;
             }
 
             if (gamepad1.left_bumper) {
-                currentHorizontalOrientation -= 0.0025;
+                targetVerticalOrientation += -0.01;
             } else if (gamepad1.right_bumper) {
-                currentHorizontalOrientation += 0.0025;
+                targetVerticalOrientation += 0.01;
             }
-
-            if (currentHorizontalOrientation > 1) {
-                currentHorizontalOrientation = 1;
-            } else if (currentHorizontalOrientation < -1) {
-                currentHorizontalOrientation = -1;
-            }
-
-//            if (targetVerticalOrientation == tapeGyroHeading) {
-//                tapeController.pauseAndReset();
-//                tapeController.resume();
-//            }
 
             if (targetVerticalOrientation > 1) {
                 targetVerticalOrientation = 1;
-            } else if (targetVerticalOrientation < -1) {
-                targetVerticalOrientation = -1;
+            } else if (targetVerticalOrientation < 0) {
+                targetVerticalOrientation = 0;
             }
 
-            tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
             tapeVerticalOrientation.setPosition(targetVerticalOrientation);
+            tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
+
 //            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 //            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
@@ -518,7 +508,7 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        1000
+                        100
                 );
             } else if (gamepad2.left_stick_button) {
                 headingOffset = heading;
@@ -614,3 +604,4 @@ public class MecanumDrive extends LinearOpMode {
     }
 
 }
+

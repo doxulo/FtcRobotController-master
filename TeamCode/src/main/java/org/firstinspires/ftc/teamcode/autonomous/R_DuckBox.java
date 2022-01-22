@@ -21,8 +21,10 @@ import org.firstinspires.ftc.teamcode.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.Arm;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -55,6 +57,9 @@ public class R_DuckBox extends LinearOpMode {
     OpenCvWebcam webcam;
     DcMotorEx Duck_Wheel2;
     DcMotorEx Duck_Wheel1;
+    DcMotorEx Intake;
+
+    ModernRoboticsI2cGyro armGyro;
 
     public enum ArmStates {
         REST, LEVEL_1, LEVEL_2, LEVEL_3
@@ -63,6 +68,19 @@ public class R_DuckBox extends LinearOpMode {
     ArmStates currentArmState;
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
+
+    PIDController controller = new PIDController(
+            0.01,
+            0.000001,// 0.000001, // TODO: Tune this
+            0.05,
+            new double[] {
+                    0.05, -0.10
+            },
+            360,
+            0,
+            new double[] {
+                    -0.15, 0.15, 25D
+            });
 
     private DcMotorEx initMotor(
             String motorName,
@@ -78,36 +96,46 @@ public class R_DuckBox extends LinearOpMode {
         return motor;
     }
 
-    public double getArmTargetDegrees(ArmStates currentArmStates) {
+    public double getArmTargetDegrees(int level) {
         double targetDegrees = 0D;
-        switch (currentArmStates) {
-            case REST:
+        switch (level) {
+            case 0:
                 targetDegrees = 0D;
                 break;
-            case LEVEL_1:
+            case 1:
                 targetDegrees = 150D;
                 break;
-            case LEVEL_2:
+            case 2:
                 targetDegrees = 200D;
                 break;
-            case LEVEL_3:
-                targetDegrees = 220D;
+            case 3:
+                targetDegrees = 210D;
                 break;
         }
 
         return targetDegrees;
     }
 
-    public void run() {
-        while (opModeIsActive()) {
-            double targetArmDegrees = getArmTargetDegrees(currentArmState);
-            double power = 0;
-            ArmMotor.setPower(power);
-        }
+    public double getPower(double currentHeading, int targetLevel) {
+        return controller.calculate(getArmTargetDegrees(targetLevel), currentHeading);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
+
+        telemetry.log().add("Gyros Calibrating. Do Not Move!");
+        armGyro.calibrate();
+
+        while (!isStopRequested() && armGyro.isCalibrating())  {
+            telemetry.addData("calibrating, ", "%f seconds passed");
+            telemetry.update();
+            sleep(50);
+        }
+
+        telemetry.addLine("Done calibrating");
+        telemetry.update();
 
         LF = initMotor(
                 "LF",
@@ -157,6 +185,13 @@ public class R_DuckBox extends LinearOpMode {
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
+        Intake = initMotor(
+                "Intake",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         Twist = hardwareMap.servo.get("Twisty");
@@ -214,15 +249,63 @@ public class R_DuckBox extends LinearOpMode {
 //                .build();
 
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
-        TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+
+        TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-17, 10, Math.toRadians(0)))
-                .strafeRight(7)
-                .waitSeconds(3)
-                .forward(7.5, SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(-19, 10, Math.toRadians(0)))
+                .strafeRight(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(5))
-                .turn(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(15,40, Math.toRadians(170)), Math.toRadians(350))
+                .waitSeconds(3)
+                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .turn(Math.toRadians(-80))
+                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .splineToLinearHeading(new Pose2d(10,36, Math.toRadians(170)), Math.toRadians(350))
+                .build();
+
+        TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(-19, 10, Math.toRadians(0)))
+                .strafeRight(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(5))
+                .waitSeconds(3)
+                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .turn(Math.toRadians(-80))
+                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .splineToLinearHeading(new Pose2d(6,36, Math.toRadians(170)), Math.toRadians(350))
+                .build();
+
+        TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(-19, 10, Math.toRadians(0)))
+                .strafeRight(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(5))
+                .waitSeconds(3)
+                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .turn(Math.toRadians(-80))
+                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .splineToLinearHeading(new Pose2d(3,36, Math.toRadians(170)), Math.toRadians(350))
+                .build();
+
+        // 10 high 5 mid 0 low
+        TrajectorySequence lv1_warehouse_from_hub = drive.trajectorySequenceBuilder(lv1.end())
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
+                .build();
+
+        TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
+                .build();
+
+        TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
                 .build();
 
         waitForStart();
@@ -240,15 +323,76 @@ public class R_DuckBox extends LinearOpMode {
         }
         telemetry.update();
 
-        Duck_Wheel1.setPower(0.75);
-        Duck_Wheel2.setPower(-0.75);
+        Duck_Wheel1.setPower(0.45);
+        Duck_Wheel2.setPower(-0.45);
 
         if(isStopRequested()) return;
-        drive.followTrajectorySequence(full);
-//        drive.followTrajectory(linearToHub);
-//        // Put Block
-//        drive.followTrajectorySequence(hubToBlocks);
-//        // Get Block
-//        drive.followTrajectory(linearToHub);
+
+        int targetLevel = 0;
+        Twist.setPosition(0.58D);
+
+        switch (barcode) {
+            case LEFT:
+                targetLevel = 3;
+                drive.followTrajectorySequence(lv3);
+                break;
+            case RIGHT:
+                targetLevel = 1;
+                drive.followTrajectorySequence(lv1);
+                break;
+            case MIDDLE:
+                targetLevel = 2;
+                drive.followTrajectorySequence(lv2);
+        }
+
+        ElapsedTime timer = new ElapsedTime();
+
+        Intake.setPower(0.3);
+        while (timer.milliseconds() < 3500) {
+            double heading = armGyro.getHeading();
+
+            if (heading > 300) {
+                heading = 0;
+            }
+
+            telemetry.addData("Heading ", heading);
+            ArmMotor.setPower(getPower(heading, targetLevel) * .5);
+
+            telemetry.update();
+        }
+
+        ArmMotor.setPower(0);
+        Intake.setPower(-0.3);
+
+        Twist.setPosition(1D);
+        sleep(500);
+        Twist.setPosition(0.58);
+
+        timer.reset();
+
+        while (timer.milliseconds() < 2500) {
+            double heading = armGyro.getHeading();
+
+            if (heading > 300) {
+                heading = 0;
+            }
+
+            telemetry.addData("Heading ", heading);
+            ArmMotor.setPower(getPower(armGyro.getHeading(), 0) * .5);
+        }
+
+        Intake.setPower(0);
+        ArmMotor.setPower(0);
+
+        switch (barcode) {
+            case LEFT:
+                drive.followTrajectorySequence(lv3_warehouse_from_hub);
+                break;
+            case RIGHT:
+                drive.followTrajectorySequence(lv1_warehouse_from_hub);
+                break;
+            case MIDDLE:
+                drive.followTrajectorySequence(lv2_warehouse_from_hub);
+        }
     }
 }
