@@ -106,10 +106,10 @@ public class R_DuckBox extends LinearOpMode {
                 targetDegrees = 150D;
                 break;
             case 2:
-                targetDegrees = 200D;
+                targetDegrees = 185D;
                 break;
             case 3:
-                targetDegrees = 210D;
+                targetDegrees = 205D;
                 break;
         }
 
@@ -261,7 +261,7 @@ public class R_DuckBox extends LinearOpMode {
                 .turn(Math.toRadians(-80))
                 .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(10,36, Math.toRadians(170)), Math.toRadians(350))
+                .splineToLinearHeading(new Pose2d(10,36, Math.toRadians(180)), Math.toRadians(350))
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
@@ -275,7 +275,7 @@ public class R_DuckBox extends LinearOpMode {
                 .turn(Math.toRadians(-80))
                 .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(6,36, Math.toRadians(170)), Math.toRadians(350))
+                .splineToLinearHeading(new Pose2d(7,36, Math.toRadians(180)), Math.toRadians(350))
                 .build();
 
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
@@ -289,23 +289,23 @@ public class R_DuckBox extends LinearOpMode {
                 .turn(Math.toRadians(-80))
                 .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(3,36, Math.toRadians(170)), Math.toRadians(350))
+                .splineToLinearHeading(new Pose2d(3,36, Math.toRadians(180)), Math.toRadians(350))
                 .build();
 
         // 10 high 5 mid 0 low
         TrajectorySequence lv1_warehouse_from_hub = drive.trajectorySequenceBuilder(lv1.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
+                .splineToSplineHeading(new Pose2d(-20, 28.5, Math.toRadians(270)), Math.toRadians(225))
                 .build();
 
         TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
+                .splineToSplineHeading(new Pose2d(-20, 28.5, Math.toRadians(270)), Math.toRadians(225))
                 .build();
 
         TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-20, 26.5, Math.toRadians(270)), Math.toRadians(225))
+                .splineToSplineHeading(new Pose2d(-20, 28.5, Math.toRadians(270)), Math.toRadians(225))
                 .build();
 
         waitForStart();
@@ -348,7 +348,7 @@ public class R_DuckBox extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         Intake.setPower(0.3);
-        while (timer.milliseconds() < 3500) {
+        while (timer.milliseconds() < 2500) {
             double heading = armGyro.getHeading();
 
             if (heading > 300) {
@@ -356,7 +356,7 @@ public class R_DuckBox extends LinearOpMode {
             }
 
             telemetry.addData("Heading ", heading);
-            ArmMotor.setPower(getPower(heading, targetLevel) * .5);
+            ArmMotor.setPower(getPower(heading, targetLevel));
 
             telemetry.update();
         }

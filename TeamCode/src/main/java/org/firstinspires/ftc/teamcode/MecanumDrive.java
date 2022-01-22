@@ -495,7 +495,7 @@ public class MecanumDrive extends LinearOpMode {
                 targetHeading = 150D;
             } else if (gamepad2.dpad_left) {
                 currentLevel = 2;
-                targetHeading = 200D;
+                targetHeading = 185D;
             } else if (gamepad2.dpad_down) {
                 currentLevel = 3;
                 targetHeading = 220D;
