@@ -90,7 +90,7 @@ public class B_Complete extends LinearOpMode {
     };
 
     final double[] twistPositions = new double[] {
-            0.615D, 0.7D, 0.9D
+            0.615D, 0.68D, 0.9D
     };
 
     double MAX_VELOCITY = 1200;

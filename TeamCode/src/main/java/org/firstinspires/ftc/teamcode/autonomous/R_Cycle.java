@@ -115,7 +115,7 @@ public class R_Cycle extends LinearOpMode {
 
         double LEFT_POSITION = 0.6175D;
         double RIGHT_POSITION = 0.115D;
-        double FRONT_POSITION = 0.70D;
+        double FRONT_POSITION = 0.68D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);

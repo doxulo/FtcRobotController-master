@@ -36,11 +36,11 @@ public class BarcodeDetector extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
-//        Scalar lowHSV = new Scalar(95, 100, 20); // lower bound HSV for blue
-//        Scalar highHSV = new Scalar(125, 255, 255); // higher bound HSV for blue
+        Scalar lowHSV = new Scalar(95, 100, 20); // lower bound HSV for blue
+        Scalar highHSV = new Scalar(125, 255, 255); // higher bound HSV for blue
 
-        Scalar lowHSV = new Scalar(0, 100, 20); // lower bound HSV for red
-        Scalar highHSV = new Scalar(20, 255, 255);// upper bound HSV for red
+//        Scalar lowHSV = new Scalar(0, 100, 20); // lower bound HSV for red
+//        Scalar highHSV = new Scalar(20, 255, 255);// upper bound HSV for red
 
         Core.inRange(mat, lowHSV, highHSV, mat);
 
