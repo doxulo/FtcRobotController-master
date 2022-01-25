@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.util.Arm;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.util.RobotArm;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -194,6 +195,9 @@ public class B_DuckBox extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        RobotArm arm = new RobotArm(ArmMotor, armGyro);
+        // arm.start();
+
         Twist = hardwareMap.servo.get("Twisty");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
 
@@ -234,8 +238,6 @@ public class B_DuckBox extends LinearOpMode {
                  */
             }
         });
-        waitForStart();
-
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 //        drive.setPoseEstimate(new Pose2d(0, 0, -180));
@@ -252,60 +254,57 @@ public class B_DuckBox extends LinearOpMode {
 
         TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(30, 10, Math.toRadians(180)))
-                .strafeLeft(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(5))
+                .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
+                .strafeLeft(6)
                 .waitSeconds(3)
-                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .forward(6)
                 .turn(Math.toRadians(80))
-                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(0,42, Math.toRadians(0)), Math.toRadians(190))
+                .back(35)
+                .turn(Math.toRadians(100))
+                .lineToLinearHeading(new Pose2d(4,39, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(30, 10, Math.toRadians(180)))
-                .strafeLeft(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(5))
+                .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
+                .strafeLeft(6)
                 .waitSeconds(3)
-                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .forward(10)
                 .turn(Math.toRadians(80))
-                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(3,42, Math.toRadians(0)), Math.toRadians(190))
+                .back(35)
+                .turn(Math.toRadians(100))
+                .lineToLinearHeading(new Pose2d(7,39, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(30, 10, Math.toRadians(180)))
-                .strafeLeft(6, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(5))
+                .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
+                .strafeLeft(6)
                 .waitSeconds(3)
-                .forward(5, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
+                .forward(10)
                 .turn(Math.toRadians(80))
-                .back(15, SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(20))
-                .splineToLinearHeading(new Pose2d(7,42, Math.toRadians(0)), Math.toRadians(190))
+                .back(35)
+                .turn(Math.toRadians(100))
+                .lineToLinearHeading(new Pose2d(10,39, Math.toRadians(0)))
                 .build();
 
         // 10 high 5 mid 0 low
         TrajectorySequence lv1_warehouse_from_hub = drive.trajectorySequenceBuilder(lv1.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(30, 26.5, Math.toRadians(270)), Math.toRadians(315))
+                .lineToConstantHeading(new Vector2d(20, 42))
+                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(30, 26.5, Math.toRadians(270)), Math.toRadians(315))
+                .lineToConstantHeading(new Vector2d(20, 42))
+                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(30, 26.5, Math.toRadians(270)), Math.toRadians(315))
+                .lineToConstantHeading(new Vector2d(20, 42))
+                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
 
         waitForStart();
@@ -323,8 +322,8 @@ public class B_DuckBox extends LinearOpMode {
         }
         telemetry.update();
 
-        Duck_Wheel1.setPower(0.45);
-        Duck_Wheel2.setPower(-0.45);
+        Duck_Wheel1.setPower(0.55);
+        Duck_Wheel2.setPower(-0.55);
 
         if(isStopRequested()) return;
 
@@ -345,11 +344,15 @@ public class B_DuckBox extends LinearOpMode {
                 drive.followTrajectorySequence(lv2);
         }
 
+        Duck_Wheel1.setPower(0);
+        Duck_Wheel2.setPower(0);
+
         ElapsedTime timer = new ElapsedTime();
 
         Intake.setPower(0.3);
         while (timer.milliseconds() < 2500) {
             double heading = armGyro.getHeading();
+            Twist.setPosition(0.58D);
 
             if (heading > 300) {
                 heading = 0;
@@ -371,6 +374,8 @@ public class B_DuckBox extends LinearOpMode {
         timer.reset();
 
         while (timer.milliseconds() < 2500) {
+            Twist.setPosition(0.58D);
+
             double heading = armGyro.getHeading();
 
             if (heading > 300) {

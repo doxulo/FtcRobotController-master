@@ -345,6 +345,9 @@ public class R_DuckBox extends LinearOpMode {
                 drive.followTrajectorySequence(lv2);
         }
 
+        Duck_Wheel1.setPower(0);
+        Duck_Wheel2.setPower(0);
+
         ElapsedTime timer = new ElapsedTime();
 
         Intake.setPower(0.3);

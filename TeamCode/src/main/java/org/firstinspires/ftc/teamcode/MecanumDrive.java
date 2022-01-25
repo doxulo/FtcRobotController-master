@@ -508,7 +508,7 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        10
+                        1
                 );
             } else if (gamepad2.left_stick_button) {
                 headingOffset = heading;
