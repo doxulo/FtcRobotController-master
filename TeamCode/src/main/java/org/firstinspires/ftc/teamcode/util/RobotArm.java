@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.util;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-public class RobotArm {
+public class RobotArm implements Runnable {
+
+    Thread t;
 
     DcMotorEx armMotor;
 
@@ -32,6 +34,13 @@ public class RobotArm {
     public void run() {
         while (this.alive) {
             this.updatePower();
+        }
+    }
+
+    public void start () {
+        if (t == null) {
+            t = new Thread(this, "Thread");
+            t.start ();
         }
     }
 
