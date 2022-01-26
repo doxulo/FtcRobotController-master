@@ -182,7 +182,7 @@ public class MecanumDrive extends LinearOpMode {
 
         telemetry.addLine("Done calibrating");
         telemetry.update();
-        limitPower = 1 / limitPower;
+        // limitPower = 1 / limitPower;
 
         Debounce debounces = new Debounce(
                 new DebounceObject("Duck", 750),

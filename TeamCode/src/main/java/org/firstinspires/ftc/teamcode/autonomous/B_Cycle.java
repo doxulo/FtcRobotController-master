@@ -199,17 +199,24 @@ public class B_Cycle extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
         TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .strafeTo(new Vector2d(25, 18))
+                .strafeTo(new Vector2d(25, 16))
+                //arm
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -1.5, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
                 .setReversed(true)
                 .forward(30)
-                .strafeTo(new Vector2d(-30, 10))
-                .strafeTo(new Vector2d(-28, -1.5))
                 .back(35)
-                .splineToSplineHeading(new Pose2d(25, 18, Math.toRadians(270)), Math.toRadians(90))
+                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
+                //arm
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(5, -1.5, Math.toRadians(180)), Math.toRadians(200))
+                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
+                .setReversed(true)
+                .forward(30)
+                .back(35)
+                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
+                //arm
+                .setReversed(false)
+                .lineToLinearHeading(new Pose2d(5, -0.5, Math.toRadians(180)))
                 .setReversed(true)
                 .forward(30)
                 .build();

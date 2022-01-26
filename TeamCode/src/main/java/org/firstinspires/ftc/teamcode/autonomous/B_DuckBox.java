@@ -209,6 +209,8 @@ public class B_DuckBox extends LinearOpMode {
         double RIGHT_POSITION = 0.115D;
         double FRONT_POSITION = 0.68D;
 
+        double armTargetHeading = 0D;
+
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
@@ -259,9 +261,14 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(6)
                 .turn(Math.toRadians(80))
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                    arm.updateHeading(armTargetHeading);
+                })
                 .back(35)
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(4,39, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(2,35, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
@@ -271,6 +278,11 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                    arm.updateHeading(armTargetHeading);
+                })
                 .back(35)
                 .turn(Math.toRadians(100))
                 .lineToLinearHeading(new Pose2d(7,39, Math.toRadians(0)))
@@ -283,6 +295,11 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                    arm.updateHeading(armTargetHeading);
+                })
                 .back(35)
                 .turn(Math.toRadians(100))
                 .lineToLinearHeading(new Pose2d(10,39, Math.toRadians(0)))
@@ -310,6 +327,8 @@ public class B_DuckBox extends LinearOpMode {
         waitForStart();
         BarcodeDetector.Location barcode = detector.getLocation();
         webcam.stopStreaming();
+
+
         switch (barcode) {
             case LEFT:
                 telemetry.addData("location: ", "left");
@@ -322,8 +341,6 @@ public class B_DuckBox extends LinearOpMode {
         }
         telemetry.update();
 
-        Duck_Wheel1.setPower(0.55);
-        Duck_Wheel2.setPower(-0.55);
 
         if(isStopRequested()) return;
 
@@ -349,45 +366,7 @@ public class B_DuckBox extends LinearOpMode {
 
         ElapsedTime timer = new ElapsedTime();
 
-        Intake.setPower(0.3);
-        while (timer.milliseconds() < 2500) {
-            double heading = armGyro.getHeading();
-            Twist.setPosition(0.58D);
-
-            if (heading > 300) {
-                heading = 0;
-            }
-
-            telemetry.addData("Heading ", heading);
-            ArmMotor.setPower(getPower(heading, targetLevel));
-
-            telemetry.update();
-        }
-
-        ArmMotor.setPower(0);
-        Intake.setPower(-0.3);
-
-        Twist.setPosition(1D);
-        sleep(500);
-        Twist.setPosition(0.58);
-
-        timer.reset();
-
-        while (timer.milliseconds() < 2500) {
-            Twist.setPosition(0.58D);
-
-            double heading = armGyro.getHeading();
-
-            if (heading > 300) {
-                heading = 0;
-            }
-
-            telemetry.addData("Heading ", heading);
-            ArmMotor.setPower(getPower(armGyro.getHeading(), 0) * .5);
-        }
-
-        Intake.setPower(0);
-        ArmMotor.setPower(0);
+        arm.updateHeading(0D);
 
         switch (barcode) {
             case LEFT:
