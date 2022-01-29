@@ -30,8 +30,8 @@ public class TrackWidthTuner extends LinearOpMode {
     public static double ANGLE = 180; // deg
     public static int NUM_TRIALS = 5;
     public static int DELAY = 1000; // ms
-    public static double LEFT_POSITION = 0.6175D;
-    public static double RIGHT_POSITION = 0.115D;
+    public static double LEFT_POSITION = 0.85D;
+    public static double RIGHT_POSITION = 0.1D;
     public static double FRONT_POSITION = 0.68D;
     @Override
     public void runOpMode() throws InterruptedException {

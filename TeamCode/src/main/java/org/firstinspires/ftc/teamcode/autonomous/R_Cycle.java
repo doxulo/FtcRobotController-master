@@ -113,8 +113,8 @@ public class R_Cycle extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
-        double LEFT_POSITION = 0.6175D;
-        double RIGHT_POSITION = 0.115D;
+        double LEFT_POSITION = 0.85D;
+        double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.68D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);

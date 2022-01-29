@@ -205,8 +205,8 @@ public class B_DuckBox extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
-        double LEFT_POSITION = 0.63D;
-        double RIGHT_POSITION = 0.115D;
+        double LEFT_POSITION = 0.85D;
+        double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.68D;
 
         double armTargetHeading = 0D;
@@ -258,12 +258,16 @@ public class B_DuckBox extends LinearOpMode {
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
                 .strafeLeft(6)
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                })
                 .waitSeconds(3)
                 .forward(6)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(0.55);
-                    Duck_Wheel2.setPower(-0.55);
+                    Duck_Wheel1.setPower(0);
+                    Duck_Wheel2.setPower(0);
                     arm.updateHeading(armTargetHeading);
                 })
                 .back(35)
@@ -275,12 +279,16 @@ public class B_DuckBox extends LinearOpMode {
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
                 .strafeLeft(6)
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                })
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(0.55);
-                    Duck_Wheel2.setPower(-0.55);
+                    Duck_Wheel1.setPower(0);
+                    Duck_Wheel2.setPower(0);
                     arm.updateHeading(armTargetHeading);
                 })
                 .back(35)
@@ -292,12 +300,16 @@ public class B_DuckBox extends LinearOpMode {
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
                 .strafeLeft(6)
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.55);
+                    Duck_Wheel2.setPower(-0.55);
+                })
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(0.55);
-                    Duck_Wheel2.setPower(-0.55);
+                    Duck_Wheel1.setPower(0);
+                    Duck_Wheel2.setPower(0);
                     arm.updateHeading(armTargetHeading);
                 })
                 .back(35)
@@ -308,18 +320,27 @@ public class B_DuckBox extends LinearOpMode {
         // 10 high 5 mid 0 low
         TrajectorySequence lv1_warehouse_from_hub = drive.trajectorySequenceBuilder(lv1.end())
                 .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    arm.updateHeading(0);
+                })
                 .lineToConstantHeading(new Vector2d(20, 42))
                 .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
                 .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    arm.updateHeading(0);
+                })
                 .lineToConstantHeading(new Vector2d(20, 42))
                 .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
                 .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    arm.updateHeading(0);
+                })
                 .lineToConstantHeading(new Vector2d(20, 42))
                 .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
                 .build();
@@ -346,6 +367,8 @@ public class B_DuckBox extends LinearOpMode {
 
         int targetLevel = 0;
         Twist.setPosition(0.58D);
+
+        arm.start();
 
         switch (barcode) {
             case LEFT:

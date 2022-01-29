@@ -40,7 +40,7 @@ public class RobotArm implements Runnable {
     public void start () {
         if (t == null) {
             t = new Thread(this, "Thread");
-            t.start ();
+            t.start();
         }
     }
 

@@ -31,8 +31,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 public class BackAndForth extends LinearOpMode {
 
     public static double DISTANCE = 50;
-    public static double LEFT_POSITION = 0.6175D;
-    public static double RIGHT_POSITION = 0.115D;
+    public static double LEFT_POSITION = 0.85D;
+    public static double RIGHT_POSITION = 0.1D;
     public static double FRONT_POSITION = 0.68D;
     @Override
     public void runOpMode() throws InterruptedException {

@@ -351,9 +351,9 @@ public class MecanumDrive extends LinearOpMode {
         };
 
         double[] restingPositions = new double[] {
-                0.46D,
+                0.7D,
                 0.89D,
-                0.28D
+                0.5D
         };
 
         Method setPowerMethod = null;
@@ -492,7 +492,7 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 currentLevel = 1;
-                targetHeading = 150D;
+                targetHeading = 145D;
             } else if (gamepad2.dpad_left) {
                 currentLevel = 2;
                 targetHeading = 185D;

@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
+import org.firstinspires.ftc.teamcode.util.RobotArm;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -148,8 +149,8 @@ public class B_Cycle extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
-        double LEFT_POSITION = 0.6175D;
-        double RIGHT_POSITION = 0.115D;
+        double LEFT_POSITION = 0.85D;
+        double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.68D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
@@ -196,18 +197,19 @@ public class B_Cycle extends LinearOpMode {
 //                .lineTo(new Vector2d(15, 0))
 //                .build();
 
+        RobotArm arm;
+
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
+
         TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
                 .strafeTo(new Vector2d(25, 16))
-                //arm
                 .setReversed(false)
                 .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
                 .setReversed(true)
                 .forward(30)
                 .back(35)
                 .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
-                //arm
                 .setReversed(false)
                 .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
                 .setReversed(true)
