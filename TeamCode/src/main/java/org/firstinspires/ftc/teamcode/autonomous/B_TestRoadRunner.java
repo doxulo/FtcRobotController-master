@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,36 +11,20 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.util.Commands;
-import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.RobotArm;
-import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
-import org.opencv.core.Core;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Rect;
-import org.openftc.easyopencv.OpenCvPipeline;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Autonomous
-public class B_Cycle extends LinearOpMode {
+public class B_TestRoadRunner extends LinearOpMode {
 
     DcMotorEx LF;
     DcMotorEx RF;
@@ -199,48 +181,12 @@ public class B_Cycle extends LinearOpMode {
 
         RobotArm arm;
 
-        drive.setPoseEstimate(new Pose2d(13, 65, Math.toRadians(90)));
+        drive.setPoseEstimate(new Pose2d(13, 65, Math.toRadians(0)));
 
-        TrajectorySequence test = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
+        TrajectorySequence test = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(0)))
                 .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .waitSeconds(1)
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .waitSeconds(1)
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .build();
-
-        TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
-                .setReversed(true)
-                .strafeTo(new Vector2d(25, 16))
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
-                .setReversed(true)
-                .forward(30)
-                .back(35)
-                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
-                .setReversed(true)
-                .forward(30)
-                .back(35)
-                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
-                //arm
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -0.5, Math.toRadians(180)))
-                .setReversed(true)
-                .forward(30)
+                .waitSeconds(2)
+                .lineToLinearHeading(new Pose2d(13, 65, Math.toRadians(0)))
                 .build();
 
         waitForStart();
@@ -259,7 +205,11 @@ public class B_Cycle extends LinearOpMode {
         telemetry.update();
 
         if(isStopRequested()) return;
-        drive.followTrajectorySequence(test);
+
+        while (opModeIsActive()) {
+            drive.followTrajectorySequence(test);
+            sleep(500);
+        }
 //        drive.followTrajectory(linearToHub);
 //        // Put Block
 //        drive.followTrajectorySequence(hubToBlocks);

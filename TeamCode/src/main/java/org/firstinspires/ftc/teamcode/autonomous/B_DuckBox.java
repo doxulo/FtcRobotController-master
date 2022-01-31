@@ -2,11 +2,8 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,35 +11,19 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.BarcodeDetector;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.util.Arm;
-import org.firstinspires.ftc.teamcode.util.Commands;
-import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.RobotArm;
-import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
-import org.opencv.core.Core;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Rect;
-import org.openftc.easyopencv.OpenCvPipeline;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Autonomous
@@ -252,97 +233,99 @@ public class B_DuckBox extends LinearOpMode {
 //                .lineTo(new Vector2d(15, 0))
 //                .build();
 
+        AtomicInteger currentTargetHeading = new AtomicInteger(0);
+
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
 
         TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
-                .strafeLeft(6)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
+                .strafeLeft(6)
                 .waitSeconds(3)
-                .forward(6)
+                .forward(10)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
-                    arm.updateHeading(armTargetHeading);
+                    currentTargetHeading.set(155);
                 })
                 .back(35)
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(2,35, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(0,39, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
-                .strafeLeft(6)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
+                .strafeLeft(6)
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
-                    arm.updateHeading(armTargetHeading);
+                    currentTargetHeading.set(200);
                 })
                 .back(35)
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(7,39, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(5,39, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(28, 10, Math.toRadians(180)))
-                .strafeLeft(6)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
+                .strafeLeft(6)
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
-                    arm.updateHeading(armTargetHeading);
+                    currentTargetHeading.set(225);
                 })
                 .back(35)
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(10,39, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(9,39, Math.toRadians(0)))
                 .build();
 
         // 10 high 5 mid 0 low
         TrajectorySequence lv1_warehouse_from_hub = drive.trajectorySequenceBuilder(lv1.end())
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    arm.updateHeading(0);
+                    currentTargetHeading.set(0);
                 })
                 .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(29, 25.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    arm.updateHeading(0);
+                    currentTargetHeading.set(0);
                 })
                 .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(29, 25.5, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    arm.updateHeading(0);
+                    currentTargetHeading.set(0);
                 })
                 .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 26.5, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(29, 25.5, Math.toRadians(180)))
                 .build();
 
         waitForStart();
@@ -365,41 +348,65 @@ public class B_DuckBox extends LinearOpMode {
 
         if(isStopRequested()) return;
 
+
         int targetLevel = 0;
         Twist.setPosition(0.58D);
 
-        arm.start();
 
         switch (barcode) {
             case LEFT:
                 targetLevel = 3;
-                drive.followTrajectorySequence(lv3);
+                drive.followTrajectorySequenceAsync(lv3);
                 break;
             case RIGHT:
                 targetLevel = 1;
-                drive.followTrajectorySequence(lv1);
+                drive.followTrajectorySequenceAsync(lv1);
                 break;
             case MIDDLE:
                 targetLevel = 2;
-                drive.followTrajectorySequence(lv2);
+                drive.followTrajectorySequenceAsync(lv2);
         }
 
-        Duck_Wheel1.setPower(0);
-        Duck_Wheel2.setPower(0);
+        while (drive.isBusy()) {
+            drive.update();
 
-        ElapsedTime timer = new ElapsedTime();
+            int heading = armGyro.getHeading();
 
-        arm.updateHeading(0D);
+            if (heading > 300) {
+                heading = 0;
+            }
+            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
+        }
+
+        ArmMotor.setPower(0);
+        Intake.setPower(-0.3);
+
+        Twist.setPosition(1D);
+        sleep(250);
+        Twist.setPosition(0.58);
+
+        sleep(500);
 
         switch (barcode) {
             case LEFT:
-                drive.followTrajectorySequence(lv3_warehouse_from_hub);
+                drive.followTrajectorySequenceAsync(lv3_warehouse_from_hub);
                 break;
             case RIGHT:
-                drive.followTrajectorySequence(lv1_warehouse_from_hub);
+                drive.followTrajectorySequenceAsync(lv1_warehouse_from_hub);
                 break;
             case MIDDLE:
-                drive.followTrajectorySequence(lv2_warehouse_from_hub);
+                drive.followTrajectorySequenceAsync(lv2_warehouse_from_hub);
+        }
+
+        while (drive.isBusy()) {
+            drive.update();
+
+            int heading = armGyro.getHeading();
+
+            if (heading > 300) {
+                heading = 0;
+            }
+            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
         }
     }
 }
