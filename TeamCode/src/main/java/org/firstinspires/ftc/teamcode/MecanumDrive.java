@@ -468,9 +468,9 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad1.left_trigger > 0) {
-                currentHorizontalOrientation = gamepad1.left_trigger/3;
+                currentHorizontalOrientation += gamepad1.left_trigger/20;
             } else if (gamepad1.right_trigger > 0) {
-                currentHorizontalOrientation = -gamepad1.right_trigger/3;
+                currentHorizontalOrientation += -gamepad1.right_trigger/20;
             } else {
                 currentHorizontalOrientation = 0;
             }
