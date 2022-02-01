@@ -255,7 +255,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.48D, 0.58D, 1D
+                0.48D, 0.58D, 0.76D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -447,6 +447,8 @@ public class MecanumDrive extends LinearOpMode {
 
             if (Intake.getPower() > 0 && redColor > 101) {
                 // sleep(1200);
+
+                Intake.setPower(-1);
                 scheduler.add(
                         setPowerMethod,
                         Intake,

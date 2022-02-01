@@ -381,7 +381,7 @@ public class B_DuckBox extends LinearOpMode {
         ArmMotor.setPower(0);
         Intake.setPower(-0.3);
 
-        Twist.setPosition(1D);
+        Twist.setPosition(0.8D);
         sleep(250);
         Twist.setPosition(0.58);
 
