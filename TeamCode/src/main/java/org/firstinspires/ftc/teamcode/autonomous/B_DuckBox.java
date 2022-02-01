@@ -248,12 +248,12 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
+                .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(155);
                 })
-                .back(35)
                 .turn(Math.toRadians(100))
                 .lineToLinearHeading(new Pose2d(0,39, Math.toRadians(0)))
                 .build();
@@ -269,12 +269,12 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
+                .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(200);
                 })
-                .back(35)
                 .turn(Math.toRadians(100))
                 .lineToLinearHeading(new Pose2d(5,39, Math.toRadians(0)))
                 .build();
@@ -290,12 +290,12 @@ public class B_DuckBox extends LinearOpMode {
                 .waitSeconds(3)
                 .forward(10)
                 .turn(Math.toRadians(80))
+                .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(225);
                 })
-                .back(35)
                 .turn(Math.toRadians(100))
                 .lineToLinearHeading(new Pose2d(9,39, Math.toRadians(0)))
                 .build();
@@ -406,7 +406,7 @@ public class B_DuckBox extends LinearOpMode {
             if (heading > 300) {
                 heading = 0;
             }
-            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
+            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading)*0.5);
         }
     }
 }
