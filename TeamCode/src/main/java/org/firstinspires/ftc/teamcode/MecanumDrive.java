@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -59,9 +60,10 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor ArmMotor;
     public ColorSensor BoxSensor;
     public CRServo tapeExtension;
-    public Servo tapeVerticalOrientation;
+    public CRServo tapeVerticalOrientation;
     public CRServo tapeHorizontalOrientation;
     public Servo[] odometryServos = new Servo[3];
+    public AnalogInput potentiometer;
 
     public static double rest = 0.46D;
     public static double close = 0.89D;
@@ -165,7 +167,7 @@ public class MecanumDrive extends LinearOpMode {
 
         FtcDashboard dash = FtcDashboard.getInstance();
 
-        tapeVerticalOrientation = hardwareMap.servo.get("TapeVerticalOrientation");
+        tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
         armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
@@ -414,7 +416,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Twist position: ", Twist.getPosition());
 
             telemetry.addData("Horizontal Position: ", tapeHorizontalOrientation.getPower());
-            telemetry.addData("Vertical position: ", tapeVerticalOrientation.getPosition());
+            telemetry.addData("Vertical position: ", tapeVerticalOrientation.getPower());
             telemetry.addData("target", targetVerticalOrientation);
 
             // telemetry.addData("integrated Z", "%3d", integratedZ);
@@ -448,7 +450,12 @@ public class MecanumDrive extends LinearOpMode {
             if (Intake.getPower() > 0 && redColor > 101) {
                 // sleep(1200);
 
-                Intake.setPower(-1);
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        -1,
+                        250
+                );
                 scheduler.add(
                         setPowerMethod,
                         Intake,
@@ -460,34 +467,36 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad1.dpad_up) {
-                tapeExtension.setPower(-1);
-            } else if (gamepad1.dpad_down) {
                 tapeExtension.setPower(1);
+            } else if (gamepad1.dpad_down) {
+                tapeExtension.setPower(-1);
             } else {
                 tapeExtension.setPower(0);
             }
 
             if (gamepad1.left_trigger > 0) {
-                currentHorizontalOrientation += gamepad1.left_trigger/20;
+                currentHorizontalOrientation = gamepad1.left_trigger/10;
             } else if (gamepad1.right_trigger > 0) {
-                currentHorizontalOrientation += -gamepad1.right_trigger/20;
+                currentHorizontalOrientation = -gamepad1.right_trigger/10;
             } else {
                 currentHorizontalOrientation = 0;
             }
 
             if (gamepad1.left_bumper) {
-                targetVerticalOrientation += -0.01;
+                targetVerticalOrientation = -0.25;
             } else if (gamepad1.right_bumper) {
-                targetVerticalOrientation += 0.01;
-            }
-
-            if (targetVerticalOrientation > 1) {
-                targetVerticalOrientation = 1;
-            } else if (targetVerticalOrientation < 0) {
+                targetVerticalOrientation = 0.25;
+            } else {
                 targetVerticalOrientation = 0;
             }
+//
+//            if (targetVerticalOrientation > 1) {
+//                targetVerticalOrientation = 1;
+//            } else if (targetVerticalOrientation < 0) {
+//                targetVerticalOrientation = 0;
+//            }
 
-            tapeVerticalOrientation.setPosition(targetVerticalOrientation);
+            tapeVerticalOrientation.setPower(targetVerticalOrientation);
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
 
 //            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
