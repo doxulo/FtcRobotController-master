@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.RobotArm;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -39,6 +40,7 @@ import org.opencv.core.Rect;
 import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Autonomous
@@ -49,9 +51,25 @@ public class B_Cycle extends LinearOpMode {
     DcMotorEx RB;
     DcMotorEx LB;
     DcMotorEx ArmMotor;
+    DcMotorEx Intake;
     Servo Twist;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
+
+    ModernRoboticsI2cGyro armGyro;
+
+    PIDController controller = new PIDController(
+            0.01,
+            0.000001,// 0.000001, // TODO: Tune this
+            0.05,
+            new double[] {
+                    0.05, -0.10
+            },
+            360,
+            0,
+            new double[] {
+                    -0.15, 0.15, 25D
+            });
 
     public enum ArmStates {
         REST, LEVEL_1, LEVEL_2, LEVEL_3
@@ -106,6 +124,21 @@ public class B_Cycle extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+
+        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
+
+        telemetry.log().add("Gyros Calibrating. Do Not Move!");
+        armGyro.calibrate();
+
+        while (!isStopRequested() && armGyro.isCalibrating())  {
+            telemetry.addData("calibrating, ", "%f seconds passed");
+            telemetry.update();
+            sleep(50);
+        }
+
+        telemetry.addLine("Done calibrating");
+        telemetry.update();
+
         LF = initMotor(
                 "LF",
                 DcMotorSimple.Direction.FORWARD,
@@ -140,6 +173,13 @@ public class B_Cycle extends LinearOpMode {
                 DcMotorSimple.Direction.REVERSE,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
+        Intake = initMotor(
+                "Intake",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         Twist = hardwareMap.servo.get("Twisty");
@@ -199,48 +239,85 @@ public class B_Cycle extends LinearOpMode {
 
         RobotArm arm;
 
+        AtomicInteger currentTargetHeading = new AtomicInteger(0);
+
         drive.setPoseEstimate(new Pose2d(13, 65, Math.toRadians(90)));
 
         TrajectorySequence test = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .waitSeconds(1)
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .waitSeconds(1)
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .lineToConstantHeading(new Vector2d(13, 66))
-                .lineToLinearHeading(new Pose2d(-11, 43, Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(13, 66, Math.toRadians(0)))
-                .lineToConstantHeading(new Vector2d(50, 66))
-                .build();
-
-        TrajectorySequence full = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setReversed(true)
-                .strafeTo(new Vector2d(25, 16))
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(200))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                    Intake.setPower(-0.5);
+                    currentTargetHeading.set(0);
+                })
+                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
+                .addDisplacementMarker(() -> {
+                    Intake.setPower(0.5);
+                })
                 .setReversed(true)
-                .forward(30)
-                .back(35)
-                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -1, Math.toRadians(180)))
+                .waitSeconds(0.5)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                    Intake.setPower(-0.5);
+                    currentTargetHeading.set(0);
+                })
+                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
+                .addDisplacementMarker(() -> {
+                    Intake.setPower(0.5);
+                })
                 .setReversed(true)
-                .forward(30)
-                .back(35)
-                .lineToLinearHeading(new Pose2d(25, 18, Math.toRadians(270)))
-                //arm
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(5, -0.5, Math.toRadians(180)))
+                .waitSeconds(0.5)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                    Intake.setPower(-0.5);
+                    currentTargetHeading.set(0);
+                })
+                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
+                .addDisplacementMarker(() -> {
+                    Intake.setPower(0.5);
+                })
                 .setReversed(true)
-                .forward(30)
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
+                .setReversed(false)
+                .waitSeconds(0.5)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                    Intake.setPower(-0.5);
+                    currentTargetHeading.set(0);
+                })
+                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
+                .addDisplacementMarker(() -> {
+                    Intake.setPower(0.5);
+                })
                 .build();
 
         waitForStart();
@@ -259,7 +336,22 @@ public class B_Cycle extends LinearOpMode {
         telemetry.update();
 
         if(isStopRequested()) return;
-        drive.followTrajectorySequence(test);
+        drive.followTrajectorySequenceAsync(test);
+
+        while (drive.isBusy() && opModeIsActive()) {
+            drive.update();
+
+            int heading = armGyro.getHeading();
+
+            if (heading > 300) {
+                heading = 0;
+            }
+
+            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
+
+            telemetry.addData("Target heading: ", currentTargetHeading.get());
+            telemetry.update();
+        }
 //        drive.followTrajectory(linearToHub);
 //        // Put Block
 //        drive.followTrajectorySequence(hubToBlocks);

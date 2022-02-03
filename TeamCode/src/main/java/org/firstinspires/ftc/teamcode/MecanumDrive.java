@@ -428,7 +428,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.update();
             lastTime = currentSystemTime;
             //drive train
-            mecanum(-Math.pow(gamepad1.left_stick_y, 3D), Math.pow(gamepad1.left_stick_x, 3D), Math.pow(gamepad1.right_stick_x, 3D));
+            mecanum(-Math.pow(gamepad1.left_stick_y, 1D), Math.pow(gamepad1.left_stick_x, 1D), Math.pow(gamepad1.right_stick_x, 1D));
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
                 limit = (limitOn ? 1 : limitPower);
