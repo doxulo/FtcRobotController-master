@@ -299,25 +299,6 @@ public class B_Cycle extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     Intake.setPower(0.5);
                 })
-                .setReversed(true)
-                .waitSeconds(0.1)
-                .addDisplacementMarker(() -> {
-                    currentTargetHeading.set(155);
-                })
-                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
-                .setReversed(false)
-                .waitSeconds(0.5)
-                .addDisplacementMarker(() -> {
-                    Twist.setPosition(0.8D);
-                    sleep(500);
-                    Twist.setPosition(0.48D);
-                    Intake.setPower(-0.5);
-                    currentTargetHeading.set(0);
-                })
-                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
-                .addDisplacementMarker(() -> {
-                    Intake.setPower(0.5);
-                })
                 .build();
 
         waitForStart();
