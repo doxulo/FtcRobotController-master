@@ -11,6 +11,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -61,6 +62,7 @@ public class B_Cycle extends LinearOpMode {
     DcMotorEx ArmMotor;
     DcMotorEx Intake;
     Servo Twist;
+    CRServo horizontalServo;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
 
@@ -197,6 +199,9 @@ public class B_Cycle extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
+        horizontalServo = hardwareMap.crservo.get("TapeHorizontialOrientation   ");
+        horizontalServo.setPower(0);
+
         double LEFT_POSITION = 0.85D;
         double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.68D;
@@ -299,88 +304,92 @@ public class B_Cycle extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(200))
+                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(200))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    sleep(500);
+                    sleep(200);
                     Twist.setPosition(0.8D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
+                .waitSeconds(0.3)
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
                     currentTargetHeading.set(1);
                     Intake.setPower(-0.5);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(1);
+                    Intake.setPower(0.8);
                 })
-                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
-                .forward(5)
+                .splineToSplineHeading(new Pose2d(40, 70, Math.toRadians(0)), Math.toRadians(0))
+                .forward(6, SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.58D);
                     Intake.setPower(-1);
                 })
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
-                .lineToLinearHeading(new Pose2d(40, 73))
-                .setReversed(true)
+                //.lineToLinearHeading(new Pose2d(40, 70))
                 .waitSeconds(0.1)
+                .setReversed(true)
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    sleep(500);
+                    sleep(200);
                     Twist.setPosition(0.8D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
+                .waitSeconds(0.3)
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
                     currentTargetHeading.set(1);
                     Intake.setPower(-1);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(1);
+                    Intake.setPower(0.8);
                 })
-                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 70, Math.toRadians(0)), Math.toRadians(0))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
-                .forward(7)
+                .forward(8, SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.58D);
                     Intake.setPower(-1);
                 })
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
-                .lineToLinearHeading(new Pose2d(40, 73))
+                //.lineToLinearHeading(new Pose2d(40, 70))
+                .waitSeconds(0.3)
                 .setReversed(true)
-                .waitSeconds(0.1)
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
-                    sleep(500);
+                    sleep(200);
                     Twist.setPosition(0.8D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
+                .waitSeconds(0.3)
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
                     currentTargetHeading.set(0);
                     Intake.setPower(-1);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(1);
+                    Intake.setPower(0.8);
                 })
-                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 70, Math.toRadians(0)), Math.toRadians(0))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
-                .forward(10)
+                .forward(10, SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.58D);
-                    Intake.setPower(1);
+                    Intake.setPower(-0.8);
                 })
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
-                .lineToLinearHeading(new Pose2d(40, 73))
+                .lineToLinearHeading(new Pose2d(40, 70))
+                .addDisplacementMarker(() -> {
+                    Intake.setPower(-1);
+                })
                 .build();
 
 

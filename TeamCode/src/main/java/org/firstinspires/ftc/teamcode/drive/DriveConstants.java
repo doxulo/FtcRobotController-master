@@ -87,8 +87,8 @@ public class DriveConstants {
      * You are free to raise this on your own if you would like. It is best determined through experimentation.
      */
 
-    public static double MAX_VEL = 30;  //calculated: 61.8423750861, use 70%;
-    public static double MAX_ACCEL = 30; //52.48180821614297;
+    public static double MAX_VEL = 43;  //calculated: 61.8423750861, use 70%;
+    public static double MAX_ACCEL = 40; //52.48180821614297;
     public static double MAX_ANG_VEL = Math.toRadians(180); //MAX_VEL/TRACK_WIDTH = 4.02694535445
     public static double MAX_ANG_ACCEL = Math.toRadians(180);
 
