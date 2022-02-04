@@ -22,21 +22,25 @@ public class DuckDetector extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
+        Mat blurredImage = new Mat();
+        Mat hsvImage = new Mat();
+        Mat mask = new Mat();
+        Mat morphOutput = new Mat();
 
-        Imgproc.blur(input, mat, new Size(10,10));
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2HSV);
-        Core.inRange(mat, new Scalar(20,100,20), new Scalar(35,255,255), mat);
-        Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(35, 35));
+        Imgproc.blur(input, blurredImage, new Size(10,10));
+        Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_RGB2HSV);
+        Core.inRange(hsvImage, new Scalar(20,100,20), new Scalar(35,255,255), mask);
+        Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, 10));
         Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, 10));
-        Imgproc.erode(mat, mat, erodeElement);
-        Imgproc.erode(mat, mat , erodeElement);
+        Imgproc.erode(mask, morphOutput, erodeElement);
+        Imgproc.erode(mask, morphOutput , erodeElement);
 
-        Imgproc.dilate(mat, mat, dilateElement);
-        Imgproc.dilate(mat, mat, dilateElement);
+        Imgproc.dilate(mask, morphOutput, dilateElement);
+        Imgproc.dilate(mask, morphOutput, dilateElement);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(mat, contours, mat, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(morphOutput, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // if any contour exist...
         if (hierarchy.size().height > 0 && hierarchy.size().width > 0) {

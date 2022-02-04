@@ -413,11 +413,6 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", "%3d deg", heading);
             telemetry.addData("Target arm heading: ", targetHeading);
-            telemetry.addData("Twist position: ", Twist.getPosition());
-
-            telemetry.addData("Horizontal Position: ", tapeHorizontalOrientation.getPower());
-            telemetry.addData("Vertical position: ", tapeVerticalOrientation.getPower());
-            telemetry.addData("target", targetVerticalOrientation);
 
             // telemetry.addData("integrated Z", "%3d", integratedZ);
             //telemetry.addLine()

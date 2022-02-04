@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -17,8 +21,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.BarcodeDetector;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.util.Commands;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -45,6 +51,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Autonomous
 public class B_Cycle extends LinearOpMode {
+
+    final double CYCLES_NUMBER = 2;
 
     DcMotorEx LF;
     DcMotorEx RF;
@@ -243,7 +251,8 @@ public class B_Cycle extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(13, 65, Math.toRadians(90)));
 
-        TrajectorySequence test = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
+
+        TrajectorySequence startToHub = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
                 .setReversed(true)
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
@@ -251,55 +260,130 @@ public class B_Cycle extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(200))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
+                    sleep(100);
                     Twist.setPosition(0.8D);
                     sleep(500);
                     Twist.setPosition(0.48D);
-                    Intake.setPower(-0.5);
-                    currentTargetHeading.set(0);
                 })
+                .build();
+
+        TrajectorySequence hubToBlocks = drive.trajectorySequenceBuilder(startToHub.end())
                 .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
-                .addDisplacementMarker(() -> {
-                    Intake.setPower(0.5);
-                })
-                .setReversed(true)
-                .waitSeconds(0.1)
-                .addDisplacementMarker(() -> {
-                    currentTargetHeading.set(155);
-                })
-                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
-                .setReversed(false)
-                .waitSeconds(0.5)
-                .addDisplacementMarker(() -> {
-                    Twist.setPosition(0.8D);
-                    sleep(500);
-                    Twist.setPosition(0.48D);
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    currentTargetHeading.set(1);
                     Intake.setPower(-0.5);
-                    currentTargetHeading.set(0);
                 })
-                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
-                .addDisplacementMarker(() -> {
-                    Intake.setPower(0.5);
-                })
-                .setReversed(true)
-                .waitSeconds(0.1)
-                .addDisplacementMarker(() -> {
-                    currentTargetHeading.set(155);
-                })
-                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
-                .setReversed(false)
-                .waitSeconds(0.5)
-                .addDisplacementMarker(() -> {
-                    Twist.setPosition(0.8D);
-                    sleep(500);
-                    Twist.setPosition(0.48D);
-                    Intake.setPower(-0.5);
-                    currentTargetHeading.set(0);
-                })
-                .splineToSplineHeading(new Pose2d(40, 75, Math.toRadians(0)), Math.toRadians(0))
-                .addDisplacementMarker(() -> {
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
                     Intake.setPower(0.5);
                 })
                 .build();
+
+        TrajectorySequence blocksToHub = drive.trajectorySequenceBuilder(hubToBlocks.end())
+                .setReversed(true)
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 43, Math.toRadians(90)), Math.toRadians(270))
+                .setReversed(false)
+                .build();
+
+        TrajectorySequence getBlocks = drive.trajectorySequenceBuilder(blocksToHub.end())
+                .lineToLinearHeading(new Pose2d(65, 65, Math.toRadians(10)))
+                .build();
+
+
+
+        TrajectorySequence test = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
+                .setReversed(true)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(200))
+                .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    sleep(500);
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    currentTargetHeading.set(1);
+                    Intake.setPower(-0.5);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
+                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
+                .forward(5)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.58D);
+                    Intake.setPower(-1);
+                })
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
+                .lineToLinearHeading(new Pose2d(40, 73))
+                .setReversed(true)
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(270))
+                .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    sleep(500);
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    currentTargetHeading.set(1);
+                    Intake.setPower(-1);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
+                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
+                .forward(7)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.58D);
+                    Intake.setPower(-1);
+                })
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
+                .lineToLinearHeading(new Pose2d(40, 73))
+                .setReversed(true)
+                .waitSeconds(0.1)
+                .addDisplacementMarker(() -> {
+                    currentTargetHeading.set(155);
+                })
+                .splineToSplineHeading(new Pose2d(-11, 48, Math.toRadians(90)), Math.toRadians(270))
+                .setReversed(false)
+                .addDisplacementMarker(() -> {
+                    sleep(500);
+                    Twist.setPosition(0.8D);
+                    sleep(500);
+                    Twist.setPosition(0.48D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    currentTargetHeading.set(0);
+                    Intake.setPower(-1);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
+                .splineToSplineHeading(new Pose2d(40, 73, Math.toRadians(0)), Math.toRadians(0))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
+                .forward(10)
+                .addDisplacementMarker(() -> {
+                    Twist.setPosition(0.58D);
+                    Intake.setPower(1);
+                })
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
+                .lineToLinearHeading(new Pose2d(40, 73))
+                .build();
+
+
 
         waitForStart();
         BarcodeDetector.Location barcode = detector.getLocation();
@@ -317,7 +401,9 @@ public class B_Cycle extends LinearOpMode {
         telemetry.update();
 
         if(isStopRequested()) return;
-        drive.followTrajectorySequenceAsync(test);
+
+        /*
+        drive.followTrajectorySequenceAsync(startToHub);
 
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
@@ -330,9 +416,84 @@ public class B_Cycle extends LinearOpMode {
 
             ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
 
-            telemetry.addData("Target heading: ", currentTargetHeading.get());
-            telemetry.update();
         }
+
+        sleep(100);
+        Twist.setPosition(0.8D);
+        sleep(300);
+        Twist.setPosition(0.48D);
+        sleep(100);
+
+        for (int i = 0; i < CYCLES_NUMBER; i++) {
+            drive.followTrajectorySequenceAsync(hubToBlocks);
+
+            while (drive.isBusy() && opModeIsActive()) {
+                drive.update();
+
+                int heading = armGyro.getHeading();
+
+                if (heading > 300) {
+                    heading = 0;
+                }
+
+                ArmMotor.setPower(controller.calculate(155, heading));
+            }
+
+
+            drive.followTrajectorySequenceAsync(getBlocks);
+            drive.getVelocityConstraint(10, Math.toRadians(10), 14);
+
+            while (drive.isBusy() && opModeIsActive()) {
+                drive.update();
+            }
+
+            sleep(100);
+
+            Trajectory currentToBlocks = drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToConstantHeading(new Vector2d(40, 75))
+                    .build();
+
+            drive.followTrajectory(currentToBlocks);
+
+            drive.followTrajectorySequenceAsync(blocksToHub);
+
+            while (drive.isBusy() && opModeIsActive()) {
+                drive.update();
+
+                int heading = armGyro.getHeading();
+
+                if (heading > 300) {
+                    heading = 0;
+                }
+
+                ArmMotor.setPower(controller.calculate(0, heading));
+            }
+
+            sleep(100);
+            Twist.setPosition(0.8D);
+            sleep(300);
+            Twist.setPosition(0.48D);
+            sleep(100);
+        }
+
+        drive.followTrajectorySequence(hubToBlocks);
+
+         */
+
+        drive.followTrajectorySequenceAsync(test);
+
+        while (drive.isBusy() && opModeIsActive()) {
+            drive.update();
+
+            int heading = armGyro.getHeading();
+
+            if (heading > 300) {
+                heading = 0;
+            }
+
+            ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
+        }
+
 //        drive.followTrajectory(linearToHub);
 //        // Put Block
 //        drive.followTrajectorySequence(hubToBlocks);
