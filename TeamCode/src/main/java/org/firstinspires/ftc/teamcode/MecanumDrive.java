@@ -84,7 +84,7 @@ public class MecanumDrive extends LinearOpMode {
      */
 
     public double limit = 1.0D;
-    public double limitPower = 0.75D;
+    public static double limitPower = 1.25D;
     /**
      * Possible function to initialize and setup future motors
      *

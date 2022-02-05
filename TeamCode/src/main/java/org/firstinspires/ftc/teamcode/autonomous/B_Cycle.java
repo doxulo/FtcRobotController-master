@@ -304,11 +304,11 @@ public class B_Cycle extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(200))
+                .splineToSplineHeading(new Pose2d(-7, 46, Math.toRadians(90)), Math.toRadians(200))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
                     sleep(200);
-                    Twist.setPosition(0.8D);
+                    Twist.setPosition(0.75D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
@@ -332,11 +332,11 @@ public class B_Cycle extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
+                .splineToSplineHeading(new Pose2d(-7, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
                     sleep(200);
-                    Twist.setPosition(0.8D);
+                    Twist.setPosition(0.75D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
@@ -356,17 +356,17 @@ public class B_Cycle extends LinearOpMode {
                     Intake.setPower(-1);
                 })
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(43, Math.toRadians(180), 16))
-                //.lineToLinearHeading(new Pose2d(40, 70))
+                .lineToLinearHeading(new Pose2d(40, 70))
                 .waitSeconds(0.3)
                 .setReversed(true)
                 .addDisplacementMarker(() -> {
                     currentTargetHeading.set(155);
                 })
-                .splineToSplineHeading(new Pose2d(-8, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
+                .splineToSplineHeading(new Pose2d(-7, 46, Math.toRadians(90)), Math.toRadians(270), SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .setReversed(false)
                 .addDisplacementMarker(() -> {
                     sleep(200);
-                    Twist.setPosition(0.8D);
+                    Twist.setPosition(0.75D);
                     sleep(500);
                     Twist.setPosition(0.48D);
                 })
@@ -380,7 +380,7 @@ public class B_Cycle extends LinearOpMode {
                 })
                 .splineToSplineHeading(new Pose2d(40, 70, Math.toRadians(0)), Math.toRadians(0))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(10, Math.toRadians(10), 16))
-                .forward(10, SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
+                .forward(13, SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(10))
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.58D);
                     Intake.setPower(-0.8);
