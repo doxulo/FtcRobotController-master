@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -16,6 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.DuckDetector;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -43,6 +45,7 @@ public class B_DuckBox extends LinearOpMode {
     DcMotorEx Duck_Wheel2;
     DcMotorEx Duck_Wheel1;
     DcMotorEx Intake;
+    CRServo horizontalServo;
 
     ModernRoboticsI2cGyro armGyro;
 
@@ -189,6 +192,9 @@ public class B_DuckBox extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
+        horizontalServo = hardwareMap.crservo.get("TapeHorizontialOrientation   ");
+        horizontalServo.setPower(0);
+
         double LEFT_POSITION = 0.85D;
         double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.68D;
@@ -269,6 +275,7 @@ public class B_DuckBox extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(270)));
 
         TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
                 .addDisplacementMarker(() -> {
@@ -290,6 +297,7 @@ public class B_DuckBox extends LinearOpMode {
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
                 .addDisplacementMarker(() -> {
@@ -307,10 +315,11 @@ public class B_DuckBox extends LinearOpMode {
                     currentTargetHeading.set(190);
                 })
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(10,39, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(7,39, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
                 .addDisplacementMarker(() -> {
@@ -328,7 +337,7 @@ public class B_DuckBox extends LinearOpMode {
                     currentTargetHeading.set(215);
                 })
                 .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(15,39, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(13,39, Math.toRadians(0)))
                 .build();
 
         // 10 high 5 mid 0 low
@@ -420,9 +429,10 @@ public class B_DuckBox extends LinearOpMode {
 
             ArmMotor.setPower(controller.calculate(currentTargetHeading.get(), heading));
         }
-        ArmMotor.setPower(0);
+
         Intake.setPower(-0.3);
 
+        sleep(200);
         Twist.setPosition(0.8D);
         sleep(250);
         Twist.setPosition(0.58);
