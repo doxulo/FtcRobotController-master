@@ -55,6 +55,10 @@ public class B_Cycle extends LinearOpMode {
 
     final double CYCLES_NUMBER = 2;
 
+    /*
+        Initialize motors
+     */
+
     DcMotorEx LF;
     DcMotorEx RF;
     DcMotorEx RB;
@@ -68,6 +72,9 @@ public class B_Cycle extends LinearOpMode {
 
     ModernRoboticsI2cGyro armGyro;
 
+    /*
+        Declare variables
+     */
     PIDController controller = new PIDController(
             0.01,
             0.000001,// 0.000001, // TODO: Tune this
@@ -89,6 +96,15 @@ public class B_Cycle extends LinearOpMode {
     ModernRoboticsI2cGyro orientationGyro;
     IntegratingGyroscope orientationGyroParsed;
 
+    /**
+     * A method to initialize a motor
+     *
+     * @param motorName             The name of the motor
+     * @param direction             The direction of the motor
+     * @param runMode               The run mode of the motor
+     * @param zeroPowerBehavior     The zeroPowerBehavior of the motor
+     * @return                      The newly initialized motor
+     */
     private DcMotorEx initMotor(
             String motorName,
             DcMotorSimple.Direction direction,
@@ -103,6 +119,12 @@ public class B_Cycle extends LinearOpMode {
         return motor;
     }
 
+    /**
+     * Gets the current target Arm Degress
+     *
+     * @param currentArmStates      The current state of the arm
+     * @return                      The target heading of the arm
+     */
     public double getArmTargetDegrees(ArmStates currentArmStates) {
         double targetDegrees = 0D;
         switch (currentArmStates) {
@@ -123,14 +145,11 @@ public class B_Cycle extends LinearOpMode {
         return targetDegrees;
     }
 
-    public void run() {
-        while (opModeIsActive()) {
-            double targetArmDegrees = getArmTargetDegrees(currentArmState);
-            double power = 0;
-            ArmMotor.setPower(power);
-        }
-    }
-
+    /**
+     * Main method
+     * 
+     * @throws InterruptedException
+     */
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -240,7 +259,10 @@ public class B_Cycle extends LinearOpMode {
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
         drive.setPoseEstimate(new Pose2d(13, 65, Math.toRadians(90)));
 
-        //top
+        /*
+            Trajectory for the Top level
+         */
+
         TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
                 .setReversed(true)
                 .addDisplacementMarker(() -> {
@@ -333,7 +355,10 @@ public class B_Cycle extends LinearOpMode {
                     Intake.setPower(-1);
                 })
                 .build();
-        //middle
+
+        /*
+            Trajectory for the middle level
+         */
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
                 .setReversed(true)
                 .addDisplacementMarker(() -> {
@@ -426,7 +451,10 @@ public class B_Cycle extends LinearOpMode {
                     Intake.setPower(-1);
                 })
                 .build();
-        //bottom
+
+        /*
+            Trajectory for the bottom level
+         */
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(13, 65, Math.toRadians(90)))
                 .setReversed(true)
                 .addDisplacementMarker(() -> {
@@ -523,7 +551,8 @@ public class B_Cycle extends LinearOpMode {
         waitForStart();
 
         Twist.setPosition(0.58D);
-        BarcodeDetector.Location barcode = detector.getLocation();
+
+        BarcodeDetector.Location barcode = detector.getLocation(); // Gets the location as detected from the webcam
         webcam.stopStreaming();
 
         switch (barcode) {
@@ -540,6 +569,9 @@ public class B_Cycle extends LinearOpMode {
 
         if(isStopRequested()) return;
 
+        /*
+            Run the Appropriate Trajectory
+         */
         switch (barcode) {
             case LEFT:
                 drive.followTrajectorySequenceAsync(lv3);
@@ -551,6 +583,11 @@ public class B_Cycle extends LinearOpMode {
                 drive.followTrajectorySequenceAsync(lv2);
         }
 
+        /*
+            Main loop
+
+            Update movement motors and arm motor
+         */
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
 
