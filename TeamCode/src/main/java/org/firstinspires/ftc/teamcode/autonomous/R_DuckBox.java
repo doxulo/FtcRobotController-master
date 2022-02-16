@@ -41,7 +41,7 @@ public class R_DuckBox extends LinearOpMode {
     Servo Twist;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
-    OpenCvWebcam duckwebcam;
+//    OpenCvWebcam duckwebcam;
     DcMotorEx Duck_Wheel2;
     DcMotorEx Duck_Wheel1;
     DcMotorEx Intake;
@@ -212,18 +212,18 @@ public class R_DuckBox extends LinearOpMode {
                         2, //The number of sub-containers to create
                         OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY); //Whether to split the container vertically or horizontally
 
-        duckwebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[0]);
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[1]);
+//        duckwebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[0]);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
 
 
         // OR...  Do Not Activate the Camera Monitor View
 //        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         BarcodeDetector detector = new BarcodeDetector(telemetry);
-        DuckDetector detector1 = new DuckDetector(telemetry);
+//        DuckDetector detector1 = new DuckDetector(telemetry);
 
         webcam.setPipeline(detector);
-        duckwebcam.setPipeline(detector1);
+//        duckwebcam.setPipeline(detector1);
 
 //        webcam.setMillisecondsPermissionTimeout(2500);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -243,22 +243,22 @@ public class R_DuckBox extends LinearOpMode {
             }
         });
 
-        duckwebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                duckwebcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-            }
-        });
+//        duckwebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+//        {
+//            @Override
+//            public void onOpened()
+//            {
+//                duckwebcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+//            }
+//
+//            @Override
+//            public void onError(int errorCode)
+//            {
+//                /*
+//                 * This will be called if the camera could not be opened
+//                 */
+//            }
+//        });
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 //        drive.setPoseEstimate(new Pose2d(0, 0, -180));
 
@@ -277,67 +277,68 @@ public class R_DuckBox extends LinearOpMode {
         TrajectorySequence lv1 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-29, 10, Math.toRadians(0)))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
-                .strafeLeft(6)
+                .turn(Math.toRadians(-5))
+                .strafeRight(3)
                 .waitSeconds(3)
-                .strafeRight(8)
-                .turn(Math.toRadians(90))
+                .strafeLeft(10)
+                .turn(Math.toRadians(-85))
                 .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(155);
                 })
-                .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(2,39, Math.toRadians(0)))
+                .turn(Math.toRadians(-100))
+                .lineToLinearHeading(new Pose2d(-2,38, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv2 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-29, 10, Math.toRadians(0)))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
-                .strafeLeft(6)
+                .strafeRight(6)
                 .waitSeconds(3)
-                .strafeRight(8)
-                .turn(Math.toRadians(90))
+                .strafeLeft(10)
+                .turn(Math.toRadians(-90))
                 .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(190);
                 })
-                .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(7,39, Math.toRadians(0)))
+                .turn(Math.toRadians(-100))
+                .lineToLinearHeading(new Pose2d(-7,38, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence lv3 = drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(270)))
                 .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(29, 10, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-29, 10, Math.toRadians(0)))
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0.55);
                     Duck_Wheel2.setPower(-0.55);
                 })
-                .strafeLeft(6)
+                .strafeRight(6)
                 .waitSeconds(3)
-                .strafeRight(8)
-                .turn(Math.toRadians(90))
+                .strafeLeft(10)
+                .turn(Math.toRadians(-90))
                 .back(35)
                 .addDisplacementMarker(() -> {
                     Duck_Wheel1.setPower(0);
                     Duck_Wheel2.setPower(0);
                     currentTargetHeading.set(215);
                 })
-                .turn(Math.toRadians(100))
-                .lineToLinearHeading(new Pose2d(13,39, Math.toRadians(0)))
+                .turn(Math.toRadians(-100))
+                .lineToLinearHeading(new Pose2d(-13,38, Math.toRadians(180)))
                 .build();
 
         // 10 high 5 mid 0 low
@@ -346,8 +347,8 @@ public class R_DuckBox extends LinearOpMode {
                 .addTemporalMarker(1, () -> {
                     currentTargetHeading.set(0);
                 })
-                .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 25.5, Math.toRadians(180)))
+                .lineToConstantHeading(new Vector2d(-20, 42))
+                .lineToLinearHeading(new Pose2d(-30, 25.5, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv2_warehouse_from_hub = drive.trajectorySequenceBuilder(lv2.end())
@@ -355,8 +356,8 @@ public class R_DuckBox extends LinearOpMode {
                 .addTemporalMarker(1, () -> {
                     currentTargetHeading.set(0);
                 })
-                .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 25.5, Math.toRadians(180)))
+                .lineToConstantHeading(new Vector2d(-20, 42))
+                .lineToLinearHeading(new Pose2d(-30, 25.5, Math.toRadians(0)))
                 .build();
 
         TrajectorySequence lv3_warehouse_from_hub = drive.trajectorySequenceBuilder(lv3.end())
@@ -364,8 +365,8 @@ public class R_DuckBox extends LinearOpMode {
                 .addTemporalMarker(1, () -> {
                     currentTargetHeading.set(0);
                 })
-                .lineToConstantHeading(new Vector2d(20, 42))
-                .lineToLinearHeading(new Pose2d(30, 25.5, Math.toRadians(180)))
+                .lineToConstantHeading(new Vector2d(-20, 42))
+                .lineToLinearHeading(new Pose2d(-30, 25.5, Math.toRadians(0)))
                 .build();
 
         waitForStart();

@@ -60,4 +60,8 @@ public class Debounce {
     public void reset(String name) {
         this.getObjectAssert(name).reset();
     }
+
+    public boolean checkIfExist(String name) {
+        return !(this.debounces.get(name) == null);
+    }
 }
