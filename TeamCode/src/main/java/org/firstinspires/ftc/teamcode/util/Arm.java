@@ -50,7 +50,7 @@ public class Arm {
 
     public void setTargetPosition(ArmTargetPosition targetPosition) {
         if (targetPosition == ArmTargetPosition.LEVEL_3 || targetPosition == ArmTargetPosition.LEVEL_0) {
-            requestRetractSlides = true;
+            this.requestRetractSlides = true;
         }
         this.targetPosition = targetPosition;
     }
@@ -72,7 +72,7 @@ public class Arm {
 
     public void update() {
         // Don't move arm while retracting
-        if (slidesRetracted && !requestRetractSlides) {
+        if (this.slidesRetracted && !this.requestRetractSlides) {
             this.updateRotation();
         } else {
             this.rotationMotor.setPower(0);
@@ -87,20 +87,24 @@ public class Arm {
     }
 
     public void updateExtension() {
-        if (requestRetractSlides) {
+        if (this.requestRetractSlides) {
             this.retractSlides();
-            requestRetractSlides = false;
-            startRetractionTime = System.currentTimeMillis();
-        } else if (System.currentTimeMillis() - startRetractionTime > 2000) {
+            this.requestRetractSlides = false;
+            this.extendingSlides = false;
+            this.startRetractionTime = System.currentTimeMillis();
+        } else if (System.currentTimeMillis() - this.startRetractionTime > 2000) {
             this.safeRetract();
-            slidesRetracted = true;
+            this.slidesRetracted = true;
         }
 
         if (this.targetPosition == ArmTargetPosition.LEVEL_1 || this.targetPosition == ArmTargetPosition.LEVEL_2) {
-            if (Math.abs(this.getTargetPosition() - this.getCorrectedArmPosition()) < threshold && !extendingSlides) {
+            if (Math.abs(this.getTargetPosition() - this.getCorrectedArmPosition()) < this.threshold && !this.extendingSlides) {
                 this.extendSlides();
-                extendingSlides = true;
-                slidesRetracted = false;
+                this.startExtensionTime = System.currentTimeMillis();
+                this.extendingSlides = true;
+                this.slidesRetracted = false;
+            } else if (this.extendingSlides && System.currentTimeMillis() - this.startExtensionTime > 2000) {
+                this.safeExtend();
             }
         }
     }
