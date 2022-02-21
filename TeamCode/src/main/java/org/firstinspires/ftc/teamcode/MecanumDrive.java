@@ -359,7 +359,7 @@ public class MecanumDrive extends LinearOpMode {
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
@@ -406,6 +406,7 @@ public class MecanumDrive extends LinearOpMode {
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 1);
        /*
        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -580,18 +581,18 @@ public class MecanumDrive extends LinearOpMode {
             }
 
 
-            if (Math.abs(targetHeading - getCorrectedPosition()) < 10 && targetHeading > 200 && targetHeading < 450) {
-                Arm_Slides.setPower(-1);
-                BoxFlip.setPosition(0.3);
-            }
-
-            if (targetHeading == 0) {
-                Arm_Slides.setPower(1);
-
-                if (getCorrectedPosition() < 100) {
-                    BoxFlip.setPosition(0.88);
-                }
-            }
+//            if (Math.abs(targetHeading - getCorrectedPosition()) < 10 && targetHeading > 200 && targetHeading < 450) {
+//                Arm_Slides.setPower(-1);
+//                BoxFlip.setPosition(0.3);
+//            }
+//
+//            if (targetHeading == 0) {
+//                Arm_Slides.setPower(1);
+//
+//                if (getCorrectedPosition() < 100) {
+//                    BoxFlip.setPosition(0.88);
+//                }
+//            }
 
 
             if (targetHeading != -1) {
@@ -614,6 +615,27 @@ public class MecanumDrive extends LinearOpMode {
 
                 ArmMotor.setPower(power);
             }
+
+
+//            if (gamepad2.dpad_up) {
+//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
+//            } else if (gamepad2.dpad_left) {
+//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
+//            } else if (gamepad2.dpad_down) {
+//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
+//            } else if (gamepad2.x) {
+//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+//                Intake.setPower(-0.5);
+//
+//                scheduler.add(
+//                        setPowerMethod,
+//                        Intake,
+//                        0,
+//                        1
+//                );
+//            }
+//
+//            outtakeArm.update();
 
             // BoxFlip.setPosition(position); // 0.3, // 0.88
 
