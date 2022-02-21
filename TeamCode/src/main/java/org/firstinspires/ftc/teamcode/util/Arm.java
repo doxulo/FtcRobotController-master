@@ -50,7 +50,9 @@ public class Arm {
 
     public void setTargetPosition(ArmTargetPosition targetPosition) {
         if (targetPosition == ArmTargetPosition.LEVEL_3 || targetPosition == ArmTargetPosition.LEVEL_0) {
-            this.requestRetractSlides = true;
+            if (!this.slidesRetracted) {
+                this.requestRetractSlides = true;
+            }
         }
         this.targetPosition = targetPosition;
     }

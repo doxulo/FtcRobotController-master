@@ -46,12 +46,13 @@ public class MecanumDrive extends LinearOpMode {
     public static double kI = 0;
     public static double kD = 0.2;
 
+    public static boolean runArmUsingEncoders = false;
+
     public int LEVEL_3_TARGET_HEADING = 300;
     public int LEVEL_2_TARGET_HEADING = 400;
     public int LEVEL_1_TARGET_HEADING = 500;
 
     public static double position = 1D;
-
 
 
     /** Global comments:
@@ -185,31 +186,18 @@ public class MecanumDrive extends LinearOpMode {
      */
     ElapsedTime timer = new ElapsedTime();
 
-    ModernRoboticsI2cGyro armGyro;
-    ModernRoboticsI2cGyro tapeGyro;
-
     @Override
     public void runOpMode() {
 
         FtcDashboard dash = FtcDashboard.getInstance();
+        telemetry = dash.getTelemetry();
+
+        telemetry.addLine("Calibrating... ");
+        telemetry.update();
 
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
 
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
-
-        telemetry.log().add("Gyros Calibrating. Do Not Move!");
-        armGyro.calibrate();
-
-        timer.reset();
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating, ", "%f seconds passed", timer.seconds());
-            telemetry.update();
-            sleep(50);
-        }
-
-        telemetry.addLine("Done calibrating");
-        telemetry.update();
         // limitPower = 1 / limitPower;
 
         Debounce debounces = new Debounce(
@@ -305,6 +293,7 @@ public class MecanumDrive extends LinearOpMode {
         int lastLevel = 0;
         int currentLevel = 0;
         int headingOffset = 0;
+        long lastArmRunUpdate = System.currentTimeMillis();
 
         boolean intakeOn = false;
         boolean limitOn = true;
@@ -360,20 +349,20 @@ public class MecanumDrive extends LinearOpMode {
                 "ArmMotor", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.REVERSE,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.BRAKE
+                DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         Duck_Wheel1 = initMotor(
                 "Duck_Wheel1",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.BRAKE
+                DcMotor.ZeroPowerBehavior.FLOAT
         );
         Arm_Slides = initMotor(
                 "Arm_Slides",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
 
         Twist = hardwareMap.servo.get("Twisty");
@@ -417,7 +406,8 @@ public class MecanumDrive extends LinearOpMode {
             odometryServos[i].setPosition(restingPositions[i]);
         }
 
-        telemetry = dash.getTelemetry();
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
 
         while (true) {
 
@@ -425,16 +415,23 @@ public class MecanumDrive extends LinearOpMode {
             controller.kI = kI;
             controller.kD = kD;
 
+            if (System.currentTimeMillis() - lastArmRunUpdate > 1000) {
+                lastArmRunUpdate = System.currentTimeMillis();
+                if (runArmUsingEncoders) {
+                    ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                } else {
+                    ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                }
+            }
+
             long currentSystemTime = System.currentTimeMillis();
 
-            int heading = armGyro.getHeading();
             // int tapeGyroHeading = tapeGyro.getHeading();
 
             // if (tapeGyroHeading > 280) {
             //    tapeGyroHeading = 0;
             // }
 
-            heading = heading > 350 ? 0 : heading;
             int redColor = BoxSensor.red();
 
             try {
@@ -562,8 +559,6 @@ public class MecanumDrive extends LinearOpMode {
                         0,
                         1
                 );
-            } else if (gamepad2.left_stick_button) {
-                headingOffset = heading;
             } else if (gamepad2.left_trigger > 0) {
                 targetHeading = -1;
                 currentLevel = -1;
@@ -715,7 +710,7 @@ public class MecanumDrive extends LinearOpMode {
 
              */
 
-            // Arm_Slides.setPower(-gamepad2.right_stick_x);
+            Arm_Slides.setPower(-gamepad2.right_stick_x);
 
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
