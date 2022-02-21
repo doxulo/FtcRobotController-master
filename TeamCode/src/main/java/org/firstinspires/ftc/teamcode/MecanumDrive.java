@@ -417,6 +417,8 @@ public class MecanumDrive extends LinearOpMode {
             odometryServos[i].setPosition(restingPositions[i]);
         }
 
+        telemetry = dash.getTelemetry();
+
         while (true) {
 
             controller.kP = kP;

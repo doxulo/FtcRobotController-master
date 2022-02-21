@@ -82,11 +82,11 @@ public class Arm {
         this.updateBox();
     }
 
-    public void updateRotation() {
+    private void updateRotation() {
         this.rotationMotor.setPower(this.controller.calculate(this.getTargetPosition(), this.getCorrectedArmPosition()));
     }
 
-    public void updateExtension() {
+    private void updateExtension() {
         if (this.requestRetractSlides) {
             this.retractSlides();
             this.requestRetractSlides = false;
@@ -109,24 +109,24 @@ public class Arm {
         }
     }
 
-    public void updateBox() {
+    private void updateBox() {
         double position = this.lerp(this.bounds[0], this.bounds[1], Math.min(this.getCorrectedArmPosition()/400, 1));
         this.boxServo.setPosition(position);
     }
 
-    public void extendSlides() {
+    private void extendSlides() {
         this.extensionMotor.setPower(1);
     }
 
-    public void safeExtend()  {
+    private void safeExtend()  {
         this.extensionMotor.setPower(0.1);
     }
 
-    public void retractSlides() {
+    private void retractSlides() {
         this.extensionMotor.setPower(-1);
     }
 
-    public void safeRetract() {
+    private void safeRetract() {
         this.extensionMotor.setPower(-0.1);
     }
 }
