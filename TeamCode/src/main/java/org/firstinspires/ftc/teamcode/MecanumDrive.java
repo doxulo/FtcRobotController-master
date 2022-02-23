@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -81,9 +82,11 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor Arm_Slides;
     public ColorSensor BoxSensor;
     public CRServo tapeExtension;
+    public CRServo tapeExtension1;
     public CRServo tapeVerticalOrientation;
     public CRServo tapeHorizontalOrientation;
     public Servo[] odometryServos = new Servo[3];
+    public RevBlinkinLedDriver Lights;
     public AnalogInput potentiometer;
 
     public static double rest = 0.46D;
@@ -369,6 +372,7 @@ public class MecanumDrive extends LinearOpMode {
         BoxFlip = hardwareMap.servo.get("BoxFlip");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
         tapeExtension = hardwareMap.crservo.get("TapeExtension");
+        tapeExtension1 = hardwareMap.crservo.get("TapeExtension1");
 
         odometryServos = new Servo[] {
                 hardwareMap.servo.get("LeftOdometryServo"),
@@ -503,10 +507,13 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad1.dpad_up) {
                 tapeExtension.setPower(1);
+                tapeExtension1.setPower(1);
             } else if (gamepad1.dpad_down) {
                 tapeExtension.setPower(-1);
+                tapeExtension1.setPower(-1);
             } else {
                 tapeExtension.setPower(0);
+                tapeExtension1.setPower(0);
             }
 
             if (gamepad1.left_trigger > 0) {

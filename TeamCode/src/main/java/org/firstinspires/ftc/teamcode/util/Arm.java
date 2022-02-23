@@ -49,11 +49,15 @@ public class Arm {
     }
 
     public void setTargetPosition(ArmTargetPosition targetPosition) {
-        if (targetPosition == ArmTargetPosition.LEVEL_3 || targetPosition == ArmTargetPosition.LEVEL_0) {
-            if (!this.slidesRetracted) {
-                this.requestRetractSlides = true;
+
+        if (!(targetPosition == this.targetPosition)) {
+            if (targetPosition == ArmTargetPosition.LEVEL_3 || targetPosition == ArmTargetPosition.LEVEL_0) {
+                if (!this.slidesRetracted) {
+                    this.requestRetractSlides = true;
+                }
             }
         }
+
         this.targetPosition = targetPosition;
     }
 
