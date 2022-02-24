@@ -4,12 +4,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class PIDController {
 
-    double[] biasPoints;
+    public double[] biasPoints;
     double[] integralBounds;
 
     public double summation = 0;
-    double fullRotation;
-    double offset;
+    public double fullRotation;
+    public double offset;
 
     public double kP;
     public double kI;

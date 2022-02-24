@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.Light;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -46,6 +47,11 @@ public class MecanumDrive extends LinearOpMode {
     public static double kP = 0.02;
     public static double kI = 0;
     public static double kD = 0.2;
+
+    public static double point1 = -0.4;
+    public static double point2 = 0.4;
+
+    public static double offset = 0;
 
     public static boolean runArmUsingEncoders = false;
 
@@ -227,9 +233,9 @@ public class MecanumDrive extends LinearOpMode {
                 0,//0.000001,// 0.000001, // TODO: Tune this
                 0,
                 new double[] {
-                        0.05, -0.10
+                        0.4, -0.4
                 },
-                360,
+                600,
                 0,
                 new double[] {
                         -0.15, 0.15, 25D
@@ -373,6 +379,7 @@ public class MecanumDrive extends LinearOpMode {
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
         tapeExtension = hardwareMap.crservo.get("TapeExtension");
         tapeExtension1 = hardwareMap.crservo.get("TapeExtension1");
+        Lights = hardwareMap.get(RevBlinkinLedDriver.class, "Lights");
 
         odometryServos = new Servo[] {
                 hardwareMap.servo.get("LeftOdometryServo"),
@@ -395,6 +402,9 @@ public class MecanumDrive extends LinearOpMode {
             e.printStackTrace();
         }
 
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
+
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -410,14 +420,20 @@ public class MecanumDrive extends LinearOpMode {
             odometryServos[i].setPosition(restingPositions[i]);
         }
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
 
         while (true) {
 
             controller.kP = kP;
             controller.kI = kI;
             controller.kD = kD;
+
+            controller.biasPoints = new double[] {
+                    point1, point2
+            };
+
+            controller.offset = offset;
+
+
 
             if (System.currentTimeMillis() - lastArmRunUpdate > 1000) {
                 lastArmRunUpdate = System.currentTimeMillis();
@@ -427,7 +443,7 @@ public class MecanumDrive extends LinearOpMode {
                     ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
             }
-
+            //fancy code
             long currentSystemTime = System.currentTimeMillis();
 
             // int tapeGyroHeading = tapeGyro.getHeading();
@@ -468,6 +484,12 @@ public class MecanumDrive extends LinearOpMode {
             lastTime = currentSystemTime;
             //drive train
             mecanum(-Math.pow(gamepad1.left_stick_y, 1D), Math.pow(gamepad1.left_stick_x, 1D), Math.pow(gamepad1.right_stick_x, 1D));
+
+            if (redColor > 100) {
+                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            } else {
+                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+            }
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
                 limit = (limitOn ? 1 : limitPower);
@@ -619,6 +641,8 @@ public class MecanumDrive extends LinearOpMode {
 
                 ArmMotor.setPower(power);
             }
+
+
 
 
 //            if (gamepad2.dpad_up) {

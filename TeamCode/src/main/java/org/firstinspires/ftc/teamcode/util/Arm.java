@@ -121,7 +121,7 @@ public class Arm {
     }
 
     private void extendSlides() {
-        this.extensionMotor.setPower(1);
+        this.extensionMotor.setPower(0.5);
     }
 
     private void safeExtend()  {
@@ -129,7 +129,7 @@ public class Arm {
     }
 
     private void retractSlides() {
-        this.extensionMotor.setPower(-1);
+        this.extensionMotor.setPower(-0.5);
     }
 
     private void safeRetract() {
