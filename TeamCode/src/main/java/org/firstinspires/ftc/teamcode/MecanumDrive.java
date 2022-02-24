@@ -486,9 +486,9 @@ public class MecanumDrive extends LinearOpMode {
             mecanum(-Math.pow(gamepad1.left_stick_y, 1D), Math.pow(gamepad1.left_stick_x, 1D), Math.pow(gamepad1.right_stick_x, 1D));
 
             if (redColor > 100) {
-                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIME);
             } else {
-                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
             }
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
