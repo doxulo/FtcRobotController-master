@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,7 +19,11 @@ import com.qualcomm.robotcore.hardware.Light;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Axis;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.autonomous.R_DuckBox_Old;
 import org.firstinspires.ftc.teamcode.util.Arm;
 import org.firstinspires.ftc.teamcode.util.Debounce;
@@ -94,6 +100,8 @@ public class MecanumDrive extends LinearOpMode {
     public Servo[] odometryServos = new Servo[3];
     public RevBlinkinLedDriver Lights;
     public AnalogInput potentiometer;
+
+    public BNO055IMU imu;
 
     public static double rest = 0.46D;
     public static double close = 0.89D;
@@ -203,6 +211,18 @@ public class MecanumDrive extends LinearOpMode {
 
         telemetry.addLine("Calibrating... ");
         telemetry.update();
+
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+//        parameters.loggingEnabled      = true;
+//        parameters.loggingTag          = "IMU";
+//        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+//
+//        imu = hardwareMap.get(BNO055IMU.class, "imu");
+//        imu.initialize(parameters);
+
 
         tapeVerticalOrientation = hardwareMap.crservo.get("TapeVerticalOrientation");
         tapeHorizontalOrientation = hardwareMap.crservo.get("TapeHorizontialOrientation");
@@ -464,15 +484,21 @@ public class MecanumDrive extends LinearOpMode {
 
             double power = 0;
 
+            // Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
             // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
-            telemetry.addData("tape measure target heading: ", targetVerticalOrientation);
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", ArmMotor.getCurrentPosition());
             telemetry.addData("Target arm heading: ", targetHeading);
+//            telemetry.addData("First Axis Orientation: ", orientation.firstAngle);
+//            telemetry.addData("Second Axis Orientation: ", orientation.secondAngle);
+//            telemetry.addData("Third Axis Orientation: ", orientation.thirdAngle);
+
 
             // telemetry.addData("integrated Z", "%3d", integratedZ);
             //telemetry.addLine()

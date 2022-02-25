@@ -93,11 +93,42 @@ public class MeepMeepTesting {
                                 .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
                                 .build()
                 );
+
+        RoadRunnerBotEntity red_duckbox = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setColorScheme(new ColorSchemeRedLight())
+                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
+                                .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(0)))
+                                .waitSeconds(2)
+                                .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
+                                .waitSeconds(2)
+                                .lineToConstantHeading(new Vector2d(-65, -35))
+                                .build()
+                );
+
+        RoadRunnerBotEntity blue_duckbox = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setColorScheme(new ColorSchemeRedLight())
+                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
+                                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(0)))
+                                .waitSeconds(2)
+                                .lineToLinearHeading(new Pose2d(-65, 25, Math.toRadians(180)))
+                                .waitSeconds(2)
+                                .lineToConstantHeading(new Vector2d(-65, 35))
+                                .build()
+                );
+
         meepMeep.setBackground(MeepMeep.Background.FIELD_FREIGHTFRENZY_OFFICIAL)
                 .setDarkMode(false)
                 .setBackgroundAlpha(1f)
                 .addEntity(blue_cycle)
                 .addEntity(red_cycle)
+                .addEntity(red_duckbox)
+                .addEntity(blue_duckbox)
                 .start();
     }
 }
