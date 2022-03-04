@@ -22,7 +22,7 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity blue_cycle = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setColorScheme(new ColorSchemeBlueLight())
-                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                                 .setReversed(true)
@@ -59,7 +59,7 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity red_cycle = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setColorScheme(new ColorSchemeRedLight())
-                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(10, -65, Math.toRadians(270)))
                                 .setReversed(true)
@@ -97,21 +97,21 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity red_duckbox = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setColorScheme(new ColorSchemeRedLight())
-                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                                 .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(0)))
                                 .waitSeconds(2)
-                                .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
-                                .waitSeconds(2)
-                                .lineToConstantHeading(new Vector2d(-65, -35))
-                                .build()
+                                    .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
+                                    .waitSeconds(2)
+                                    .lineToConstantHeading(new Vector2d(-65, -35))
+                                    .build()
                 );
 
         RoadRunnerBotEntity blue_duckbox = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setColorScheme(new ColorSchemeRedLight())
-                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
                                 .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(0)))

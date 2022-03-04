@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.util;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Arm {
 
     public enum ArmTargetPosition {
@@ -14,7 +16,7 @@ public class Arm {
     DcMotorEx extensionMotor;
 
     PIDController controller;
-    ArmTargetPosition targetPosition;
+    ArmTargetPosition targetPosition = ArmTargetPosition.LEVEL_0;
 
     double[] bounds = new double[] {0.3, 0.88};
     int[] targetPositions = new int[] {1, 390, 425, 500};
@@ -30,6 +32,8 @@ public class Arm {
 
     int threshold;
 
+    Telemetry telemetry;
+
     public double lerp(double p0, double p1, double t) {
         return (1-t)*p0 + p1*t;
     }
@@ -40,6 +44,15 @@ public class Arm {
         this.extensionMotor = extensionMotor;
         this.threshold = threshold;
         this.boxServo =  boxServo;
+    }
+
+    public Arm(PIDController controller, DcMotorEx rotationMotor, DcMotorEx extensionMotor, Servo boxServo, int threshold, Telemetry telemetry) {
+        this.controller = controller;
+        this.rotationMotor = rotationMotor;
+        this.extensionMotor = extensionMotor;
+        this.threshold = threshold;
+        this.boxServo =  boxServo;
+        this.telemetry = telemetry;
     }
 
     private int getCorrectedArmPosition() {
@@ -84,12 +97,20 @@ public class Arm {
             this.rotationMotor.setPower(0);
         }
 
+        if (this.telemetry != null) {
+            this.telemetry.addData("Difference: ", this.getTargetPosition() - this.getCorrectedArmPosition());
+        }
+
         this.updateExtension();
         this.updateBox();
     }
 
     private void updateRotation() {
-        this.rotationMotor.setPower(this.controller.calculate(this.getTargetPosition(), this.getCorrectedArmPosition()));
+        if (this.getCorrectedArmPosition() < 20 && this.targetPosition == ArmTargetPosition.LEVEL_0) {
+            this.rotationMotor.setPower(0);
+        } else {
+            this.rotationMotor.setPower(this.controller.calculate(this.getTargetPosition(), this.getCorrectedArmPosition()));
+        }
     }
 
     private void updateExtension() {
@@ -104,7 +125,7 @@ public class Arm {
         }
 
         if (this.targetPosition == ArmTargetPosition.LEVEL_1 || this.targetPosition == ArmTargetPosition.LEVEL_2) {
-            if (Math.abs(this.getTargetPosition() - this.getCorrectedArmPosition()) < this.threshold && !this.extendingSlides) {
+            if (Math.abs(this.getTargetPosition() - this.getCorrectedArmPosition()) <= this.threshold && !this.extendingSlides) {
                 this.extendSlides();
                 this.startExtensionTime = System.currentTimeMillis();
                 this.extendingSlides = true;
@@ -121,7 +142,7 @@ public class Arm {
     }
 
     private void extendSlides() {
-        this.extensionMotor.setPower(0.5);
+        this.extensionMotor.setPower(0.7);
     }
 
     private void safeExtend()  {
@@ -129,10 +150,10 @@ public class Arm {
     }
 
     private void retractSlides() {
-        this.extensionMotor.setPower(-0.5);
+        this.extensionMotor.setPower(-0.7);
     }
 
     private void safeRetract() {
-        this.extensionMotor.setPower(-0.1);
+        this.extensionMotor.setPower(-0.5);
     }
 }

@@ -203,7 +203,7 @@ public class R_DuckBox_Old extends LinearOpMode {
 
         double LEFT_POSITION = 0.85D;
         double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.68D;
+        double FRONT_POSITION = 0.65D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);

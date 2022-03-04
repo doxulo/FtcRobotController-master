@@ -20,6 +20,8 @@ public class PIDController {
 
     public boolean paused;
 
+    public Telemetry telemetry;
+
     public PIDController(double kP, double kI, double kD, double[] biasPoints, double fullRotation, double offset, double[] integralBounds) {
         this.kP = kP;
         this.kI = kI;
@@ -29,6 +31,18 @@ public class PIDController {
         this.offset = offset;
         this.integralBounds = integralBounds;
         this.paused = true;
+    }
+
+    public PIDController(double kP, double kI, double kD, double[] biasPoints, double fullRotation, double offset, double[] integralBounds, Telemetry telemetry) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.biasPoints = biasPoints;
+        this.fullRotation = fullRotation;
+        this.offset = offset;
+        this.integralBounds = integralBounds;
+        this.paused = true;
+        this.telemetry = telemetry;
     }
 
     public double lerp(double p0, double p1, double t) {
@@ -63,6 +77,12 @@ public class PIDController {
 
         this.lastTime = System.currentTimeMillis();
         this.lastError = dp;
+
+        if (this.telemetry != null) {
+            this.telemetry.addData("error: ", error);
+            this.telemetry.addData("integral: ", integral);
+            this.telemetry.addData("derivative", derivative);
+        }
 
         return (error + integral + derivative + bias);
     }

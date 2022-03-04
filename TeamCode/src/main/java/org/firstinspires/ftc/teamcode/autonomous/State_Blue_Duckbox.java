@@ -5,30 +5,26 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.BarcodeDetector;
-import org.firstinspires.ftc.teamcode.DuckDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.PIDController;
-import org.firstinspires.ftc.teamcode.util.RobotArm;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 
 @Autonomous
-public class B_DuckBox_DuckCamTest extends LinearOpMode {
+public class State_Blue_Duckbox extends LinearOpMode {
 
     DcMotorEx LF;
     DcMotorEx RF;
@@ -38,20 +34,15 @@ public class B_DuckBox_DuckCamTest extends LinearOpMode {
     Servo Twist;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
-    OpenCvWebcam duckwebcam;
-    DcMotorEx Duck_Wheel2;
     DcMotorEx Duck_Wheel1;
     DcMotorEx Intake;
+    CRServo horizontalServo;
 
     ModernRoboticsI2cGyro armGyro;
 
     public enum ArmStates {
         REST, LEVEL_1, LEVEL_2, LEVEL_3
     }
-
-    ArmStates currentArmState;
-    ModernRoboticsI2cGyro orientationGyro;
-    IntegratingGyroscope orientationGyroParsed;
 
     PIDController controller = new PIDController(
             0.01,
@@ -164,22 +155,12 @@ public class B_DuckBox_DuckCamTest extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
-        Duck_Wheel2 = initMotor(
-                "Duck_Wheel2",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.BRAKE
-        );
-
         Intake = initMotor(
                 "Intake",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
-
-        RobotArm arm = new RobotArm(ArmMotor, armGyro);
-        // arm.start();
 
         Twist = hardwareMap.servo.get("Twisty");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
@@ -188,11 +169,13 @@ public class B_DuckBox_DuckCamTest extends LinearOpMode {
         Servo rightOdometryServo = hardwareMap.servo.get("RightOdometryServo");
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
+        horizontalServo = hardwareMap.crservo.get("TapeHorizontialOrientation");
+        horizontalServo.setPower(0);
+
         double LEFT_POSITION = 0.85D;
         double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.65D;
 
-        double armTargetHeading = 0D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
@@ -205,25 +188,22 @@ public class B_DuckBox_DuckCamTest extends LinearOpMode {
                         2, //The number of sub-containers to create
                         OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY); //Whether to split the container vertically or horizontally
 
-        duckwebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[0]);
-//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[1]);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
 
 
         // OR...  Do Not Activate the Camera Monitor View
 //        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
-//        BarcodeDetector detector = new BarcodeDetector(telemetry);
-        DuckDetector detector1 = new DuckDetector(telemetry);
+        BarcodeDetector detector = new BarcodeDetector(telemetry);
 
-        duckwebcam.setPipeline(detector1);
+        webcam.setPipeline(detector);
 
-//        webcam.setMillisecondsPermissionTimeout(2500);
-        duckwebcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                duckwebcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
 
             @Override
@@ -234,24 +214,61 @@ public class B_DuckBox_DuckCamTest extends LinearOpMode {
                  */
             }
         });
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-//        {
-//            @Override
-//            public void onOpened()
-//            {
-//                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
-//            }
-//
-//            @Override
-//            public void onError(int errorCode)
-//            {
-//                /*
-//                 * This will be called if the camera could not be opened
-//                 */
-//            }
-//        });
+        drive.setPoseEstimate(new Pose2d(-35, -65, Math.toRadians(270)));
+
+        TrajectorySequence first_path = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
+                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(0)))
+                .waitSeconds(2)
+                .build();
+
+        TrajectorySequence top = drive.trajectorySequenceBuilder(first_path.end())
+                .lineToLinearHeading(new Pose2d(-65, 25, Math.toRadians(180)))
+                .waitSeconds(2)
+                .lineToConstantHeading(new Vector2d(-65, 35))
+                .build();
+
         waitForStart();
+        BarcodeDetector.Location barcode = detector.getLocation();
+        webcam.stopStreaming();
 
+
+        switch (barcode) {
+            case LEFT:
+                telemetry.addData("location: ", "left");
+                break;
+            case RIGHT:
+                telemetry.addData("location: ", "right");
+                break;
+            case MIDDLE:
+                telemetry.addData("location: ", "middle");
+        }
+        telemetry.update();
+
+
+        if(isStopRequested()) return;
+
+
+        drive.followTrajectorySequenceAsync(first_path);
+
+        while (drive.isBusy()) {
+            drive.update();
+        }
+
+        switch (barcode) {
+            case LEFT:
+                drive.followTrajectorySequenceAsync(top);
+                break;
+            case RIGHT:
+                drive.followTrajectorySequenceAsync(top);
+                break;
+            case MIDDLE:
+                drive.followTrajectorySequenceAsync(top);
+        }
+
+        while (drive.isBusy()) {
+            drive.update();
+        }
     }
 }

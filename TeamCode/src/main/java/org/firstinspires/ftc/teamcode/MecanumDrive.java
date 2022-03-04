@@ -59,6 +59,8 @@ public class MecanumDrive extends LinearOpMode {
 
     public static double offset = 0;
 
+
+
     public static boolean runArmUsingEncoders = false;
 
     public int LEVEL_3_TARGET_HEADING = 300;
@@ -249,9 +251,9 @@ public class MecanumDrive extends LinearOpMode {
         Scheduler scheduler = new Scheduler();
 
         PIDController controller = new PIDController(
-                0.01,
+                0.02,
                 0,//0.000001,// 0.000001, // TODO: Tune this
-                0,
+                0.02,
                 new double[] {
                         0.4, -0.4
                 },
@@ -259,7 +261,7 @@ public class MecanumDrive extends LinearOpMode {
                 0,
                 new double[] {
                         -0.15, 0.15, 25D
-                });
+                }, telemetry);
 
         PIDController tapeController = new PIDController(
                 0.02,
@@ -346,7 +348,7 @@ public class MecanumDrive extends LinearOpMode {
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
 
         );
@@ -428,8 +430,9 @@ public class MecanumDrive extends LinearOpMode {
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 1);
+        RF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 30, telemetry);
        /*
        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -489,11 +492,13 @@ public class MecanumDrive extends LinearOpMode {
 
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
+            telemetry.addData("Arm Slides Power: ", Arm_Slides.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
+            telemetry.addData("Slides Position: ", RF.getCurrentPosition());
             // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("Summation: ", tapeController.summation);
-            telemetry.addData("arm heading: ", ArmMotor.getCurrentPosition());
+            telemetry.addData("arm heading: ", ArmMotor.getCurrentPosition()/10);
             telemetry.addData("Target arm heading: ", targetHeading);
 //            telemetry.addData("First Axis Orientation: ", orientation.firstAngle);
 //            telemetry.addData("Second Axis Orientation: ", orientation.secondAngle);
@@ -555,10 +560,10 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad1.dpad_up) {
                 tapeExtension.setPower(1);
-                tapeExtension1.setPower(1);
+                tapeExtension1.setPower(-1);
             } else if (gamepad1.dpad_down) {
                 tapeExtension.setPower(-1);
-                tapeExtension1.setPower(-1);
+                tapeExtension1.setPower(1);
             } else {
                 tapeExtension.setPower(0);
                 tapeExtension1.setPower(0);
@@ -579,6 +584,7 @@ public class MecanumDrive extends LinearOpMode {
             } else {
                 targetVerticalOrientation = 0;
             }
+
 //
 //            if (targetVerticalOrientation > 1) {
 //                targetVerticalOrientation = 1;
@@ -593,44 +599,44 @@ public class MecanumDrive extends LinearOpMode {
 //            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
 
-
-            if (gamepad2.dpad_up) {
-                currentLevel = 1;
-                targetHeading = 390D;
-            } else if (gamepad2.dpad_left) {
-                currentLevel = 2;
-                targetHeading = 425D;
-            } else if (gamepad2.dpad_down) {
-                currentLevel = 3;
-                targetHeading = 500D;
-            } else if (gamepad2.x) {
-                currentLevel = 0;
-                targetHeading = 0D;
-                Intake.setPower(-0.5);
-
-                scheduler.add(
-                        setPowerMethod,
-                        Intake,
-                        0,
-                        1
-                );
-            } else if (gamepad2.left_trigger > 0) {
-                targetHeading = -1;
-                currentLevel = -1;
-                ArmMotor.setPower(-gamepad2.left_trigger/3);
-            } else if (gamepad2.right_trigger > 0) {
-                targetHeading = -1;
-                currentLevel = -1;
-                ArmMotor.setPower(gamepad2.right_trigger/3);
-            }  else if (resetArmPower) {
-                resetArmPower = false;
-                targetHeading = -1;
-                currentLevel = -1;
-                controller.pauseAndReset();
-                ArmMotor.setPower(0);
-            } else if (ArmMotor.getPower() != 0) {
-                ArmMotor.setPower(0);
-            }
+//
+//            if (gamepad2.dpad_up) {
+//                currentLevel = 1;
+//                targetHeading = 390D;
+//            } else if (gamepad2.dpad_left) {
+//                currentLevel = 2;
+//                targetHeading = 425D;
+//            } else if (gamepad2.dpad_down) {
+//                currentLevel = 3;
+//                targetHeading = 500D;
+//            } else if (gamepad2.x) {
+//                currentLevel = 0;
+//                targetHeading = 0D;
+//                Intake.setPower(-0.5);
+//
+//                scheduler.add(
+//                        setPowerMethod,
+//                        Intake,
+//                        0,
+//                        1
+//                );
+//            } else if (gamepad2.left_trigger > 0) {
+//                targetHeading = -1;
+//                currentLevel = -1;
+//                ArmMotor.setPower(-gamepad2.left_trigger/3);
+//            } else if (gamepad2.right_trigger > 0) {
+//                targetHeading = -1;
+//                currentLevel = -1;
+//                ArmMotor.setPower(gamepad2.right_trigger/3);
+//            }  else if (resetArmPower) {
+//                resetArmPower = false;
+//                targetHeading = -1;
+//                currentLevel = -1;
+//                controller.pauseAndReset();
+//                ArmMotor.setPower(0);
+//            } else if (ArmMotor.getPower() != 0) {
+//                ArmMotor.setPower(0);
+//            }
 
 
 //            if (Math.abs(targetHeading - getCorrectedPosition()) < 10 && targetHeading > 200 && targetHeading < 450) {
@@ -647,49 +653,49 @@ public class MecanumDrive extends LinearOpMode {
 //            }
 
 
-            if (targetHeading != -1) {
-                power = controller.calculate(targetHeading, getCorrectedPosition());
+//            if (targetHeading != -1) {
+//                power = controller.calculate(targetHeading, getCorrectedPosition());
+//
+//                if (getCorrectedPosition() < 100) {
+//                    power = power/10;
+//                }
+//                telemetry.addData("Power: ", power);
+//                if (targetHeading == 0) {
+//                    power *= 0.5;
+//                }
+//                if (currentLevel != lastLevel) {
+//                    controller.pauseAndReset();
+//                    controller.resume();
+//                }
+//
+//                lastLevel = currentLevel;
+//                resetArmPower = true;
+//
+//                ArmMotor.setPower(power);
+//            }
 
-                if (getCorrectedPosition() < 100) {
-                    power = power/10;
-                }
-                telemetry.addData("Power: ", power);
-                if (targetHeading == 0) {
-                    power *= 0.5;
-                }
-                if (currentLevel != lastLevel) {
-                    controller.pauseAndReset();
-                    controller.resume();
-                }
 
-                lastLevel = currentLevel;
-                resetArmPower = true;
 
-                ArmMotor.setPower(power);
+
+            if (gamepad2.dpad_up) {
+                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
+            } else if (gamepad2.dpad_left) {
+                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
+            } else if (gamepad2.dpad_down) {
+                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
+            } else if (gamepad2.x) {
+                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                Intake.setPower(-0.5);
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        1
+                );
             }
 
-
-
-
-//            if (gamepad2.dpad_up) {
-//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
-//            } else if (gamepad2.dpad_left) {
-//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
-//            } else if (gamepad2.dpad_down) {
-//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
-//            } else if (gamepad2.x) {
-//                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-//                Intake.setPower(-0.5);
-//
-//                scheduler.add(
-//                        setPowerMethod,
-//                        Intake,
-//                        0,
-//                        1
-//                );
-//            }
-//
-//            outtakeArm.update();
+            outtakeArm.update();
 
             // BoxFlip.setPosition(position); // 0.3, // 0.88
 
@@ -767,7 +773,7 @@ public class MecanumDrive extends LinearOpMode {
 
              */
 
-            Arm_Slides.setPower(-gamepad2.right_stick_x);
+            // Arm_Slides.setPower(-gamepad2.right_stick_x);
 
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);

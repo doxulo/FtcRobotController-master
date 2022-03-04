@@ -32,7 +32,7 @@ public class TrackWidthTuner extends LinearOpMode {
     public static int DELAY = 1000; // ms
     public static double LEFT_POSITION = 0.85D;
     public static double RIGHT_POSITION = 0.1D;
-    public static double FRONT_POSITION = 0.68D;
+    public static double FRONT_POSITION = 0.65D;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -49,10 +49,10 @@ public class TrackWidthTuner extends LinearOpMode {
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
-        waitForStart();
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
+        waitForStart();
         if (isStopRequested()) return;
 
         telemetry.clearAll();

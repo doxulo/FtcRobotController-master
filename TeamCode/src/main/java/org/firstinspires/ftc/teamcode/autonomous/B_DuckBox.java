@@ -197,7 +197,7 @@ public class B_DuckBox extends LinearOpMode {
 
         double LEFT_POSITION = 0.85D;
         double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.68D;
+        double FRONT_POSITION = 0.65D;
 
         double armTargetHeading = 0D;
 

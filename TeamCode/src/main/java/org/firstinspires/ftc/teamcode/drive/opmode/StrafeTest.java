@@ -21,7 +21,7 @@ public class StrafeTest extends LinearOpMode {
     public static double DISTANCE = 60; // in
     public static double LEFT_POSITION = 0.85D;
     public static double RIGHT_POSITION = 0.1D;
-    public static double FRONT_POSITION = 0.68D;
+    public static double FRONT_POSITION = 0.65D;
     @Override
     public void runOpMode() throws InterruptedException {
         Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
@@ -35,10 +35,10 @@ public class StrafeTest extends LinearOpMode {
                 .strafeRight(DISTANCE)
                 .build();
 
-        waitForStart();
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
+        waitForStart();
 
         if (isStopRequested()) return;
 

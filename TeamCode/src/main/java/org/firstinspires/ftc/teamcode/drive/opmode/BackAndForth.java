@@ -33,7 +33,7 @@ public class BackAndForth extends LinearOpMode {
     public static double DISTANCE = 50;
     public static double LEFT_POSITION = 0.85D;
     public static double RIGHT_POSITION = 0.1D;
-    public static double FRONT_POSITION = 0.68D;
+    public static double FRONT_POSITION = 0.65D;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -48,10 +48,10 @@ public class BackAndForth extends LinearOpMode {
                 .back(DISTANCE)
                 .build();
 
-        waitForStart();
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
+        waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             drive.followTrajectory(trajectoryForward);
             drive.followTrajectory(trajectoryBackward);
