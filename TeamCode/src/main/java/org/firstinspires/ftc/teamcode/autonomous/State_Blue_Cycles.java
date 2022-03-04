@@ -154,19 +154,6 @@ public class State_Blue_Cycles extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
 
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
-
-        telemetry.log().add("Gyros Calibrating. Do Not Move!");
-        armGyro.calibrate();
-
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating, ", "%f seconds passed");
-            telemetry.update();
-            sleep(50);
-        }
-
-        telemetry.addLine("Done calibrating");
-        telemetry.update();
 
         LF = initMotor(
                 "LF",
@@ -267,32 +254,32 @@ public class State_Blue_Cycles extends LinearOpMode {
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, 65, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(40, 68, Math.toRadians(0)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,65 , Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, 65, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(40, 68, Math.toRadians(0)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,65 , Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, 65, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(40, 68, Math.toRadians(0)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,65 , Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, 65, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,65 , Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, 65, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
                 .build();
 
         waitForStart();

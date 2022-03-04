@@ -242,7 +242,8 @@ public class MecanumDrive extends LinearOpMode {
                 new DebounceObject("Derivative", 500),
                 new DebounceObject("Servo", 300),
                 new DebounceObject("OdometryServo", 1000),
-                new DebounceObject("Test.", 1000)
+                new DebounceObject("Test.", 1000),
+                new DebounceObject("ServoPosition", 50)
         );
 
         Switch duckMotorSwitch = new Switch(false);
@@ -302,7 +303,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.48D, 0.58D, 0.76D
+                0.53D, 0.63D, 0.76D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -500,6 +501,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", ArmMotor.getCurrentPosition()/10);
             telemetry.addData("Target arm heading: ", targetHeading);
+            telemetry.addData("BoxFLip: ", BoxFlip.getPosition());
 //            telemetry.addData("First Axis Orientation: ", orientation.firstAngle);
 //            telemetry.addData("Second Axis Orientation: ", orientation.secondAngle);
 //            telemetry.addData("Third Axis Orientation: ", orientation.thirdAngle);
@@ -595,6 +597,12 @@ public class MecanumDrive extends LinearOpMode {
             tapeVerticalOrientation.setPower(targetVerticalOrientation);
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
 
+
+            if (gamepad2.right_trigger > 0 && debounces.checkAndUpdate("ServoPosition")) {
+                Arm.higherBound += 0.01;
+            } else if (gamepad2.left_trigger > 0 && debounces.checkAndUpdate("ServoPosition")) {
+                Arm.higherBound -= 0.01;
+            }
 //            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 //            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 
@@ -678,12 +686,36 @@ public class MecanumDrive extends LinearOpMode {
 
 
             if (gamepad2.dpad_up) {
+                Intake.setPower(0.5);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        100
+                );
             } else if (gamepad2.dpad_left) {
+                Intake.setPower(0.5);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        100
+                );
             } else if (gamepad2.dpad_down) {
+                Intake.setPower(0.5);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
-            } else if (gamepad2.x) {
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        100
+                );
+            } else if (gamepad2.dpad_right  && outtakeArm.targetPosition != Arm.ArmTargetPosition.LEVEL_0 && RF.getCurrentPosition() < 200) {
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 Intake.setPower(-0.5);
 
@@ -691,7 +723,7 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        1
+                        1500
                 );
             }
 
@@ -773,14 +805,19 @@ public class MecanumDrive extends LinearOpMode {
 
              */
 
-            // Arm_Slides.setPower(-gamepad2.right_stick_x);
+            if (gamepad2.right_stick_y == 0 && RF.getCurrentPosition() < 300 ) {
+                Arm_Slides.setPower(-0.3);
+            } else {
+                Arm_Slides.setPower(-gamepad2.right_stick_y);
+            }
 
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
-            } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && debounces.check("Servo")) {
+            } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && !gamepad2.right_stick_button && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
-            } else if (redColor > 5 && gamepad2.y && debounces.checkAndUpdate("Servo")) {
+            } else if (redColor > 5 && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
+                
                 // sleep(1000);
             } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);

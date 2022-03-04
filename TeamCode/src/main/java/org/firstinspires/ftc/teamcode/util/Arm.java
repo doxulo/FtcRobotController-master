@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+@Config
 public class Arm {
 
     public enum ArmTargetPosition {
@@ -16,10 +18,17 @@ public class Arm {
     DcMotorEx extensionMotor;
 
     PIDController controller;
-    ArmTargetPosition targetPosition = ArmTargetPosition.LEVEL_0;
+    public ArmTargetPosition targetPosition = ArmTargetPosition.LEVEL_0;
 
-    double[] bounds = new double[] {0.3, 0.88};
-    int[] targetPositions = new int[] {1, 390, 425, 500};
+    public static double lowerBound = 0.37;
+    public static double higherBound = 0.92;
+
+    public double currentServoPosition = lowerBound;
+
+    public static int level0Position = 1;
+    public static int level1Position = 390;
+    public static int level2Position = 425;
+    public static int level3Position = 500;
     long startExtensionTime = -1;
     long startRetractionTime = -1;
 
@@ -27,6 +36,10 @@ public class Arm {
     boolean requestRetractSlides = false;
     boolean slidesRetracted = true;
     boolean slidesMoving = false;
+
+    boolean servoChangingPosition = false;
+
+    long lastServoChangePosition = System.currentTimeMillis();
 
     Servo boxServo;
 
@@ -62,28 +75,37 @@ public class Arm {
     }
 
     public void setTargetPosition(ArmTargetPosition targetPosition) {
+        if (!this.servoChangingPosition && targetPosition != this.targetPosition) {
+            if (targetPosition == ArmTargetPosition.LEVEL_0) {
+                this.currentServoPosition = lowerBound;
+            } else {
+                this.currentServoPosition = higherBound;
+            }
 
-        if (!(targetPosition == this.targetPosition)) {
-            if (targetPosition == ArmTargetPosition.LEVEL_3 || targetPosition == ArmTargetPosition.LEVEL_0) {
-                if (!this.slidesRetracted) {
-                    this.requestRetractSlides = true;
-                }
+            if (this.targetPosition != ArmTargetPosition.LEVEL_0) {
+                this.servoChangingPosition = true;
             }
         }
 
         this.targetPosition = targetPosition;
+
+        this.lastServoChangePosition = System.currentTimeMillis();
+
+        this.updateBox();
+
+
     }
 
     public int getTargetPosition() {
         switch (this.targetPosition) {
             case LEVEL_0:
-                return targetPositions[0];
+                return level0Position;
             case LEVEL_1:
-                return targetPositions[1];
+                return level1Position;
             case LEVEL_2:
-                return targetPositions[2];
+                return level2Position;
             case LEVEL_3:
-                return targetPositions[3];
+                return level3Position;
         }
 
         return 0;
@@ -101,59 +123,42 @@ public class Arm {
             this.telemetry.addData("Difference: ", this.getTargetPosition() - this.getCorrectedArmPosition());
         }
 
-        this.updateExtension();
-        this.updateBox();
     }
 
     private void updateRotation() {
-        if (this.getCorrectedArmPosition() < 20 && this.targetPosition == ArmTargetPosition.LEVEL_0) {
+        if (this.servoChangingPosition) {
+            if (System.currentTimeMillis() - this.lastServoChangePosition < 500) {
+                this.updateBox();
+            } else {
+                this.servoChangingPosition = false;
+            }
+
+        } else if (this.getCorrectedArmPosition() < 20 && this.targetPosition == ArmTargetPosition.LEVEL_0) {
             this.rotationMotor.setPower(0);
         } else {
             this.rotationMotor.setPower(this.controller.calculate(this.getTargetPosition(), this.getCorrectedArmPosition()));
         }
-    }
 
-    private void updateExtension() {
-        if (this.requestRetractSlides) {
-            this.retractSlides();
-            this.requestRetractSlides = false;
-            this.extendingSlides = false;
-            this.startRetractionTime = System.currentTimeMillis();
-        } else if (System.currentTimeMillis() - this.startRetractionTime > 2000) {
-            this.safeRetract();
-            this.slidesRetracted = true;
-        }
-
-        if (this.targetPosition == ArmTargetPosition.LEVEL_1 || this.targetPosition == ArmTargetPosition.LEVEL_2) {
-            if (Math.abs(this.getTargetPosition() - this.getCorrectedArmPosition()) <= this.threshold && !this.extendingSlides) {
-                this.extendSlides();
-                this.startExtensionTime = System.currentTimeMillis();
-                this.extendingSlides = true;
-                this.slidesRetracted = false;
-            } else if (this.extendingSlides && System.currentTimeMillis() - this.startExtensionTime > 2000) {
-                this.safeExtend();
-            }
-        }
     }
 
     private void updateBox() {
-        double position = this.lerp(this.bounds[0], this.bounds[1], Math.min(this.getCorrectedArmPosition()/400, 1));
-        this.boxServo.setPosition(position);
+        this.boxServo.setPosition(this.currentServoPosition);
     }
 
-    private void extendSlides() {
-        this.extensionMotor.setPower(0.7);
-    }
 
-    private void safeExtend()  {
-        this.extensionMotor.setPower(0.1);
-    }
-
-    private void retractSlides() {
-        this.extensionMotor.setPower(-0.7);
-    }
-
-    private void safeRetract() {
-        this.extensionMotor.setPower(-0.5);
-    }
+//    private void extendSlides() {
+//        this.extensionMotor.setPower(0.7);
+//    }
+//
+//    private void safeExtend()  {
+//        this.extensionMotor.setPower(0.1);
+//    }
+//
+//    private void retractSlides() {
+//        this.extensionMotor.setPower(-0.7);
+//    }
+//
+//    private void safeRetract() {
+//        this.extensionMotor.setPower(-0.5);
+//    }
 }
