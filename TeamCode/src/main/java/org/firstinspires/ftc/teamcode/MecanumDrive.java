@@ -817,7 +817,7 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistPositions[1]);
             } else if (redColor > 5 && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
-                
+
                 // sleep(1000);
             } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
