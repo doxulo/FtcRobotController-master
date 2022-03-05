@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.util.DebounceObject;
 import org.firstinspires.ftc.teamcode.util.OldPIDController;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.Scheduler;
+import org.firstinspires.ftc.teamcode.util.Slides;
 import org.firstinspires.ftc.teamcode.util.Switch;
 import org.firstinspires.ftc.teamcode.util.MathUtil;
 
@@ -50,7 +51,7 @@ public class MecanumDrive extends LinearOpMode {
     }
 
 
-    public static double kP = 0.02;
+    public static double kP = 0.005;
     public static double kI = 0;
     public static double kD = 0.2;
 
@@ -200,6 +201,8 @@ public class MecanumDrive extends LinearOpMode {
 
         return Math.max(currentPosition, 0);
     }
+
+
     /**
      * Main method that executes upon code run
      */
@@ -209,7 +212,7 @@ public class MecanumDrive extends LinearOpMode {
     public void runOpMode() {
 
         FtcDashboard dash = FtcDashboard.getInstance();
-        telemetry = dash.getTelemetry();
+        // telemetry = dash.getTelemetry();
 
         telemetry.addLine("Calibrating... ");
         telemetry.update();
@@ -243,7 +246,7 @@ public class MecanumDrive extends LinearOpMode {
                 new DebounceObject("Servo", 300),
                 new DebounceObject("OdometryServo", 1000),
                 new DebounceObject("Test.", 1000),
-                new DebounceObject("ServoPosition", 50)
+                new DebounceObject("ArmPosition", 250)
         );
 
         Switch duckMotorSwitch = new Switch(false);
@@ -278,6 +281,20 @@ public class MecanumDrive extends LinearOpMode {
                 }
         );
 
+        PIDController slidesController = new PIDController(
+                0.005,
+                0,
+                0.01,
+                new double[] {
+                        0, 0
+                },
+                700,
+                0,
+                new double[] {
+                        -0.25, 0.25, 10D
+                }
+        );
+
         PIDController initTapeController = new PIDController(
                 0.01,
                 0,
@@ -303,7 +320,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.53D, 0.63D, 0.76D
+                0.53D, 0.63D, 0.84D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -314,7 +331,7 @@ public class MecanumDrive extends LinearOpMode {
         ExtensionStates currentExtensionState = ExtensionStates.ARM_REST;
         LiftStates targetArmState = LiftStates.LEVEL_0;
 
-        double defaultPower = 0.56D;
+        double defaultPower = 0.5D;
         double targetHeading = 0D;
         double currentHorizontalOrientation = 0.5D;
         double targetVerticalOrientation = 0D;
@@ -325,6 +342,7 @@ public class MecanumDrive extends LinearOpMode {
         int lastLevel = 0;
         int currentLevel = 0;
         int headingOffset = 0;
+        int extensionTarget = 0;
         long lastArmRunUpdate = System.currentTimeMillis();
 
         boolean intakeOn = false;
@@ -334,6 +352,7 @@ public class MecanumDrive extends LinearOpMode {
         boolean on = false;
         boolean retractOn = false;
         boolean safeRetractOn = true;
+        boolean retractArm = false;
 
         long extensionStartTime = System.currentTimeMillis();
 
@@ -418,6 +437,11 @@ public class MecanumDrive extends LinearOpMode {
         };
 
         Method setPowerMethod = null;
+        Method setServoPositionMethod = null;
+
+        Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 30, telemetry);
+
+        Slides slides = new Slides( (DcMotorEx) Arm_Slides, (DcMotorEx) RF);
 
         try {
             setPowerMethod = Intake.getClass().getMethod("setPower", double.class);
@@ -431,9 +455,8 @@ public class MecanumDrive extends LinearOpMode {
         waitForStart();
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 30, telemetry);
+        Arm_Slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
        /*
        ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
        ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -447,16 +470,9 @@ public class MecanumDrive extends LinearOpMode {
 
         while (true) {
 
-            controller.kP = kP;
-            controller.kI = kI;
-            controller.kD = kD;
-
-            controller.biasPoints = new double[] {
-                    point1, point2
-            };
-
-            controller.offset = offset;
-
+            slidesController.kP = kP;
+            slidesController.kI = kI;
+            slidesController.kD = kD;
 
 
             if (System.currentTimeMillis() - lastArmRunUpdate > 1000) {
@@ -496,7 +512,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Arm Slides Power: ", Arm_Slides.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
-            telemetry.addData("Slides Position: ", RF.getCurrentPosition());
+            telemetry.addData("Slides Position: ", Arm_Slides.getCurrentPosition());
             // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("Summation: ", tapeController.summation);
             telemetry.addData("arm heading: ", ArmMotor.getCurrentPosition()/10);
@@ -598,10 +614,10 @@ public class MecanumDrive extends LinearOpMode {
             tapeHorizontalOrientation.setPower(currentHorizontalOrientation);
 
 
-            if (gamepad2.right_trigger > 0 && debounces.checkAndUpdate("ServoPosition")) {
-                Arm.higherBound += 0.01;
-            } else if (gamepad2.left_trigger > 0 && debounces.checkAndUpdate("ServoPosition")) {
-                Arm.higherBound -= 0.01;
+            if (gamepad2.right_trigger > 0 && debounces.checkAndUpdate("ArmPosition")) {
+                Arm.level1Position -= 1;
+            } else if (gamepad2.left_trigger > 0 && debounces.checkAndUpdate("ArmPosition")) {
+                Arm.level1Position +=  1;
             }
 //            tapeVerticalOrientation.setPower(-MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
 //            telemetry.addData("Power sent: ", -MathUtil.clamp(tapeController.calculate(Math.round(targetVerticalOrientation), tapeGyroHeading), -1, 1));
@@ -686,7 +702,7 @@ public class MecanumDrive extends LinearOpMode {
 
 
             if (gamepad2.dpad_up) {
-                Intake.setPower(0.5);
+                Intake.setPower(1);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
 
                 scheduler.add(
@@ -696,7 +712,7 @@ public class MecanumDrive extends LinearOpMode {
                         100
                 );
             } else if (gamepad2.dpad_left) {
-                Intake.setPower(0.5);
+                Intake.setPower(1);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
 
                 scheduler.add(
@@ -706,7 +722,7 @@ public class MecanumDrive extends LinearOpMode {
                         100
                 );
             } else if (gamepad2.dpad_down) {
-                Intake.setPower(0.5);
+                Intake.setPower(1);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
 
                 scheduler.add(
@@ -715,15 +731,15 @@ public class MecanumDrive extends LinearOpMode {
                         0,
                         100
                 );
-            } else if (gamepad2.dpad_right  && outtakeArm.targetPosition != Arm.ArmTargetPosition.LEVEL_0 && RF.getCurrentPosition() < 200) {
+            } else if (gamepad2.dpad_right  && outtakeArm.targetPosition != Arm.ArmTargetPosition.LEVEL_0 && Arm_Slides.getCurrentPosition() < 200) {
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                Intake.setPower(-0.5);
+                Intake.setPower(-1);
 
                 scheduler.add(
                         setPowerMethod,
                         Intake,
                         0,
-                        1500
+                        2000
                 );
             }
 
@@ -805,12 +821,6 @@ public class MecanumDrive extends LinearOpMode {
 
              */
 
-            if (gamepad2.right_stick_y == 0 && RF.getCurrentPosition() < 300 ) {
-                Arm_Slides.setPower(-0.3);
-            } else {
-                Arm_Slides.setPower(-gamepad2.right_stick_y);
-            }
-
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
             } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && !gamepad2.right_stick_button && debounces.check("Servo")) {
@@ -818,12 +828,53 @@ public class MecanumDrive extends LinearOpMode {
             } else if (redColor > 5 && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
 
-                // sleep(1000);
+                // retractArm = true;
             } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
-                // sleep(650);
             }
 
+            if (retractArm) {
+                Arm_Slides.setPower(lerp(-0.3, -0.6, ((double) Math.abs(Arm_Slides.getCurrentPosition()))/750D));
+
+                if (Arm_Slides.getCurrentPosition() < 50) {
+                    retractArm = false;
+                }
+
+                outtakeArm.targetPosition = Arm.ArmTargetPosition.LEVEL_0;
+            } else if (gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
+                Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                Arm_Slides.setPower(-0.3);
+            } else if (gamepad2.x) {
+                Arm_Slides.setTargetPosition(700);
+                Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Arm_Slides.setPower(0.7);
+            } else {
+                Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                Arm_Slides.setPower(-gamepad2.right_stick_y);
+            }
+
+            if (gamepad2.right_bumper || gamepad2.left_bumper) {
+
+                if (startDuck == 0) {
+                    duckMotorSwitch.setTrue();
+                    startDuck = System.currentTimeMillis();
+                    if (gamepad2.left_bumper) {
+                        Duck_Wheel1.setPower(-defaultPower);
+                    } else {
+                        Duck_Wheel1.setPower(defaultPower);
+                    }
+                } else if (System.currentTimeMillis() - startDuck > 850) {
+                    if (gamepad2.left_bumper) {
+                        Duck_Wheel1.setPower(-0.75);
+                    } else {
+                        Duck_Wheel1.setPower(0.75);
+                    }
+                }
+            } else if (duckMotorSwitch.check()){
+                duckMotorSwitch.trigger();
+                startDuck = 0;
+                Duck_Wheel1.setPower(0);
+            }
 
 
 

@@ -26,7 +26,7 @@ public class Arm {
     public double currentServoPosition = lowerBound;
 
     public static int level0Position = 1;
-    public static int level1Position = 390;
+    public static int level1Position = 380;
     public static int level2Position = 425;
     public static int level3Position = 500;
     long startExtensionTime = -1;
