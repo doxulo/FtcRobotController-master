@@ -13,9 +13,9 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -37,9 +37,7 @@ public class State_Blue_Cycles extends LinearOpMode {
     CRServo horizontalServo;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
-
     ModernRoboticsI2cGyro armGyro;
-
     /*
         Declare variables
      */
