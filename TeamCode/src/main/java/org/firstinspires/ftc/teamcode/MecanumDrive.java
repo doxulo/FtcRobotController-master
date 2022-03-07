@@ -368,7 +368,7 @@ public class MecanumDrive extends LinearOpMode {
         RF = initMotor(
                 "RF",
                 DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.STOP_AND_RESET_ENCODER,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.FLOAT
 
         );
@@ -844,12 +844,15 @@ public class MecanumDrive extends LinearOpMode {
             } else if (gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-0.3);
-            } else if (gamepad2.x) {
+            }
+            // Delete after here
+            else if (gamepad2.x) {
                 Arm_Slides.setTargetPosition(700);
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 Arm_Slides.setPower(0.7);
             } else {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                // Keep this line
                 Arm_Slides.setPower(-gamepad2.right_stick_y);
             }
 
