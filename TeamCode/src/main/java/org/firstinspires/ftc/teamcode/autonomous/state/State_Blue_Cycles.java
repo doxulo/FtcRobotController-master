@@ -25,7 +25,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Autonomous(name = "Blue Cycles", group = "State")
+@Autonomous(name = "Blue Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
 public class State_Blue_Cycles extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;

@@ -21,7 +21,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Red Duckbox", group = "State")
+@Autonomous(name = "Red Duckbox", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
 public class State_Red_Duckbox extends LinearOpMode {
 
     DcMotorEx LF;
