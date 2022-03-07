@@ -20,7 +20,7 @@ public class Arm {
     PIDController controller;
     public ArmTargetPosition targetPosition = ArmTargetPosition.LEVEL_0;
 
-    public static double lowerBound = 0.37;
+    public static double lowerBound = 0.25;
     public static double higherBound = 0.92;
 
     public double currentServoPosition = lowerBound;
@@ -68,7 +68,7 @@ public class Arm {
         this.telemetry = telemetry;
     }
 
-    private int getCorrectedArmPosition() {
+    public int getCorrectedArmPosition() {
         int currentPosition = this.rotationMotor.getCurrentPosition()/10;
 
         return Math.max(currentPosition, 0);
@@ -127,7 +127,7 @@ public class Arm {
 
     private void updateRotation() {
         if (this.servoChangingPosition) {
-            if (System.currentTimeMillis() - this.lastServoChangePosition < 500) {
+            if (System.currentTimeMillis() - this.lastServoChangePosition < 1) {
                 this.updateBox();
             } else {
                 this.servoChangingPosition = false;

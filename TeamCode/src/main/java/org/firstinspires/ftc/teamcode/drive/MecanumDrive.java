@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.util.Switch;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @TeleOp(group = "Control", name = "MAIN MECANUM DRIVE")
 @Config
@@ -345,6 +346,7 @@ public class MecanumDrive extends LinearOpMode {
         int headingOffset = 0;
         int extensionTarget = 0;
         long lastArmRunUpdate = System.currentTimeMillis();
+        long scheduleRetractArm = 0;
 
         boolean intakeOn = false;
         boolean limitOn = true;
@@ -354,6 +356,8 @@ public class MecanumDrive extends LinearOpMode {
         boolean retractOn = false;
         boolean safeRetractOn = true;
         boolean retractArm = false;
+        boolean spinningIntake = true;
+        boolean scheduleArmReturn = false;
 
         long extensionStartTime = System.currentTimeMillis();
 
@@ -438,7 +442,7 @@ public class MecanumDrive extends LinearOpMode {
         };
 
         Method setPowerMethod = null;
-        Method setServoPositionMethod = null;
+        Method setRetractArmBoolean = null;
 
         Arm outtakeArm = new Arm(controller, (DcMotorEx) ArmMotor, (DcMotorEx) Arm_Slides, BoxFlip, 30, telemetry);
 
@@ -710,8 +714,9 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        100
+                        1000
                 );
+
             } else if (gamepad2.dpad_left) {
                 Intake.setPower(1);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
@@ -720,8 +725,9 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        100
+                        1000
                 );
+
             } else if (gamepad2.dpad_down) {
                 Intake.setPower(1);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
@@ -730,8 +736,9 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        100
+                        1000
                 );
+
             } else if (gamepad2.dpad_right  && outtakeArm.targetPosition != Arm.ArmTargetPosition.LEVEL_0 && Arm_Slides.getCurrentPosition() < 200) {
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 Intake.setPower(-1);
@@ -742,85 +749,10 @@ public class MecanumDrive extends LinearOpMode {
                         0,
                         2000
                 );
+
             }
 
             outtakeArm.update();
-
-            // BoxFlip.setPosition(position); // 0.3, // 0.88
-
-//            switch (currentArmState) {
-//                case LEVEL_0:
-//                    ArmMotor.setPower(controller.calculate(0, ArmMotor.getCurrentPosition()));
-//
-//                    if (gamepad2.dpad_up) {
-//                        currentArmState = LiftStates.LEVEL_3;
-//                    }
-//                    break;
-//                case LEVEL_3:
-//
-//                    ArmMotor.setPower(controller.calculate(LEVEL_3_TARGET_HEADING, ArmMotor.getCurrentPosition()));
-//
-//                    if (Math.abs(ArmMotor.getCurrentPosition() - LEVEL_3_TARGET_HEADING) < 50 && ArmMotor.getPower() < 0.25) {
-//                        if (gamepad2.dpad_left || gamepad2.dpad_down || gamepad2.x) {
-//                            if (!retractOn) {
-//                                if (gamepad2.dpad_left) {
-//                                    targetArmState = LiftStates.LEVEL_2;
-//                                } else if (gamepad2.dpad_down) {
-//                                    targetArmState = LiftStates.LEVEL_1;
-//                                } else if (gamepad2.x) {
-//                                    targetArmState = LiftStates.LEVEL_0;
-//                                }
-//                                currentExtensionState = ExtensionStates.ARM_RETRACT;
-//                                retractOn = true;
-//                                safeRetractOn = false;
-//                                extensionStartTime = System.currentTimeMillis();
-//                            }
-//                        } else if (safeRetractOn) {
-//                            retractOn = false;
-//                            safeRetractOn = false;
-//                            currentExtensionState = ExtensionStates.ARM_EXTENT;
-//                        }
-//
-//                        if ((System.currentTimeMillis() - extensionStartTime) > 1000) {
-//                            currentExtensionState = ExtensionStates.ARM_REST;
-//                            currentArmState = targetArmState;
-//                        }
-//
-//                        if (gamepad2.y) {
-//                            Twist.setPosition(0.7D);
-//                        }
-//                    } else {
-//                        safeRetractOn = true;
-//                        currentExtensionState = ExtensionStates.ARM_SAFE_RETRACT;
-//                    }
-//
-//                    break;
-//            }
-//
-//            switch (currentExtensionState) {
-//                case ARM_REST:
-//                    Arm_Slides.setPower(0);
-//                    break;
-//                case ARM_EXTENT:
-//                    Arm_Slides.setPower(1);
-//                    break;
-//                case ARM_RETRACT:
-//                    Arm_Slides.setPower(-1);
-//                    break;
-//            }
-
-
-            /*
-            if (gamepad2.right_stick_button) {
-                Arm_Slides.setPower(0);
-            } else {
-                if (gamepad2.right_stick_x > 0.4) {
-                    Arm_Slides.setPower(gamepad2.right_stick_x);
-                } else if (gamepad2.right_stick_x < -0.4){
-                }
-            }
-
-             */
 
             if (debounces.check("Servo") && redColor < 85) {
                 Twist.setPosition(twistPositions[0]);
@@ -829,32 +761,51 @@ public class MecanumDrive extends LinearOpMode {
             } else if (redColor > 5 && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
 
-                // retractArm = true;
+                scheduleRetractArm = System.currentTimeMillis();
             } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
             }
 
+
+            if (System.currentTimeMillis() - scheduleRetractArm > 500 && scheduleRetractArm != 0) {
+                scheduleRetractArm = 0;
+                retractArm = true;
+            }
+
+            
             if (retractArm) {
-                Arm_Slides.setPower(lerp(-0.3, -0.6, ((double) Math.abs(Arm_Slides.getCurrentPosition()))/750D));
 
-                if (Arm_Slides.getCurrentPosition() < 50) {
-                    retractArm = false;
-                }
+                Arm_Slides.setTargetPosition(0);
+                Arm_Slides.setPower(1);
+                Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                outtakeArm.targetPosition = Arm.ArmTargetPosition.LEVEL_0;
-            } else if (gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
+                scheduleArmReturn = true;
+                retractArm = false;
+            } else if (gamepad2.x) {
+                Arm_Slides.setTargetPosition(700);
+                Arm_Slides.setPower(1);
+                Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            } else if (!Arm_Slides.isBusy() && gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-0.3);
-            }
-            // Delete after here
-            else if (gamepad2.x) {
-                Arm_Slides.setTargetPosition(700);
-                Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Arm_Slides.setPower(0.7);
-            } else {
+            } else if (!Arm_Slides.isBusy()){
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                // Keep this line
                 Arm_Slides.setPower(-gamepad2.right_stick_y);
+            }
+
+
+            if (scheduleArmReturn && !Arm_Slides.isBusy()) {
+                scheduleArmReturn = false;
+                Intake.setPower(-1);
+
+                scheduler.add(
+                        setPowerMethod,
+                        Intake,
+                        0,
+                        2000
+                );
+
+                outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
             }
 
             if (gamepad2.right_bumper || gamepad2.left_bumper) {
