@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.util.Arm;
 import org.firstinspires.ftc.teamcode.util.AxesSigns;
 import org.firstinspires.ftc.teamcode.util.BNO055IMUUtil;
@@ -96,6 +97,7 @@ public class MecanumDrive extends LinearOpMode {
     public AnalogInput potentiometer;
 
     public BNO055IMU imu;
+    Orientation lastAngles = new Orientation();
 
     public static double rest = 0.46D;
     public static double close = 0.89D;
@@ -489,7 +491,7 @@ public class MecanumDrive extends LinearOpMode {
 
             // Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-
+            telemetry.addData("imu heading", lastAngles.firstAngle);
             telemetry.addData("Arm Power: ", ArmMotor.getPower());
             telemetry.addData("Dt: ", currentSystemTime - lastTime);
             telemetry.addData("Arm Slides Power: ", Arm_Slides.getPower());
