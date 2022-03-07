@@ -22,6 +22,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Autonomous(name = "Blue Duckbox", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
 public class State_Blue_Duckbox extends LinearOpMode {
 
@@ -175,6 +177,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
         double RIGHT_POSITION = 0.1D;
         double FRONT_POSITION = 0.65D;
 
+        AtomicInteger targetArmLevel = new AtomicInteger(0);
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
@@ -217,33 +220,41 @@ public class State_Blue_Duckbox extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(-35, -65, Math.toRadians(270)));
 
-        TrajectorySequence first_path = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
-                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(0)))
-                .waitSeconds(2)
-                .build();
 
-        TrajectorySequence top = drive.trajectorySequenceBuilder(first_path.end())
-                .lineToLinearHeading(new Pose2d(-65, 25, Math.toRadians(180)))
-                .waitSeconds(2)
-                .lineToConstantHeading(new Vector2d(-65, 35))
-                .build();
 
         waitForStart();
+
         BarcodeDetector.Location barcode = detector.getLocation();
         webcam.stopStreaming();
 
+        int target = 0;
 
         switch (barcode) {
             case LEFT:
+                target = 1;
                 telemetry.addData("location: ", "left");
                 break;
             case RIGHT:
+                target = 2;
                 telemetry.addData("location: ", "right");
                 break;
             case MIDDLE:
+                target = 3;
                 telemetry.addData("location: ", "middle");
         }
         telemetry.update();
+
+        TrajectorySequence first_path = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
+                .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(180)))
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0.5);
+                    sleep(4000);
+                    Duck_Wheel1.setPower(0);
+                    targetArmLevel.set(1);
+                })
+                .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
+                .lineToConstantHeading(new Vector2d(-65, -35))
+                .build();
 
 
         if(isStopRequested()) return;

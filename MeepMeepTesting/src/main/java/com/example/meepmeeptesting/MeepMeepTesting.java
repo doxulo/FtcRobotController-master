@@ -81,12 +81,12 @@ public class MeepMeepTesting {
                 .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
-                                .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(0)))
+                                .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(180)))
                                 .waitSeconds(2)
-                                    .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
-                                    .waitSeconds(2)
-                                    .lineToConstantHeading(new Vector2d(-65, -35))
-                                    .build()
+                                .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
+                                .waitSeconds(2)
+                                .lineToConstantHeading(new Vector2d(-65, -35))
+                                .build()
                 );
 
         RoadRunnerBotEntity blue_duckbox = new DefaultBotBuilder(meepMeep)
@@ -95,7 +95,7 @@ public class MeepMeepTesting {
                 .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
-                                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(0)))
+                                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(180)))
                                 .waitSeconds(2)
                                 .lineToLinearHeading(new Pose2d(-65, 25, Math.toRadians(180)))
                                 .waitSeconds(2)

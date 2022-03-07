@@ -766,13 +766,11 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistPositions[0]);
             }
 
-
             if (System.currentTimeMillis() - scheduleRetractArm > 500 && scheduleRetractArm != 0) {
                 scheduleRetractArm = 0;
                 retractArm = true;
             }
 
-            
             if (retractArm) {
 
                 Arm_Slides.setTargetPosition(0);
@@ -782,16 +780,23 @@ public class MecanumDrive extends LinearOpMode {
                 scheduleArmReturn = true;
                 retractArm = false;
             } else if (gamepad2.x) {
-                Arm_Slides.setTargetPosition(700);
+                if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_1) {
+                    Arm_Slides.setTargetPosition(600);
+                } else if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_2) {
+                    Arm_Slides.setTargetPosition(350);
+                } else {
+                    Arm_Slides.setTargetPosition(100);
+                }
                 Arm_Slides.setPower(1);
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             } else if (!Arm_Slides.isBusy() && gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-0.3);
-            } else if (!Arm_Slides.isBusy()){
+            } /* else if (!Arm_Slides.isBusy()){
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-gamepad2.right_stick_y);
             }
+            */
 
 
             if (scheduleArmReturn && !Arm_Slides.isBusy()) {
@@ -813,12 +818,13 @@ public class MecanumDrive extends LinearOpMode {
                 if (startDuck == 0) {
                     duckMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
+
                     if (gamepad2.left_bumper) {
                         Duck_Wheel1.setPower(-defaultPower);
                     } else {
                         Duck_Wheel1.setPower(defaultPower);
                     }
-                } else if (System.currentTimeMillis() - startDuck > 850) {
+                } else if (System.currentTimeMillis() - startDuck > 750) {
                     if (gamepad2.left_bumper) {
                         Duck_Wheel1.setPower(-0.75);
                     } else {
@@ -830,6 +836,7 @@ public class MecanumDrive extends LinearOpMode {
                 startDuck = 0;
                 Duck_Wheel1.setPower(0);
             }
+
 
 
 
