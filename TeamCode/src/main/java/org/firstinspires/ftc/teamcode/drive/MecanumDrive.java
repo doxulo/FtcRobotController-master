@@ -792,14 +792,14 @@ public class MecanumDrive extends LinearOpMode {
             } else if (!Arm_Slides.isBusy() && gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-0.3);
-            } /* else if (!Arm_Slides.isBusy()){
+            } else if (!Arm_Slides.isBusy()){
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-gamepad2.right_stick_y);
             }
-            */
 
 
-            if (scheduleArmReturn && !Arm_Slides.isBusy()) {
+
+            if (scheduleArmReturn && !Arm_Slides.isBusy() ) {
                 scheduleArmReturn = false;
                 Intake.setPower(-1);
 

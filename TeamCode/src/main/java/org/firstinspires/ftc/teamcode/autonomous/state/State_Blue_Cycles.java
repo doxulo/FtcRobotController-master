@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -118,37 +119,38 @@ public class State_Blue_Cycles extends LinearOpMode {
      */
     @Override
     public void runOpMode() throws InterruptedException {
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 
 
-        LF = initMotor(
-                "LF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RF = initMotor(
-                "RF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-
-        );
-
-        LB = initMotor(
-                "LB",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RB = initMotor(
-                "RB",
-                DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
+//        LF = initMotor(
+//                "LF",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_USING_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
+//
+//        RF = initMotor(
+//                "RF",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_USING_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//
+//        );
+//
+//        LB = initMotor(
+//                "LB",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_USING_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
+//
+//        RB = initMotor(
+//                "RB",
+//                DcMotorSimple.Direction.REVERSE,
+//                DcMotor.RunMode.RUN_USING_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
 
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
@@ -181,33 +183,32 @@ public class State_Blue_Cycles extends LinearOpMode {
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
-
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        BarcodeDetector detector = new BarcodeDetector(telemetry);
-        webcam.setPipeline(detector);
-        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-            }
-        });
+//
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+//
+//        BarcodeDetector detector = new BarcodeDetector(telemetry);
+//        webcam.setPipeline(detector);
+//        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+//        {
+//            @Override
+//            public void onOpened()
+//            {
+//                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
+//            }
+//
+//            @Override
+//            public void onError(int errorCode)
+//            {
+//                /*
+//                 * This will be called if the camera could not be opened
+//                 */
+//            }
+//        });
 
         waitForStart();
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
         drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
@@ -218,18 +219,13 @@ public class State_Blue_Cycles extends LinearOpMode {
 
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                 .lineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)))
-                .waitSeconds(2)
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
-                .waitSeconds(2)
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
                 .setReversed(false)
-                .waitSeconds(2)
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .setReversed(true)
-                .waitSeconds(2)
                 .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
-                .waitSeconds(2)
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .setReversed(true)
@@ -245,56 +241,78 @@ public class State_Blue_Cycles extends LinearOpMode {
         TrajectorySequence top_Linear = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(0.1)
+                .waitSeconds(.5)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,67 , Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(0.1)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,67, Math.toRadians(0)))
-                .waitSeconds(0.1)
-                .lineToLinearHeading(new Pose2d(40, 67, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
                 .build();
-
+        TrajectorySequence top_new = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
+                .setReversed(true)
+                .lineToConstantHeading(new Vector2d(10,55))
+                .turn(Math.toRadians(-30))
+                .turn(Math.toRadians(-60))
+                .setReversed(false)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(40, 67))
+                .setReversed(true)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(10,55))
+                .turn(Math.toRadians(60))
+                .turn(Math.toRadians(-60))
+                .setReversed(false)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(40, 67))
+                .setReversed(true)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(10,55))
+                .turn(Math.toRadians(60))
+                .turn(Math.toRadians(-60))
+                .setReversed(false)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(40, 67))
+                .setReversed(true)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(10,55))
+                .turn(Math.toRadians(60))
+                .turn(Math.toRadians(-60))
+                .setReversed(false)
+                .lineToConstantHeading(new Vector2d(10,67))
+                .lineToConstantHeading(new Vector2d(40, 67))
+                .build();
         waitForStart();
-            drive.followTrajectorySequenceAsync(top);
+            drive.followTrajectorySequenceAsync(top_Linear);
             while (drive.isBusy() && opModeIsActive()) {
                 drive.update();
             }

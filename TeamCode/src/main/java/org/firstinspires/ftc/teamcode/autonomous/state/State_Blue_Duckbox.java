@@ -266,16 +266,16 @@ public class State_Blue_Duckbox extends LinearOpMode {
             drive.update();
         }
 
-        switch (barcode) {
-            case LEFT:
-                drive.followTrajectorySequenceAsync(top);
-                break;
-            case RIGHT:
-                drive.followTrajectorySequenceAsync(top);
-                break;
-            case MIDDLE:
-                drive.followTrajectorySequenceAsync(top);
-        }
+//        switch (barcode) {
+//            case LEFT:
+//                drive.followTrajectorySequenceAsync(top);
+//                break;
+//            case RIGHT:
+//                drive.followTrajectorySequenceAsync(top);
+//                break;
+//            case MIDDLE:
+//                drive.followTrajectorySequenceAsync(top);
+//        }
 
         while (drive.isBusy()) {
             drive.update();
