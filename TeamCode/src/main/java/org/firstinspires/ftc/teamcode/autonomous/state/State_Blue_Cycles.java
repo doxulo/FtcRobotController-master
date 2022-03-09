@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.Arm;
 import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -32,9 +33,11 @@ public class State_Blue_Cycles extends LinearOpMode {
     DcMotorEx RF;
     DcMotorEx RB;
     DcMotorEx LB;
+    DcMotorEx Arm_Slides;
     DcMotorEx ArmMotor;
     DcMotorEx Intake;
     Servo Twist;
+    Servo BoxFlip;
     CRServo horizontalServo;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
@@ -121,37 +124,6 @@ public class State_Blue_Cycles extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-
-
-//        LF = initMotor(
-//                "LF",
-//                DcMotorSimple.Direction.FORWARD,
-//                DcMotor.RunMode.RUN_USING_ENCODER,
-//                DcMotor.ZeroPowerBehavior.FLOAT
-//        );
-//
-//        RF = initMotor(
-//                "RF",
-//                DcMotorSimple.Direction.FORWARD,
-//                DcMotor.RunMode.RUN_USING_ENCODER,
-//                DcMotor.ZeroPowerBehavior.FLOAT
-//
-//        );
-//
-//        LB = initMotor(
-//                "LB",
-//                DcMotorSimple.Direction.FORWARD,
-//                DcMotor.RunMode.RUN_USING_ENCODER,
-//                DcMotor.ZeroPowerBehavior.FLOAT
-//        );
-//
-//        RB = initMotor(
-//                "RB",
-//                DcMotorSimple.Direction.REVERSE,
-//                DcMotor.RunMode.RUN_USING_ENCODER,
-//                DcMotor.ZeroPowerBehavior.FLOAT
-//        );
-
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
                 DcMotorSimple.Direction.REVERSE,
@@ -166,7 +138,15 @@ public class State_Blue_Cycles extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        Arm_Slides = initMotor(
+                "Arm_Slides",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
         Twist = hardwareMap.servo.get("Twisty");
+        BoxFlip = hardwareMap.servo.get("BoxFlip");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
 
         Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
@@ -206,113 +186,71 @@ public class State_Blue_Cycles extends LinearOpMode {
 //                 */
 //            }
 //        });
-
-        waitForStart();
+        Arm outtake = new Arm(new PIDController(
+                0.02,
+                0,//0.000001,// 0.000001, // TODO: Tune this
+                0.02,
+                new double[] {
+                        0.4, -0.4
+                },
+                600,
+                0,
+                new double[] {
+                        -0.15, 0.15, 25D
+                }), ArmMotor, Arm_Slides, BoxFlip, 0);
 
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
+
         drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
-
-        /*
-            Trajectory for the Top level
-         */
-
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
-                .lineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)))
-                .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
+                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(50)))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(16, 63.5, Math.toRadians(5)), Math.toRadians(50))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(16, 63.5, Math.toRadians(5)), Math.toRadians(50))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(16, 63.5, Math.toRadians(5)), Math.toRadians(50))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(10, 60, Math.toRadians(60)), Math.toRadians(250))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
+                .waitSeconds(.5)
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
+                .splineToSplineHeading(new Pose2d(16, 63.5, Math.toRadians(5)), Math.toRadians(50))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .waitSeconds(.5)
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
+                .waitSeconds(.5)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(16, 63.5, Math.toRadians(5)), Math.toRadians(50))
+                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
                 .build();
 
-        TrajectorySequence top_Linear = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(60)))
-                .waitSeconds(.5)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
-                .waitSeconds(.5)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
-                .waitSeconds(.5)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
-                .waitSeconds(.5)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineTo(new Vector2d(10, 55), Math.toRadians(240))
-                .waitSeconds(.5)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), 0)
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .build();
-        TrajectorySequence top_new = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
-                .setReversed(true)
-                .lineToConstantHeading(new Vector2d(10,55))
-                .turn(Math.toRadians(-30))
-                .turn(Math.toRadians(-60))
-                .setReversed(false)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(40, 67))
-                .setReversed(true)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(10,55))
-                .turn(Math.toRadians(60))
-                .turn(Math.toRadians(-60))
-                .setReversed(false)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(40, 67))
-                .setReversed(true)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(10,55))
-                .turn(Math.toRadians(60))
-                .turn(Math.toRadians(-60))
-                .setReversed(false)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(40, 67))
-                .setReversed(true)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(10,55))
-                .turn(Math.toRadians(60))
-                .turn(Math.toRadians(-60))
-                .setReversed(false)
-                .lineToConstantHeading(new Vector2d(10,67))
-                .lineToConstantHeading(new Vector2d(40, 67))
-                .build();
         waitForStart();
-            drive.followTrajectorySequenceAsync(top_Linear);
+            drive.followTrajectorySequenceAsync(top);
             while (drive.isBusy() && opModeIsActive()) {
                 drive.update();
             }
