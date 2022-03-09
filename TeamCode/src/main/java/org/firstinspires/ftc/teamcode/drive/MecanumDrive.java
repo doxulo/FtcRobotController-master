@@ -781,7 +781,7 @@ public class MecanumDrive extends LinearOpMode {
                 retractArm = false;
             } else if (gamepad2.x) {
                 if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_1) {
-                    Arm_Slides.setTargetPosition(600);
+                    Arm_Slides.setTargetPosition(700);
                 } else if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_2) {
                     Arm_Slides.setTargetPosition(350);
                 } else {
