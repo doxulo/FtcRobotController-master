@@ -6,7 +6,9 @@ import com.acmerobotics.roadrunner.profile.VelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.noahbres.meepmeep.MeepMeep;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueLight;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedDark;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedLight;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 
@@ -122,34 +124,38 @@ public class MeepMeepTesting {
                                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
                                 .build()
                 );
+        RoadRunnerBotEntity blue_duckbox = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setColorScheme(new ColorSchemeBlueDark())
+                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
+                                .splineToSplineHeading(new Pose2d(-62, 62, Math.toRadians(180)), Math.toRadians(180))
+                                .waitSeconds(2)
+                                .setReversed(true)
+                                .lineToSplineHeading(new Pose2d(-55, 25, Math.toRadians(180)))
+                                .waitSeconds(2)
+                                .lineToSplineHeading(new Pose2d(-62, 40, Math.toRadians(180)))
+                                .build()
+                );
 
         RoadRunnerBotEntity red_duckbox = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setColorScheme(new ColorSchemeRedLight())
-                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
+                .setColorScheme(new ColorSchemeRedDark())
+                .setConstraints(50 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
-                                .lineToLinearHeading(new Pose2d(-65, -65, Math.toRadians(180)))
+                                .setReversed(true)
+                                .splineToSplineHeading(new Pose2d(-65, -65, Math.toRadians(0)), Math.toRadians(180))
                                 .waitSeconds(2)
+                                .setReversed(false)
+                                .splineToLinearHeading(new Pose2d(-60, -45, Math.toRadians(180)), Math.toRadians(180))
                                 .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
                                 .waitSeconds(2)
                                 .lineToConstantHeading(new Vector2d(-65, -35))
                                 .build()
                 );
 
-        RoadRunnerBotEntity blue_duckbox = new DefaultBotBuilder(meepMeep)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setColorScheme(new ColorSchemeRedLight())
-                .setConstraints(40 , 50, 2 * Math.PI, 2 * Math.PI, 14.5)
-                .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
-                                .lineToLinearHeading(new Pose2d(-65, 65, Math.toRadians(180)))
-                                .waitSeconds(2)
-                                .lineToLinearHeading(new Pose2d(-65, 25, Math.toRadians(180)))
-                                .waitSeconds(2)
-                                .lineToConstantHeading(new Vector2d(-65, 35))
-                                .build()
-                );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_FREIGHTFRENZY_OFFICIAL)
                 .setDarkMode(false)

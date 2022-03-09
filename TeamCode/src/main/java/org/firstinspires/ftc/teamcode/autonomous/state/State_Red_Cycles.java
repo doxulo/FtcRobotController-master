@@ -27,7 +27,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Autonomous(name = "Red Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
+@Autonomous(name = "State Red Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
 public class State_Red_Cycles extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;
@@ -203,7 +203,7 @@ public class State_Red_Cycles extends LinearOpMode {
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
 
-        drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
+        drive.setPoseEstimate(new Pose2d(10, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, -65, Math.toRadians(270)))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
