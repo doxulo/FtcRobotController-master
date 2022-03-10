@@ -206,54 +206,155 @@ public class State_Red_Cycles extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(10, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, -65, Math.toRadians(270)))
                 .setReversed(true)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
-                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .build();
 
         waitForStart();
         drive.followTrajectorySequenceAsync(top);
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
+            outtake.update();
         }
     }
 }

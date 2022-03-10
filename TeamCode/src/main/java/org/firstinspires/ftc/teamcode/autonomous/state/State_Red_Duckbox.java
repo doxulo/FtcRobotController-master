@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -207,25 +208,93 @@ public class State_Red_Duckbox extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(-35, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-62, -62, Math.toRadians(0)), Math.toRadians(180))
-                .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(-0.5);
-                })
-                .waitSeconds(2)
-                .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(0);
+                .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
                 })
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-55, -45, Math.toRadians(180)), Math.toRadians(180))
-                .lineToSplineHeading(new Pose2d(-55, -25, Math.toRadians(180)))
+                .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(-27, -25, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
                 .waitSeconds(2)
-                .lineToSplineHeading(new Pose2d(-65, -35, Math.toRadians(180)))
+                .splineToSplineHeading(new Pose2d(-46, -25, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-58, -35, Math.toRadians(0)),Math.toRadians(270))
+                .build();
+
+        TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(-34, -30, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .waitSeconds(2)
+                .splineToSplineHeading(new Pose2d(-46, -30, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, -40, Math.toRadians(0)),Math.toRadians(270))
+                .build();
+
+        TrajectorySequence bottom = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
+                .setReversed(false)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
+                .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(-38, -30, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .waitSeconds(2)
+                .splineToSplineHeading(new Pose2d(-46, -30, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, -40, Math.toRadians(0)),Math.toRadians(270))
                 .build();
 
         waitForStart();
         drive.followTrajectorySequenceAsync(top);
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
+            outtake.update();
         }
     }
 }

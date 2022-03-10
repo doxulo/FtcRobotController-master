@@ -210,26 +210,99 @@ public class State_Blue_Duckbox extends LinearOpMode {
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
 
-        drive.setPoseEstimate(new Pose2d(-35, 65, Math.toRadians(270)));
-        TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(270)))
-                .splineToSplineHeading(new Pose2d(-62, 62, Math.toRadians(180)), Math.toRadians(180))
-                .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(-0.5);
-                })
-                .waitSeconds(2)
-                .addDisplacementMarker(() -> {
-                    Duck_Wheel1.setPower(0);
+        drive.setPoseEstimate(new Pose2d(-35, 65, Math.toRadians(90)));
+        TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
                 })
                 .setReversed(true)
-                .lineToSplineHeading(new Pose2d(-55, 25, Math.toRadians(180)))
+                .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-31, 30, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
                 .waitSeconds(2)
-                .lineToSplineHeading(new Pose2d(-62, 40, Math.toRadians(0)))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
+                .build();
+
+        TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-34, 30, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .waitSeconds(2)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
+                .build();
+
+        TrajectorySequence bottom = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .waitSeconds(5)
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
+                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
+                .setReversed(true)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
+                .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-38, 30, Math.toRadians(180)), Math.toRadians(0))
+                .addTemporalMarker(() -> {
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .waitSeconds(2)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
                 .build();
 
         waitForStart();
         drive.followTrajectorySequenceAsync(top);
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
+            outtake.update();
         }
     }
 }
