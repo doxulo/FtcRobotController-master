@@ -334,7 +334,7 @@ public class State_Blue_Cycles extends LinearOpMode {
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1.5 , () -> {
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
                     Intake.setPower(0.6);
                     Twist.setPosition(0.53D);
                 })
