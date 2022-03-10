@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -13,15 +12,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Arm;
-import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +30,7 @@ public class State_Red_Duckbox extends LinearOpMode {
     DcMotorEx Arm_Slides;
     DcMotorEx ArmMotor;
     DcMotorEx Intake;
+    DcMotorEx Duck_Wheel1;
     Servo Twist;
     Servo BoxFlip;
     CRServo horizontalServo;
@@ -145,6 +140,13 @@ public class State_Red_Duckbox extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.BRAKE
         );
 
+        Duck_Wheel1 = initMotor(
+                "Duck_Wheel1",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.FLOAT
+        );
+
         Twist = hardwareMap.servo.get("Twisty");
         BoxFlip = hardwareMap.servo.get("BoxFlip");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
@@ -205,13 +207,19 @@ public class State_Red_Duckbox extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(-35, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-65, -65, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-62, -62, Math.toRadians(0)), Math.toRadians(180))
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(-0.5);
+                })
                 .waitSeconds(2)
+                .addDisplacementMarker(() -> {
+                    Duck_Wheel1.setPower(0);
+                })
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-60, -45, Math.toRadians(180)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-65, -25, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-55, -45, Math.toRadians(180)), Math.toRadians(180))
+                .lineToSplineHeading(new Pose2d(-55, -25, Math.toRadians(180)))
                 .waitSeconds(2)
-                .lineToConstantHeading(new Vector2d(-65, -35))
+                .lineToSplineHeading(new Pose2d(-65, -35, Math.toRadians(180)))
                 .build();
 
         waitForStart();
