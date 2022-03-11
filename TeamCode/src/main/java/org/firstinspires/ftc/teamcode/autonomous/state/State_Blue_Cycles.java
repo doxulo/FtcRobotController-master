@@ -205,11 +205,12 @@ public class State_Blue_Cycles extends LinearOpMode {
                 })
                 //preload
                 .lineToLinearHeading(new Pose2d(10, 55, Math.toRadians(50)))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    // extend
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -234,12 +235,12 @@ public class State_Blue_Cycles extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    // extend
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -266,12 +267,12 @@ public class State_Blue_Cycles extends LinearOpMode {
                 //2nd cycle
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    // extend
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -295,12 +296,12 @@ public class State_Blue_Cycles extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    // extend
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -324,12 +325,12 @@ public class State_Blue_Cycles extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(10, 55, Math.toRadians(50)), Math.toRadians(230))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    // extend
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);

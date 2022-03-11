@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Arm {
 
     public enum ArmTargetPosition {
-        LEVEL_0, LEVEL_1, LEVEL_2, LEVEL_3
+        LEVEL_0, LEVEL_1, LEVEL_2, LEVEL_3, AUTONOMOUS_LEVEL_1, AUTONOMOUS_LEVEL_2, AUTONOMOUS_LEVEL_3
     }
 
 
@@ -29,6 +29,10 @@ public class Arm {
     public static int level1Position = 400;
     public static int level2Position = 425;
     public static int level3Position = 500;
+    public static int autonomousLevel1Position = 400;
+    public static int autonomousLevel2Position = 425;
+    public static int autonomousLevel3Position = 500;
+
     long startExtensionTime = -1;
     long startRetractionTime = -1;
 
@@ -106,6 +110,12 @@ public class Arm {
                 return level2Position;
             case LEVEL_3:
                 return level3Position;
+            case AUTONOMOUS_LEVEL_1:
+                return autonomousLevel1Position;
+            case AUTONOMOUS_LEVEL_2:
+                return autonomousLevel2Position;
+            case AUTONOMOUS_LEVEL_3:
+                return autonomousLevel3Position;
         }
 
         return 0;

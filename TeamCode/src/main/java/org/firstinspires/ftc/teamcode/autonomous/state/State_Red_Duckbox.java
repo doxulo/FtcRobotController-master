@@ -221,10 +221,12 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
                 .splineToSplineHeading(new Pose2d(-27, -25, Math.toRadians(180)), Math.toRadians(0))
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -249,10 +251,12 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
                 .splineToSplineHeading(new Pose2d(-34, -30, Math.toRadians(180)), Math.toRadians(0))
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
@@ -277,10 +281,12 @@ public class State_Red_Duckbox extends LinearOpMode {
                 })
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
                 .splineToSplineHeading(new Pose2d(-38, -30, Math.toRadians(180)), Math.toRadians(0))
+                .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
-                    sleep(200);
                     Twist.setPosition(0.84D);
-                    sleep(500);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
