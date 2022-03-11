@@ -216,7 +216,7 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
@@ -246,7 +246,7 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
@@ -277,7 +277,7 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .setReversed(false)
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .splineToSplineHeading(new Pose2d(-58, -37, Math.toRadians(90)), Math.toRadians(90))
                 .splineToSplineHeading(new Pose2d(-38, -30, Math.toRadians(180)), Math.toRadians(0))

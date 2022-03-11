@@ -221,7 +221,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
@@ -252,7 +252,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
@@ -284,7 +284,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .setReversed(true)
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
                 .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
                 .splineToSplineHeading(new Pose2d(-38, 30, Math.toRadians(180)), Math.toRadians(0))
@@ -306,6 +306,9 @@ public class State_Blue_Duckbox extends LinearOpMode {
 
         waitForStart();
         drive.followTrajectorySequenceAsync(top);
+
+        Twist.setPosition(0.63D);
+        Arm_Slides.setPower(-0.1);
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
             outtake.update();
