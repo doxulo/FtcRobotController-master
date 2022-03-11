@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autonomous.league;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,6 +25,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous(group = "League")
+@Disabled
 public class R_DuckBox_Old extends LinearOpMode {
 
     DcMotorEx LF;

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,10 +12,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.Arm;
+import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -23,22 +26,22 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Autonomous(name = "Red Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
-public class State_Red_Cycles extends LinearOpMode {
 
+@Autonomous(name = "State Red Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
+public class State_Red_Cycles extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;
     DcMotorEx RB;
     DcMotorEx LB;
+    DcMotorEx Arm_Slides;
     DcMotorEx ArmMotor;
     DcMotorEx Intake;
     Servo Twist;
+    Servo BoxFlip;
     CRServo horizontalServo;
     ColorSensor BoxSensor;
     OpenCvWebcam webcam;
-
     ModernRoboticsI2cGyro armGyro;
-
     /*
         Declare variables
      */
@@ -119,53 +122,10 @@ public class State_Red_Cycles extends LinearOpMode {
      */
     @Override
     public void runOpMode() throws InterruptedException {
-
-
-        armGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "ArmGyro");
-
-        telemetry.log().add("Gyros Calibrating. Do Not Move!");
-        armGyro.calibrate();
-
-        while (!isStopRequested() && armGyro.isCalibrating())  {
-            telemetry.addData("calibrating, ", "%f seconds passed");
-            telemetry.update();
-            sleep(50);
-        }
-
-        telemetry.addLine("Done calibrating");
-        telemetry.update();
-
-        LF = initMotor(
-                "LF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RF = initMotor(
-                "RF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-
-        );
-
-        LB = initMotor(
-                "LB",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RB = initMotor(
-                "RB",
-                DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         ArmMotor = initMotor(
-                "ArmMotor", // TODO: change to ArmMotor
+                "ArmMotor",
                 DcMotorSimple.Direction.REVERSE,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
@@ -178,7 +138,15 @@ public class State_Red_Cycles extends LinearOpMode {
                 DcMotor.ZeroPowerBehavior.FLOAT
         );
 
+        Arm_Slides = initMotor(
+                "Arm_Slides",
+                DcMotorSimple.Direction.FORWARD,
+                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+                DcMotor.ZeroPowerBehavior.BRAKE
+        );
+
         Twist = hardwareMap.servo.get("Twisty");
+        BoxFlip = hardwareMap.servo.get("BoxFlip");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
 
         Servo leftOdometryServo = hardwareMap.servo.get("LeftOdometryServo");
@@ -195,77 +163,198 @@ public class State_Red_Cycles extends LinearOpMode {
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
+//
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+//
+//        BarcodeDetector detector = new BarcodeDetector(telemetry);
+//        webcam.setPipeline(detector);
+//        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+//        {
+//            @Override
+//            public void onOpened()
+//            {
+//                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
+//            }
+//
+//            @Override
+//            public void onError(int errorCode)
+//            {
+//                /*
+//                 * This will be called if the camera could not be opened
+//                 */
+//            }
+//        });
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        Arm outtake = new Arm(new PIDController(
+                0.02,
+                0,//0.000001,// 0.000001, // TODO: Tune this
+                0.02,
+                new double[] {
+                        0.4, -0.4
+                },
+                600,
+                0,
+                new double[] {
+                        -0.15, 0.15, 25D
+                }), ArmMotor, Arm_Slides, BoxFlip, 0);
 
-        BarcodeDetector detector = new BarcodeDetector(telemetry);
-        webcam.setPipeline(detector);
-        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-            }
-        });
-
-        waitForStart();
-
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
-        drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
 
-        /*
-            Trajectory for the Top level
-         */
-
+        drive.setPoseEstimate(new Pose2d(10, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, -65, Math.toRadians(270)))
                 .setReversed(true)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,-65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,-65 , Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,-65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,-65 , Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,-65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,-65 , Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,-65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10,-65 , Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(10, -55, Math.toRadians(310)))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .addTemporalMarker(() -> {
+                    // extend
+                    sleep(200);
+                    Twist.setPosition(0.84D);
+                    sleep(500);
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(10,-65, Math.toRadians(0)))
-                .lineToLinearHeading(new Pose2d(40, -65, Math.toRadians(0)))
+                .splineToSplineHeading(new Pose2d(16, -63.5, Math.toRadians(355)), Math.toRadians(310))
+                .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(40, -67, Math.toRadians(0)),0)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.63D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1); // Level change
+                })
                 .build();
 
         waitForStart();
-            drive.followTrajectorySequenceAsync(top);
-            while (drive.isBusy() && opModeIsActive()) {
-                drive.update();
-            }
+        drive.followTrajectorySequenceAsync(top);
+        while (drive.isBusy() && opModeIsActive()) {
+            drive.update();
+            outtake.update();
+        }
     }
 }

@@ -26,7 +26,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Autonomous(name = "Blue Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
+@Autonomous(name = "Blue Arm Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
 public class CyclesArmTest extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;
@@ -121,37 +121,38 @@ public class CyclesArmTest extends LinearOpMode {
      */
     @Override
     public void runOpMode() throws InterruptedException {
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 
 
-        LF = initMotor(
-                "LF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RF = initMotor(
-                "RF",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-
-        );
-
-        LB = initMotor(
-                "LB",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
-
-        RB = initMotor(
-                "RB",
-                DcMotorSimple.Direction.REVERSE,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
-        );
+//        LF = initMotor(
+//                "LF",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
+//
+//        RF = initMotor(
+//                "RF",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//
+//        );
+//
+//        LB = initMotor(
+//                "LB",
+//                DcMotorSimple.Direction.FORWARD,
+//                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
+//
+//        RB = initMotor(
+//                "RB",
+//                DcMotorSimple.Direction.REVERSE,
+//                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
+//                DcMotor.ZeroPowerBehavior.FLOAT
+//        );
 
         ArmMotor = initMotor(
                 "ArmMotor", // TODO: change to ArmMotor
@@ -219,7 +220,6 @@ public class CyclesArmTest extends LinearOpMode {
 
         waitForStart();
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Arm outtake = new Arm(new PIDController(
                 0.02,
                 0,//0.000001,// 0.000001, // TODO: Tune this

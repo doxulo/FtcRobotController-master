@@ -436,9 +436,9 @@ public class MecanumDrive extends LinearOpMode {
 
 
         double[] restingPositions = new double[] {
-                0.7D,
-                0.89D,
-                0.5D
+                0.75D,
+                0.83D,
+                0.3D
         };
 
         Method setPowerMethod = null;
@@ -582,11 +582,11 @@ public class MecanumDrive extends LinearOpMode {
             }
 
             if (gamepad1.dpad_up) {
-                tapeExtension.setPower(1);
-                tapeExtension1.setPower(-1);
-            } else if (gamepad1.dpad_down) {
                 tapeExtension.setPower(-1);
                 tapeExtension1.setPower(1);
+            } else if (gamepad1.dpad_down) {
+                tapeExtension.setPower(1);
+                tapeExtension1.setPower(-1);
             } else {
                 tapeExtension.setPower(0);
                 tapeExtension1.setPower(0);
@@ -747,7 +747,7 @@ public class MecanumDrive extends LinearOpMode {
                         setPowerMethod,
                         Intake,
                         0,
-                        2000
+                        1000
                 );
 
             }
@@ -781,7 +781,7 @@ public class MecanumDrive extends LinearOpMode {
                 retractArm = false;
             } else if (gamepad2.x) {
                 if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_1) {
-                    Arm_Slides.setTargetPosition(600);
+                    Arm_Slides.setTargetPosition(680);
                 } else if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_2) {
                     Arm_Slides.setTargetPosition(350);
                 } else {
@@ -791,15 +791,15 @@ public class MecanumDrive extends LinearOpMode {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             } else if (!Arm_Slides.isBusy() && gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                Arm_Slides.setPower(-0.3);
-            } /* else if (!Arm_Slides.isBusy()){
+                Arm_Slides.setPower(-0.1);
+            } else if (!Arm_Slides.isBusy()) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-gamepad2.right_stick_y);
             }
-            */
 
 
-            if (scheduleArmReturn && !Arm_Slides.isBusy()) {
+
+            if (scheduleArmReturn && !ArmMotor.isBusy() && Arm_Slides.getCurrentPosition() < 50) {
                 scheduleArmReturn = false;
                 Intake.setPower(-1);
 
