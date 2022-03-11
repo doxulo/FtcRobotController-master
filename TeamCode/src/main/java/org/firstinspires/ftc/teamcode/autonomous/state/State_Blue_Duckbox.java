@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -171,29 +170,30 @@ public class State_Blue_Duckbox extends LinearOpMode {
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
-//
-//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-//
-//        BarcodeDetector detector = new BarcodeDetector(telemetry);
-//        webcam.setPipeline(detector);
-//        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-//        {
-//            @Override
-//            public void onOpened()
-//            {
-//                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
-//            }
-//
-//            @Override
-//            public void onError(int errorCode)
-//            {
-//                /*
-//                 * This will be called if the camera could not be opened
-//                 */
-//            }
-//        });
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        BarcodeDetector detector = new BarcodeDetector(telemetry);
+        webcam.setPipeline(detector);
+        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
+
         Arm outtake = new Arm(new PIDController(
                 0.02,
                 0,//0.000001,// 0.000001, // TODO: Tune this
@@ -305,7 +305,26 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .build();
 
         waitForStart();
-        drive.followTrajectorySequenceAsync(bottom);
+        BarcodeDetector.Location barcode = detector.getLocation();
+        webcam.stopStreaming();
+
+
+        switch (barcode) {
+            case LEFT:
+                telemetry.addData("location: ", "left");
+                telemetry.update();
+                drive.followTrajectorySequenceAsync(bottom);
+                break;
+            case RIGHT:
+                telemetry.addData("location: ", "right");
+                telemetry.update();
+                drive.followTrajectorySequenceAsync(top);
+                break;
+            case MIDDLE:
+                telemetry.addData("location: ", "middle");
+                telemetry.update();
+                drive.followTrajectorySequenceAsync(middle);
+        }
 
         Twist.setPosition(0.6D);
         Arm_Slides.setPower(-0.1);
