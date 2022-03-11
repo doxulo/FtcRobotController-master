@@ -196,7 +196,7 @@ public class State_Red_Cycles_No_Slide extends LinearOpMode {
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
 
-        drive.setPoseEstimate(new Pose2d(10, -65, Math.toRadians(90)));
+        drive.setPoseEstimate(new Pose2d(10, -65, Math.toRadians(270)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, -65, Math.toRadians(270)))
                 .setReversed(true)
                 .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
