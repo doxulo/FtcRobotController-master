@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 @Autonomous(group = "drive")
 public class SplineTest extends LinearOpMode {
     public static double LEFT_POSITION = 0.85D;
-    public static double RIGHT_POSITION = 0.1D;
-    public static double FRONT_POSITION = 0.65D;
+    public static double RIGHT_POSITION = 0.13D;
+    public static double FRONT_POSITION = 0D;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);

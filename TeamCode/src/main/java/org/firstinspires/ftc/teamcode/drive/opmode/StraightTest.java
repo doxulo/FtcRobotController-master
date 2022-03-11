@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 public class StraightTest extends LinearOpMode {
     public static double DISTANCE = 60; // in
     public static double LEFT_POSITION = 0.85D;
-    public static double RIGHT_POSITION = 0.1D;
-    public static double FRONT_POSITION = 0.65D;
+    public static double RIGHT_POSITION = 0.13D;
+    public static double FRONT_POSITION = 0D;
 
     @Override
     public void runOpMode() throws InterruptedException {

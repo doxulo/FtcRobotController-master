@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Arm;
@@ -102,7 +103,7 @@ public class State_Blue_Cycles_No_Slide extends LinearOpMode {
                 targetDegrees = 200D;
                 break;
             case LEVEL_3:
-                targetDegrees = 220D;
+                targetDegrees = 160D;
                 break;
         }
 
@@ -151,8 +152,8 @@ public class State_Blue_Cycles_No_Slide extends LinearOpMode {
         horizontalServo.setPower(0);
 
         double LEFT_POSITION = 0.85D;
-        double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.65D;
+        double RIGHT_POSITION = 0.13D;
+        double FRONT_POSITION = 0D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
@@ -199,97 +200,123 @@ public class State_Blue_Cycles_No_Slide extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                 .setReversed(true)
-                .addTemporalMarker(() -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
                     Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
-                .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(-12, 46, Math.toRadians(90)), Math.toRadians(270))
+                .waitSeconds(0.1)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                    Twist.setPosition(0.63D);
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(0.6);
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Twist.setPosition(0.53D);
                 })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .splineToSplineHeading(new Pose2d(16, 68, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(43, 68, Math.toRadians(0)),0)
+                .waitSeconds(0.2)
                 .addTemporalMarker(() -> {
                     Intake.setPower(-1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                    Twist.setPosition(0.6D);
                 })
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(0.5)
-                .waitSeconds(0.5)
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.84D);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                    Twist.setPosition(0.63D);
-                    Intake.setPower(-1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(0.6);
-                    Twist.setPosition(0.53D);
-                })
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .addTemporalMarker(() -> {
-                    Intake.setPower(-1);
+                .splineToSplineHeading(new Pose2d(16,68, Math.toRadians(0)), Math.toRadians(180))
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                    Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(-12, 46, Math.toRadians(90)), Math.toRadians(270))
+                .waitSeconds(0.1)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                    Twist.setPosition(0.63D);
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(0.6);
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Twist.setPosition(0.53D);
                 })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .splineToSplineHeading(new Pose2d(16, 69, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(44, 69, Math.toRadians(0)),0)
+                .waitSeconds(0.2)
                 .addTemporalMarker(() -> {
                     Intake.setPower(-1);
+                    Twist.setPosition(0.6D);
+                })
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(16,70, Math.toRadians(0)), Math.toRadians(180))
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                    Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(-12, 44, Math.toRadians(90)), Math.toRadians(270))
+                .waitSeconds(0.1)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
-                    Twist.setPosition(0.63D);
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
-                    Intake.setPower(0.6);
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Twist.setPosition(0.53D);
                 })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
+                .splineToSplineHeading(new Pose2d(16, 70, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(46, 70, Math.toRadians(0)),0)
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    Twist.setPosition(0.6D);
+                })
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(16,72, Math.toRadians(0)), Math.toRadians(180))
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                })
+                .splineToSplineHeading(new Pose2d(-12, 44, Math.toRadians(90)), Math.toRadians(270))
+                .waitSeconds(0.1)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.84D);
+                })
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.6D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    Twist.setPosition(0.53D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(1);
+                })
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(16, 70, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(43, 70, Math.toRadians(0)),0)
                 /**
                  * Parked
                  */
@@ -299,9 +326,16 @@ public class State_Blue_Cycles_No_Slide extends LinearOpMode {
 
         outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
 //
-        Arm_Slides.setPower(-0.1);
+        Arm_Slides.setPower(-0.3);
         drive.followTrajectorySequenceAsync(top);
+
+        drive.update();
+
         while (drive.isBusy() && opModeIsActive()) {
+
+            if (BoxSensor.red() > 86 && Twist.getPosition() < 0.6D) {
+                Twist.setPosition(0.6D);
+            }
             drive.update();
             outtake.update();
         }

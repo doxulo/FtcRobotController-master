@@ -108,7 +108,7 @@ public class MecanumDrive extends LinearOpMode {
     double[] restingPositions = new double[] {
             0.35D,
             0.5D,
-            0.1D
+            0.13D
     };
 
     /**
@@ -322,7 +322,7 @@ public class MecanumDrive extends LinearOpMode {
                 0);
 
         double[] twistPositions = new double[] {
-                0.53D, 0.63D, 0.84D
+                0.53D, 0.6D, 0.84D
         };
 
         double[] activeOdometryPosition = new double[] {
@@ -438,7 +438,7 @@ public class MecanumDrive extends LinearOpMode {
         double[] restingPositions = new double[] {
                 0.75D,
                 0.83D,
-                0.3D
+                0.25D
         };
 
         Method setPowerMethod = null;
@@ -539,11 +539,7 @@ public class MecanumDrive extends LinearOpMode {
             //drive train
             mecanum(-Math.pow(gamepad1.left_stick_y, 1D), Math.pow(gamepad1.left_stick_x, 1D), Math.pow(gamepad1.right_stick_x, 1D));
 
-            if (redColor > 100) {
-                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIME);
-            } else {
-                Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
-            }
+//
 
             if (gamepad1.y && debounces.checkAndUpdate("Limit")) {
                 limit = (limitOn ? 1 : limitPower);
@@ -557,8 +553,10 @@ public class MecanumDrive extends LinearOpMode {
                         multiple = -1;
                     }
 
-                    intakeOn = !intakeOn;
-                    Intake.setPower(intakeOn ? multiple : 0);
+                    if (Intake.getPower() != 0.99 && Intake.getPower() != -0.99) {
+                        intakeOn = !intakeOn;
+                        Intake.setPower(intakeOn ? multiple : 0);
+                    }
                 }
             }
 
@@ -707,7 +705,7 @@ public class MecanumDrive extends LinearOpMode {
 
 
             if (gamepad2.dpad_up) {
-                Intake.setPower(1);
+                Intake.setPower(0.99);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
 
                 scheduler.add(
@@ -718,7 +716,7 @@ public class MecanumDrive extends LinearOpMode {
                 );
 
             } else if (gamepad2.dpad_left) {
-                Intake.setPower(1);
+                Intake.setPower(0.99);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_2);
 
                 scheduler.add(
@@ -729,7 +727,7 @@ public class MecanumDrive extends LinearOpMode {
                 );
 
             } else if (gamepad2.dpad_down) {
-                Intake.setPower(1);
+                Intake.setPower(0.99);
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_3);
 
                 scheduler.add(
@@ -741,15 +739,17 @@ public class MecanumDrive extends LinearOpMode {
 
             } else if (gamepad2.dpad_right  && outtakeArm.targetPosition != Arm.ArmTargetPosition.LEVEL_0 && Arm_Slides.getCurrentPosition() < 200) {
                 outtakeArm.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                Intake.setPower(-1);
+                Intake.setPower(-0.99);
 
                 scheduler.add(
                         setPowerMethod,
                         Intake,
                         0,
-                        1000
+                        1300
                 );
 
+            } else if (gamepad2.dpad_right) {
+                scheduleRetractArm = System.currentTimeMillis();
             }
 
             outtakeArm.update();
@@ -766,7 +766,7 @@ public class MecanumDrive extends LinearOpMode {
                 Twist.setPosition(twistPositions[0]);
             }
 
-            if (System.currentTimeMillis() - scheduleRetractArm > 500 && scheduleRetractArm != 0) {
+            if (System.currentTimeMillis() - scheduleRetractArm > 250 && scheduleRetractArm != 0) {
                 scheduleRetractArm = 0;
                 retractArm = true;
             }
@@ -783,7 +783,7 @@ public class MecanumDrive extends LinearOpMode {
                 if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_1) {
                     Arm_Slides.setTargetPosition(680);
                 } else if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_2) {
-                    Arm_Slides.setTargetPosition(350);
+                    Arm_Slides.setTargetPosition(515);
                 } else {
                     Arm_Slides.setTargetPosition(100);
                 }
@@ -791,7 +791,7 @@ public class MecanumDrive extends LinearOpMode {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             } else if (!Arm_Slides.isBusy() && gamepad2.right_stick_y == 0 && Arm_Slides.getCurrentPosition() < 300) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                Arm_Slides.setPower(-0.1);
+                Arm_Slides.setPower(-0.2);
             } else if (!Arm_Slides.isBusy()) {
                 Arm_Slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 Arm_Slides.setPower(-gamepad2.right_stick_y);

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous.state;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -13,22 +12,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Arm;
-import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Autonomous(name = "State Blue Duckbox", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
-public class State_Blue_Duckbox extends LinearOpMode {
+@Autonomous(name = "State Blue Cycles Spline No Slides Stop", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
+public class State_Cycles_Spline_Stop extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;
     DcMotorEx RB;
@@ -36,7 +31,6 @@ public class State_Blue_Duckbox extends LinearOpMode {
     DcMotorEx Arm_Slides;
     DcMotorEx ArmMotor;
     DcMotorEx Intake;
-    DcMotorEx Duck_Wheel1;
     Servo Twist;
     Servo BoxFlip;
     CRServo horizontalServo;
@@ -109,7 +103,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 targetDegrees = 200D;
                 break;
             case LEVEL_3:
-                targetDegrees = 220D;
+                targetDegrees = 160D;
                 break;
         }
 
@@ -144,13 +138,6 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
                 DcMotor.ZeroPowerBehavior.BRAKE
-        );
-
-        Duck_Wheel1 = initMotor(
-                "Duck_Wheel1",
-                DcMotorSimple.Direction.FORWARD,
-                DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
         );
 
         Twist = hardwareMap.servo.get("Twisty");
@@ -210,106 +197,57 @@ public class State_Blue_Duckbox extends LinearOpMode {
 
         AtomicInteger currentTargetHeading = new AtomicInteger(0);
 
-        drive.setPoseEstimate(new Pose2d(-35, 65, Math.toRadians(90)));
-        TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+        drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
+        TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
-                .waitSeconds(5)
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
-                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
-                .addTemporalMarker(() -> {
-                    Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
-                })
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-60, 35, Math.toRadians(90)), Math.toRadians(270))
-                .splineToSplineHeading(new Pose2d(-31, 28, Math.toRadians(180)), Math.toRadians(0))
-                .waitSeconds(0.5)
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.84D);
-                })
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(-12, 45, Math.toRadians(90)), Math.toRadians(270))
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 25, Math.toRadians(180)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.6D);
-                    Intake.setPower(-1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                })
-                .waitSeconds(2)
-                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
-                .build();
-
-        TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+                .splineToSplineHeading(new Pose2d(16, 68, Math.toRadians(0)), Math.toRadians(0))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
+                .splineToSplineHeading(new Pose2d(43, 68, Math.toRadians(0)),0)
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(DriveConstants.MAX_VEL, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
-                .waitSeconds(5)
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
-                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
-                .addTemporalMarker(() -> {
-                    Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_2); // Level change
-                })
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-60, 35, Math.toRadians(90)), Math.toRadians(270))
-                .splineToSplineHeading(new Pose2d(-34, 28, Math.toRadians(180)), Math.toRadians(0))
-                .waitSeconds(0.5)
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.84D);
-                })
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(16,68, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-10, 42, Math.toRadians(90)), Math.toRadians(270))
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 25, Math.toRadians(180)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.6D);
-                    Intake.setPower(-1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                })
-                .waitSeconds(2)
-                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
-                .build();
-
-        TrajectorySequence bottom = drive.trajectorySequenceBuilder(new Pose2d(-35, 65, Math.toRadians(90)))
+                .splineToSplineHeading(new Pose2d(16, 69, Math.toRadians(0)), Math.toRadians(0))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
+                .splineToSplineHeading(new Pose2d(46, 69, Math.toRadians(0)),0)
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(DriveConstants.MAX_VEL, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .waitSeconds(0.2)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
-                .waitSeconds(5)
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
-                .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
-                .addTemporalMarker(() -> {
-                    Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_3); // Level change
-                })
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-60, 35, Math.toRadians(90)), Math.toRadians(270))
-                .splineToSplineHeading(new Pose2d(-38, 28, Math.toRadians(180)), Math.toRadians(0))
-                .waitSeconds(0.5)
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.84D);
-                })
-                .waitSeconds(0.5)
+                .splineToSplineHeading(new Pose2d(16,70, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-8, 41, Math.toRadians(90)), Math.toRadians(270))
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 25, Math.toRadians(180)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    Twist.setPosition(0.6D);
-                    Intake.setPower(-1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
-                })
-                .waitSeconds(2)
-                .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(16, 70, Math.toRadians(0)), Math.toRadians(0))
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30))
+                .splineToSplineHeading(new Pose2d(49, 70, Math.toRadians(0)),0)
+                .setConstraints(SampleMecanumDrive.getVelocityConstraint(DriveConstants.MAX_VEL, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(16,72, Math.toRadians(0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-6, 40, Math.toRadians(90)), Math.toRadians(270))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(16, 70, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(43, 70, Math.toRadians(0)),0)
+                /**
+                 * Parked
+                 */
                 .build();
 
         waitForStart();
-        drive.followTrajectorySequenceAsync(bottom);
 
-        Twist.setPosition(0.6D);
-        Arm_Slides.setPower(-0.1);
+        outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
+//
+        Arm_Slides.setPower(-0.3);
+        drive.followTrajectorySequenceAsync(top);
+
+        drive.update();
+
         while (drive.isBusy() && opModeIsActive()) {
+
+            if (BoxSensor.red() > 86 && Twist.getPosition() < 0.6D) {
+                Twist.setPosition(0.6D);
+            }
             drive.update();
             outtake.update();
         }

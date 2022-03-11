@@ -90,7 +90,7 @@ public class AutonomousTemplate extends LinearOpMode {
     };
 
     final double[] twistPositions = new double[] {
-            0.615D, 0.65D, 0.9D
+            0.615D, 0D, 0.9D
     };
 
     private DcMotorEx initMotor(

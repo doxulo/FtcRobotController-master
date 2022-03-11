@@ -188,8 +188,8 @@ public class CyclesArmTest extends LinearOpMode {
         horizontalServo.setPower(0);
 
         double LEFT_POSITION = 0.85D;
-        double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.65D;
+        double RIGHT_POSITION = 0.13D;
+        double FRONT_POSITION = 0D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
@@ -251,7 +251,7 @@ public class CyclesArmTest extends LinearOpMode {
                     sleep(200);
                     Twist.setPosition(0.84D);
                     sleep(500);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
@@ -262,7 +262,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .addDisplacementMarker(() -> {
                     Intake.setPower(-1);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
@@ -275,7 +275,7 @@ public class CyclesArmTest extends LinearOpMode {
                     sleep(200);
                     Twist.setPosition(0.84D);
                     sleep(500);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
@@ -287,7 +287,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .addDisplacementMarker(() -> {
                     Intake.setPower(-1);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
@@ -298,7 +298,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.84D);
                     sleep(500);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
@@ -310,7 +310,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .addDisplacementMarker(() -> {
                     Intake.setPower(-1);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
@@ -321,7 +321,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.84D);
                     sleep(500);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
@@ -333,7 +333,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .addDisplacementMarker(() -> {
                     Intake.setPower(-1);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
@@ -344,7 +344,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     Twist.setPosition(0.84D);
                     sleep(500);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
@@ -356,7 +356,7 @@ public class CyclesArmTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(40, 65, Math.toRadians(0)), 0)
                 .addDisplacementMarker(() -> {
                     Intake.setPower(-1);
-                    Twist.setPosition(0.63D);
+                    Twist.setPosition(0.6D);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);

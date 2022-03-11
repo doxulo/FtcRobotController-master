@@ -197,8 +197,8 @@ public class B_DuckBox extends LinearOpMode {
         horizontalServo.setPower(0);
 
         double LEFT_POSITION = 0.85D;
-        double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.65D;
+        double RIGHT_POSITION = 0.13D;
+        double FRONT_POSITION = 0D;
 
         double armTargetHeading = 0D;
 

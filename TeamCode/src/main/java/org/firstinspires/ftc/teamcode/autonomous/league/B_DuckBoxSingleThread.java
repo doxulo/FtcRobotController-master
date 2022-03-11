@@ -188,8 +188,8 @@ public class B_DuckBoxSingleThread extends LinearOpMode {
         Servo frontOdometryServo = hardwareMap.servo.get("FrontOdometryServo");
 
         double LEFT_POSITION = 0.85D;
-        double RIGHT_POSITION = 0.1D;
-        double FRONT_POSITION = 0.65D;
+        double RIGHT_POSITION = 0.13D;
+        double FRONT_POSITION = 0D;
 
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);

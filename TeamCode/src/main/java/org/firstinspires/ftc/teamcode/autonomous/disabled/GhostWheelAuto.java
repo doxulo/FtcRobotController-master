@@ -73,7 +73,7 @@ public class GhostWheelAuto extends LinearOpMode {
     };
 
     final double[] twistPositions = new double[] {
-            0.615D, 0.65D, 0.9D
+            0.615D, 0D, 0.9D
     };
 
     double MAX_VELOCITY = 1200;
