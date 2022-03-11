@@ -22,11 +22,11 @@ public class BarcodeDetector extends OpenCvPipeline {
     private Location location;
 
     static final Rect LEFT_ROI = new Rect(
-            new Point(0, 400),
-            new Point(160, 640));
+            new Point(0, 200),
+            new Point(213, 480));
     static final Rect MID_ROI = new Rect(
-            new Point(160, 400),
-            new Point(320, 640));
+            new Point(213, 200),
+            new Point(426, 480));
 
     static double PERCENT_COLOR_THRESHOLD = 0.1;
 
