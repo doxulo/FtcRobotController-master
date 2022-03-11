@@ -82,6 +82,8 @@ public class Arm {
         if (!this.servoChangingPosition && targetPosition != this.targetPosition) {
             if (targetPosition == ArmTargetPosition.LEVEL_0) {
                 this.currentServoPosition = lowerBound;
+            } else if (targetPosition == ArmTargetPosition.AUTONOMOUS_LEVEL_2 || targetPosition == ArmTargetPosition.AUTONOMOUS_LEVEL_3) {
+                this.currentServoPosition = higherBound-0.1;
             } else {
                 this.currentServoPosition = higherBound;
             }

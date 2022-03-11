@@ -215,7 +215,7 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
                 .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
@@ -231,14 +231,14 @@ public class State_Blue_Duckbox extends LinearOpMode {
                     Twist.setPosition(0.84D);
                 })
                 .waitSeconds(0.5)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
                 .waitSeconds(2)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
                 .build();
 
@@ -246,13 +246,13 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
                 .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_2); // Level change
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
@@ -262,14 +262,14 @@ public class State_Blue_Duckbox extends LinearOpMode {
                     Twist.setPosition(0.84D);
                 })
                 .waitSeconds(0.5)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
                 .waitSeconds(2)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
                 .build();
 
@@ -277,14 +277,14 @@ public class State_Blue_Duckbox extends LinearOpMode {
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, 55, Math.toRadians(180)), Math.toRadians(180))
                 .lineToLinearHeading(new Pose2d(-62, 62,Math.toRadians(200)))
-                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.35))
+                .addTemporalMarker(() -> Duck_Wheel1.setPower(0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,55, Math.toRadians(180)))
                 .setReversed(true)
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
-                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_3); // Level change
                 })
                 .splineToSplineHeading(new Pose2d(-60, 37, Math.toRadians(90)), Math.toRadians(270))
                 .splineToSplineHeading(new Pose2d(-38, 30, Math.toRadians(180)), Math.toRadians(0))
@@ -293,19 +293,19 @@ public class State_Blue_Duckbox extends LinearOpMode {
                     Twist.setPosition(0.84D);
                 })
                 .waitSeconds(0.5)
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.63D);
                     Intake.setPower(-1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
                 })
                 .waitSeconds(2)
-                .setReversed(false)
-                .splineToSplineHeading(new Pose2d(-46, 30, Math.toRadians(180)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-60, 40, Math.toRadians(0)),Math.toRadians(90))
                 .build();
 
         waitForStart();
-        drive.followTrajectorySequenceAsync(top);
+        drive.followTrajectorySequenceAsync(bottom);
 
         Twist.setPosition(0.63D);
         Arm_Slides.setPower(-0.1);

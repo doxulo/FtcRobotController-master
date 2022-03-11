@@ -21,8 +21,8 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Autonomous(name = "State Blue Cycles", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
-public class State_Blue_Cycles extends LinearOpMode {
+@Autonomous(name = "State Blue Cycles No Slides", group = "State", preselectTeleOp = "MAIN MECANUM DRIVE")
+public class State_Blue_Cycles_No_Slide extends LinearOpMode {
     DcMotorEx LF;
     DcMotorEx RF;
     DcMotorEx RB;
@@ -199,52 +199,94 @@ public class State_Blue_Cycles extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(10, 65, Math.toRadians(90)));
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(10, 65, Math.toRadians(90)))
                 .setReversed(true)
+                .addTemporalMarker(() -> {
+                    Intake.setPower(1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                })
                 .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
                 .waitSeconds(0.5)
-                /**
-                 * Drop Preload
-                 */
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.84D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                /**
-                 * Pick Up Block
-                 */
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
                 .waitSeconds(0.5)
-                /**
-                 * Drop Freight
-                 */
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.84D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(0.5)
-                /**
-                 * Pick Up Freight
-                 */
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
                 .waitSeconds(0.5)
-                /**
-                 * Drop Freight
-                 */
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.84D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
-                .waitSeconds(0.5)
-                /**
-                 * Pick Up Freight
-                 */
+                .addTemporalMarker(() -> {
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
+                })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,67, Math.toRadians(0)), Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(-12, 42, Math.toRadians(90)), Math.toRadians(270))
                 .waitSeconds(0.5)
-                /**
-                 * Drop Freight
-                 */
+                .addTemporalMarker(() -> {
+                    Twist.setPosition(0.84D);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                    Twist.setPosition(0.63D);
+                    Intake.setPower(-1);
+                    outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
+                    Intake.setPower(0.6);
+                    Twist.setPosition(0.53D);
+                })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(22, 67, Math.toRadians(0)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(40, 67, Math.toRadians(0)),0)
@@ -255,13 +297,13 @@ public class State_Blue_Cycles extends LinearOpMode {
 
         waitForStart();
 
-//        outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
+        outtake.setTargetPosition(Arm.ArmTargetPosition.LEVEL_1);
 //
-//        Arm_Slides.setPower(-0.3);
+        Arm_Slides.setPower(-0.1);
         drive.followTrajectorySequenceAsync(top);
         while (drive.isBusy() && opModeIsActive()) {
             drive.update();
-//            outtake.update();
+            outtake.update();
         }
     }
 }
