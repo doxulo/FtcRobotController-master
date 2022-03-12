@@ -49,8 +49,10 @@ public class MecanumDrive extends LinearOpMode {
     public static double kI = 0;
     public static double kD = 0.2;
 
-    public static double point1 = -0.4;
-    public static double point2 = 0.4;
+    public static double point1 = 0.7;
+    public static double point2 = 0.72;
+    public static double point3 = 0.78;
+    public static double time = 500;
 
     public static double offset = 0;
 
@@ -58,7 +60,7 @@ public class MecanumDrive extends LinearOpMode {
 
     public static boolean runArmUsingEncoders = false;
 
-    public int LEVEL_3_TARGET_HEADING = 300;
+    public int LEVEL_3_TARGET_HEADING = 200;
     public int LEVEL_2_TARGET_HEADING = 400;
     public int LEVEL_1_TARGET_HEADING = 500;
 
@@ -170,6 +172,10 @@ public class MecanumDrive extends LinearOpMode {
 
     public double lerp(double p0, double p1, double t) {
         return (1-t)*p0 + p1*t;
+    }
+
+    public double quadraticCurve(double p0, double p1, double p2, double t) {
+        return ((1-t)*(1-t))*p0 + 2*t*(1-t)*p1+(t*t)*p2;
     }
 
     // 647
@@ -412,7 +418,7 @@ public class MecanumDrive extends LinearOpMode {
                 "Duck_Wheel1",
                 DcMotorSimple.Direction.FORWARD,
                 DcMotor.RunMode.RUN_WITHOUT_ENCODER,
-                DcMotor.ZeroPowerBehavior.FLOAT
+                DcMotor.ZeroPowerBehavior.BRAKE
         );
         Arm_Slides = initMotor(
                 "Arm_Slides",
@@ -781,9 +787,9 @@ public class MecanumDrive extends LinearOpMode {
                 retractArm = false;
             } else if (gamepad2.x) {
                 if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_1) {
-                    Arm_Slides.setTargetPosition(680);
+                    Arm_Slides.setTargetPosition(573);
                 } else if (outtakeArm.targetPosition == Arm.ArmTargetPosition.LEVEL_2) {
-                    Arm_Slides.setTargetPosition(515);
+                    Arm_Slides.setTargetPosition(508);
                 } else {
                     Arm_Slides.setTargetPosition(100);
                 }
@@ -815,21 +821,15 @@ public class MecanumDrive extends LinearOpMode {
 
             if (gamepad2.right_bumper || gamepad2.left_bumper) {
 
+                int multiple = gamepad2.right_bumper ? -1 : 1;
+
                 if (startDuck == 0) {
                     duckMotorSwitch.setTrue();
                     startDuck = System.currentTimeMillis();
 
-                    if (gamepad2.left_bumper) {
-                        Duck_Wheel1.setPower(-defaultPower);
-                    } else {
-                        Duck_Wheel1.setPower(defaultPower);
-                    }
-                } else if (System.currentTimeMillis() - startDuck > 750) {
-                    if (gamepad2.left_bumper) {
-                        Duck_Wheel1.setPower(-0.75);
-                    } else {
-                        Duck_Wheel1.setPower(0.75);
-                    }
+                    Duck_Wheel1.setPower(point1*multiple);
+                } else {
+                    Duck_Wheel1.setPower(quadraticCurve(point1*multiple, point2*multiple, point3*multiple, (System.currentTimeMillis() - startDuck)/time));
                 }
             } else if (duckMotorSwitch.check()){
                 duckMotorSwitch.trigger();

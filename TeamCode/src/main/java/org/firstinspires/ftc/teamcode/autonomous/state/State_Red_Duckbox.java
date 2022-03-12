@@ -13,10 +13,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.Arm;
+import org.firstinspires.ftc.teamcode.util.BarcodeDetector;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -166,29 +171,29 @@ public class State_Red_Duckbox extends LinearOpMode {
         leftOdometryServo.setPosition(LEFT_POSITION);
         rightOdometryServo.setPosition(RIGHT_POSITION);
         frontOdometryServo.setPosition(FRONT_POSITION);
-//
-//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-//
-//        BarcodeDetector detector = new BarcodeDetector(telemetry);
-//        webcam.setPipeline(detector);
-//        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-//        {
-//            @Override
-//            public void onOpened()
-//            {
-//                webcam.startStreaming(640, 480, OpenCvCameraRotation.SIDEWAYS_LEFT);
-//            }
-//
-//            @Override
-//            public void onError(int errorCode)
-//            {
-//                /*
-//                 * This will be called if the camera could not be opened
-//                 */
-//            }
-//        });
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        BarcodeDetector detector = new BarcodeDetector(telemetry);
+        webcam.setPipeline(detector);
+        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
         Arm outtake = new Arm(new PIDController(
                 0.02,
                 0,//0.000001,// 0.000001, // TODO: Tune this
@@ -209,13 +214,14 @@ public class State_Red_Duckbox extends LinearOpMode {
         TrajectorySequence top = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(290)))
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -30, Math.toRadians(90)), Math.toRadians(90))
+                .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
@@ -238,18 +244,18 @@ public class State_Red_Duckbox extends LinearOpMode {
         TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(290)))
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -30, Math.toRadians(90)), Math.toRadians(90))
-                .addTemporalMarker(() -> {
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_2); // Level change
                 })
-                .splineToSplineHeading(new Pose2d(-27, -28, Math.toRadians(180)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(-31, -28, Math.toRadians(180)), Math.toRadians(0))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
@@ -267,18 +273,18 @@ public class State_Red_Duckbox extends LinearOpMode {
         TrajectorySequence bottom = drive.trajectorySequenceBuilder(new Pose2d(-35, -65, Math.toRadians(270)))
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(-62, -55, Math.toRadians(0)), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(315)))
+                .lineToLinearHeading(new Pose2d(-62,-62, Math.toRadians(290)))
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(-0.4))
                 .waitSeconds(5)
                 .addTemporalMarker(() -> Duck_Wheel1.setPower(0))
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -30, Math.toRadians(90)), Math.toRadians(90))
-                .addTemporalMarker(() -> {
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_3); // Level change
                 })
-                .splineToSplineHeading(new Pose2d(-27, -28, Math.toRadians(180)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(-35, -28, Math.toRadians(180)), Math.toRadians(0))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);

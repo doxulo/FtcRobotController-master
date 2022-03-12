@@ -23,10 +23,10 @@ public class BarcodeDetector extends OpenCvPipeline {
 
     static final Rect LEFT_ROI = new Rect(
             new Point(0, 200),
-            new Point(213, 480));
+            new Point(213, 350));
     static final Rect MID_ROI = new Rect(
             new Point(213, 200),
-            new Point(426, 480));
+            new Point(426, 350));
 
     static double PERCENT_COLOR_THRESHOLD = 0.1;
 
@@ -80,10 +80,10 @@ public class BarcodeDetector extends OpenCvPipeline {
         Scalar notBarcode = new Scalar(255, 0, 0);
         Scalar barcode = new Scalar(0, 255, 0);
 
-        Imgproc.rectangle(mat, LEFT_ROI, location == Location.LEFT ? barcode : notBarcode);
-        Imgproc.rectangle(mat, MID_ROI, location == Location.MIDDLE ? barcode : notBarcode);
+        Imgproc.rectangle(input, LEFT_ROI, location == Location.LEFT ? barcode : notBarcode);
+        Imgproc.rectangle(input, MID_ROI, location == Location.MIDDLE ? barcode : notBarcode);
 
-        return mat;
+        return input;
     }
 
     public Location getLocation() {

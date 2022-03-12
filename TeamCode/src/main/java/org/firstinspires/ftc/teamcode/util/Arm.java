@@ -28,8 +28,8 @@ public class Arm {
     public static int level0Position = 1;
     public static int level1Position = 400;
     public static int level2Position = 425;
-    public static int level3Position = 500;
-    public static int autonomousLevel1Position = 360;
+    public static int level3Position = 530;
+    public static int autonomousLevel1Position = 345;
     public static int autonomousLevel2Position = 455;
     public static int autonomousLevel3Position = 505;
 
