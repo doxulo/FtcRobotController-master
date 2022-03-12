@@ -221,8 +221,7 @@ public class State_Red_Duckbox extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-62,-55, Math.toRadians(0)))
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(-58, -30, Math.toRadians(90)), Math.toRadians(90))
-                .waitSeconds(1)
-                .addTemporalMarker(() -> {
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     Intake.setPower(1);
                     outtake.setTargetPosition(Arm.ArmTargetPosition.AUTONOMOUS_LEVEL_1); // Level change
                 })
