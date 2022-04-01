@@ -44,7 +44,6 @@ public class MecanumDrive extends LinearOpMode {
         ARM_EXTENT, ARM_RETRACT, ARM_REST, ARM_SAFE_RETRACT, ARM_SAFE_EXTEND
     }
 
-
     public static double kP = 0.005;
     public static double kI = 0;
     public static double kD = 0.2;
@@ -92,6 +91,7 @@ public class MecanumDrive extends LinearOpMode {
     public DcMotor ArmMotor;
     public DcMotor Arm_Slides;
     public ColorSensor BoxSensor;
+    public ColorSensor BoxSensor2;
     public CRServo tapeExtension;
     public CRServo tapeExtension1;
     public CRServo tapeVerticalOrientation;
@@ -430,6 +430,7 @@ public class MecanumDrive extends LinearOpMode {
         Twist = hardwareMap.servo.get("Twisty");
         BoxFlip = hardwareMap.servo.get("BoxFlip");
         BoxSensor = hardwareMap.colorSensor.get("Boxsensor");
+        BoxSensor2 = hardwareMap.colorSensor.get("Boxsensor2");
         tapeExtension = hardwareMap.crservo.get("TapeExtension");
         tapeExtension1 = hardwareMap.crservo.get("TapeExtension1");
         Lights = hardwareMap.get(RevBlinkinLedDriver.class, "Lights");
@@ -504,6 +505,7 @@ public class MecanumDrive extends LinearOpMode {
             // }
 
             int redColor = BoxSensor.red();
+            int redColor2 = BoxSensor2.red();
 
             try {
                 scheduler.checkAndExecute();
@@ -523,6 +525,7 @@ public class MecanumDrive extends LinearOpMode {
             telemetry.addData("Arm Slides Power: ", Arm_Slides.getPower());
             // telemetry.addData(String.format("Red: %d, Green: %d, Blue: %d", redColor, BoxSensor.green(), BoxSensor.blue()), "");
             telemetry.addData("Red: ", redColor);
+            telemetry.addData("Red: ", redColor2);
             telemetry.addData("Slides Position: ", Arm_Slides.getCurrentPosition());
             // telemetry.addData("tape measurer heading: ", tapeGyroHeading);
             telemetry.addData("Summation: ", tapeController.summation);
@@ -566,14 +569,14 @@ public class MecanumDrive extends LinearOpMode {
                 }
             }
 
-            if (Intake.getPower() > 0 && redColor > 101) {
+            if (Intake.getPower() > 0 && redColor > 101 || Intake.getPower() > 0 && redColor2 > 101) {
                 // sleep(1200);
 
                 scheduler.add(
                         setPowerMethod,
                         Intake,
                         -1,
-                        250
+                        500
                 );
                 scheduler.add(
                         setPowerMethod,
@@ -590,7 +593,7 @@ public class MecanumDrive extends LinearOpMode {
                 tapeExtension1.setPower(1);
             } else if (gamepad1.dpad_down) {
                 tapeExtension.setPower(1);
-                tapeExtension1.setPower(-1);
+                tapeExtension1.setPower(-0.2);
             } else {
                 tapeExtension.setPower(0);
                 tapeExtension1.setPower(0);
@@ -760,15 +763,15 @@ public class MecanumDrive extends LinearOpMode {
 
             outtakeArm.update();
 
-            if (debounces.check("Servo") && redColor < 85) {
+            if (debounces.check("Servo") && redColor < 85  && redColor2 < 85) {
                 Twist.setPosition(twistPositions[0]);
-            } else if (redColor > 86 && !gamepad2.y && !gamepad2.a && !gamepad2.right_stick_button && debounces.check("Servo")) {
+            } else if ((redColor > 86 || redColor2 > 86) && !gamepad2.y && !gamepad2.a && !gamepad2.right_stick_button && debounces.check("Servo")) {
                 Twist.setPosition(twistPositions[1]);
-            } else if (redColor > 5 && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
+            } else if ((redColor > 5 || redColor2 > 5) && ( gamepad2.y || gamepad2.right_stick_button ) && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[2]);
 
                 scheduleRetractArm = System.currentTimeMillis();
-            } else if (redColor > 86 && gamepad2.a && debounces.checkAndUpdate("Servo")) {
+            } else if ((redColor > 86 || redColor2 > 86) && gamepad2.a && debounces.checkAndUpdate("Servo")) {
                 Twist.setPosition(twistPositions[0]);
             }
 

@@ -239,7 +239,7 @@ public class State_Red_Cycles extends LinearOpMode {
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .splineToSplineHeading(new Pose2d(10, -58, Math.toRadians(310)), Math.toRadians(130))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
@@ -268,7 +268,7 @@ public class State_Red_Cycles extends LinearOpMode {
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .splineToSplineHeading(new Pose2d(10, -58, Math.toRadians(310)), Math.toRadians(130))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
@@ -297,7 +297,7 @@ public class State_Red_Cycles extends LinearOpMode {
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .splineToSplineHeading(new Pose2d(10, -58, Math.toRadians(310)), Math.toRadians(130))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
@@ -326,7 +326,7 @@ public class State_Red_Cycles extends LinearOpMode {
                 })
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(22,-67, Math.toRadians(0)), Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(10, -55, Math.toRadians(310)), Math.toRadians(130))
+                .splineToSplineHeading(new Pose2d(10, -58, Math.toRadians(310)), Math.toRadians(130))
                 .waitSeconds(0.5)
                 .addTemporalMarker(() -> {
                     Twist.setPosition(0.84D);
